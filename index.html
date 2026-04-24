@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aniol Escofet — Industrial Engineer</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FAFAF8;--bg-alt:#F0EFEB;--text:#1B1B1B;--text-light:#F0EFEB;--text-muted:#7A7670;--accent:#C2410C;--accent-hover:#9A3412;--accent-light:rgba(194,65,12,.08);--border:#DDD9D0;--border-light:#E8E5DE;--white:#FFF;--card:#FFF;--serif:'Libre Baskerville',Georgia,serif;--sans:'Outfit',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;--shadow-sm:0 1px 3px rgba(0,0,0,.04);--shadow-md:0 4px 20px rgba(0,0,0,.06);--radius:3px;--max-w:1180px;--nav-h:60px}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}::selection{background:var(--accent);color:#fff}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}img{max-width:100%;display:block}a{color:var(--accent);text-decoration:none;transition:color .2s}a:hover{color:var(--accent-hover)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(250,250,248,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid transparent;transition:border-color .3s,box-shadow .3s}nav.scrolled{border-bottom-color:var(--border);box-shadow:var(--shadow-sm)}.nav-inner{max-width:var(--max-w);margin:0 auto;padding:0 32px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between}.nav-logo{font-family:var(--serif);font-size:1.15rem;color:var(--text);text-decoration:none}.nav-logo span{font-style:italic;color:var(--accent)}.nav-links{display:flex;gap:28px;list-style:none}.nav-links a{font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);text-decoration:none;transition:color .25s;position:relative}.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--accent);transition:width .3s ease}.nav-links a:hover{color:var(--text)}.nav-links a:hover::after{width:100%}.nav-toggle{display:none;background:0 0;border:none;cursor:pointer;padding:8px}.nav-toggle span{display:block;width:20px;height:1.5px;background:var(--text);margin:5px 0;transition:.3s}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 32px 80px;max-width:var(--max-w);margin:0 auto}.hero-content{width:100%}.hero-eyebrow{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);margin-bottom:20px;opacity:0;animation:fadeUp .7s ease .15s forwards}.hero h1{font-family:var(--serif);font-size:clamp(2.8rem,6.5vw,5rem);font-weight:400;line-height:1.08;letter-spacing:-.02em;margin-bottom:28px;opacity:0;animation:fadeUp .7s ease .3s forwards}.hero h1 em{font-style:italic}.hero-desc{max-width:560px;font-size:1.08rem;color:var(--text-muted);line-height:1.75;margin-bottom:44px;opacity:0;animation:fadeUp .7s ease .45s forwards}.hero-stats{display:flex;gap:56px;flex-wrap:wrap;opacity:0;animation:fadeUp .7s ease .6s forwards}.hero-stat{display:flex;flex-direction:column;gap:2px}.hero-stat-value{font-family:var(--serif);font-size:1.8rem;font-weight:700}.hero-stat-label{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)}
+
+/* SECTIONS */
+section{padding:100px 32px;max-width:var(--max-w);margin:0 auto}.section-header{display:flex;align-items:baseline;gap:16px;margin-bottom:56px}.section-num{font-family:var(--mono);font-size:.72rem;color:var(--accent);letter-spacing:.04em}.section-title{font-family:var(--serif);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:400}.section-line{flex:1;height:1px;background:var(--border);margin-left:12px}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}.about-text p{color:var(--text-muted);margin-bottom:18px;font-size:1.02rem;line-height:1.78}.about-text p strong{color:var(--text);font-weight:500}.about-photos{display:grid;grid-template-columns:1fr 1fr;gap:12px}.photo-placeholder{aspect-ratio:1;background:var(--bg-alt);border:2px dashed var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;transition:.3s;text-align:center;padding:12px}.photo-placeholder:hover{border-color:var(--accent);color:var(--accent)}.photo-placeholder.tall{grid-row:span 2;aspect-ratio:auto}.interests-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}.interest-tag{font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;padding:5px 14px;border:1px solid var(--border);border-radius:2px;color:var(--text-muted);transition:.2s}.interest-tag:hover{border-color:var(--accent);color:var(--accent)}
+
+/* EXPERIENCE */
+.exp-item{display:grid;grid-template-columns:200px 1fr;gap:44px;padding:36px 0;border-top:1px solid var(--border)}.exp-item:last-child{border-bottom:1px solid var(--border)}.exp-date{font-family:var(--mono);font-size:.78rem;color:var(--text-muted);padding-top:3px}.exp-role h3{font-size:1.2rem;font-weight:500;margin-bottom:2px}.exp-company{font-family:var(--mono);font-size:.78rem;color:var(--accent);letter-spacing:.02em;margin-bottom:10px}.exp-desc{color:var(--text-muted);font-size:.94rem;line-height:1.72}.exp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.exp-tag{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;padding:3px 10px;border:1px solid var(--border-light);border-radius:2px;color:var(--text-muted);transition:.2s}.exp-tag:hover{border-color:var(--accent);color:var(--accent)}
+
+/* PROJECTS */
+.projects-category{margin-bottom:64px}.projects-category-title{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:24px;padding-bottom:10px;border-bottom:1px solid var(--border-light)}.projects-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.project-card{background:var(--card);border:1px solid var(--border-light);padding:36px;position:relative;overflow:hidden;transition:all .35s ease;cursor:default}.project-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}.project-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow-md)}.project-card:hover::before{transform:scaleX(1)}.project-card.featured{grid-column:span 2}.project-idx{font-family:var(--mono);font-size:.65rem;color:var(--border);margin-bottom:16px;display:block}.project-card h3{font-family:var(--serif);font-size:1.35rem;font-weight:400;margin-bottom:6px}.project-subtitle{font-family:var(--mono);font-size:.68rem;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}.project-desc{color:var(--text-muted);font-size:.9rem;line-height:1.72}
+.project-desc p{margin-bottom:14px}
+.project-desc p:last-child{margin-bottom:0}.project-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}.project-tag{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);background:var(--bg-alt);padding:3px 10px;border-radius:2px}
+
+/* IMAGE SLIDER */
+.img-slider{position:relative;width:100%;margin-top:20px;padding-top:20px;border-top:1px solid var(--border-light);overflow:hidden}
+.img-slider.no-border{border-top:none;padding-top:0;margin-top:0}
+.img-slider-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;padding-bottom:12px;scrollbar-width:none;-ms-overflow-style:none}
+.img-slider-track::-webkit-scrollbar{display:none}
+.img-slider-track .slide{flex:0 0 auto;scroll-snap-align:start;width:420px;height:280px;background:var(--bg-alt);border:2px dashed var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;text-align:center;padding:16px;transition:.3s;overflow:hidden}
+.img-slider-track .slide:hover{border-color:var(--accent);color:var(--accent)}
+.img-slider-track .slide img{width:100%;height:100%;object-fit:cover;border-radius:2px}
+.img-slider-track .slide.portrait{width:220px}
+.slider-controls{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
+.slider-btn{width:32px;height:32px;border:1px solid var(--border);background:var(--white);border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:.8rem;color:var(--text-muted)}
+.slider-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* MEDIA PLACEHOLDER (for sections without slider yet) */
+.media-placeholder{width:100%;aspect-ratio:16/9;background:var(--bg-alt);border:2px dashed var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;text-align:center;padding:20px;margin-top:20px}
+
+/* PDF VIEWER */
+.pdf-viewer{margin-top:24px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--white)}
+.pdf-viewer-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg-alt);border-bottom:1px solid var(--border-light)}
+.pdf-viewer-title{font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.pdf-viewer-nav{display:flex;align-items:center;gap:8px}
+.pdf-nav-btn{width:30px;height:30px;border:1px solid var(--border);background:var(--white);border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:.75rem;color:var(--text-muted)}
+.pdf-nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.pdf-page-info{font-family:var(--mono);font-size:.68rem;color:var(--text-muted);min-width:80px;text-align:center}
+.pdf-download-btn{font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;padding:6px 16px;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:2px;cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.pdf-download-btn:hover{background:var(--accent);color:var(--white)}
+.pdf-viewer iframe{width:100%;height:600px;border:none}
+
+/* BADGE */
+.grade-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-light);border:1px solid var(--accent);color:var(--accent);font-family:var(--mono);font-size:.68rem;font-weight:500;padding:4px 12px;border-radius:2px;margin-left:8px;letter-spacing:.03em}
+
+/* SKILLS */
+.skills-layout{display:grid;grid-template-columns:repeat(4,1fr);gap:40px}.skill-block h4{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:14px}.skill-block ul{list-style:none}.skill-block li{font-size:.88rem;color:var(--text-muted);padding:5px 0;border-bottom:1px solid transparent;transition:.2s}.skill-block li:hover{color:var(--text);padding-left:4px;border-bottom-color:var(--border-light)}
+
+/* CONTACT */
+.contact-section{text-align:center;padding:120px 32px}.contact-tagline{font-family:var(--serif);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:400;line-height:1.2;margin-bottom:20px}.contact-tagline em{font-style:italic;color:var(--accent)}.contact-sub{color:var(--text-muted);font-size:1rem;max-width:440px;margin:0 auto 40px;line-height:1.7}.contact-links{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}.contact-link{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:12px 28px;border:1px solid var(--border);color:var(--text);text-decoration:none;transition:.3s;border-radius:var(--radius)}.contact-link:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}.contact-link.primary{background:var(--text);color:var(--text-light);border-color:var(--text)}.contact-link.primary:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* LIGHTBOX */
+.lightbox-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:200;display:none;align-items:center;justify-content:center;cursor:zoom-out;opacity:0;transition:opacity .3s ease}
+.lightbox-overlay.active{display:flex;opacity:1}
+.lightbox-overlay img{max-width:92vw;max-height:90vh;object-fit:contain;border-radius:4px;box-shadow:0 8px 60px rgba(0,0,0,.5)}
+.lightbox-close{position:absolute;top:20px;right:28px;color:#fff;font-size:1.6rem;cursor:pointer;background:none;border:none;font-family:var(--sans);opacity:.7;transition:.2s}
+.lightbox-close:hover{opacity:1}
+.img-slider-track .slide.has-img{cursor:zoom-in;border:1px solid var(--border-light);padding:0}
+.img-slider-track .slide.has-video{padding:0;border:1px solid var(--border-light);width:500px;position:relative;cursor:pointer;overflow:hidden}
+.img-slider-track .slide.has-video iframe{width:100%;height:100%;border:none;border-radius:2px}
+.img-slider-track .slide.has-video img{width:100%;height:100%;object-fit:cover}
+.img-slider-track .slide.has-video .play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:rgba(0,0,0,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.3s}
+.img-slider-track .slide.has-video:hover .play-icon{background:var(--accent)}
+.play-icon::after{content:'';display:block;width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent #fff;margin-left:3px}
+
+footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-family:var(--mono);font-size:.65rem;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}.reveal.visible{opacity:1;transform:translateY(0)}.stagger-1{transition-delay:.05s}.stagger-2{transition-delay:.1s}.stagger-3{transition-delay:.15s}.stagger-4{transition-delay:.2s}
+
+.parallax-bg{position:relative;overflow:hidden}.parallax-bg::before{content:'';position:absolute;top:-60px;left:-60px;right:-60px;bottom:-60px;background:radial-gradient(ellipse at 30% 20%,var(--accent-light) 0%,transparent 60%);pointer-events:none;z-index:0}.parallax-bg>*{position:relative;z-index:1}
+
+@media(max-width:900px){.about-grid{grid-template-columns:1fr;gap:40px}.projects-grid{grid-template-columns:1fr}.project-card.featured{grid-column:span 1}.skills-layout{grid-template-columns:1fr 1fr}.exp-item{grid-template-columns:1fr;gap:8px}.hero-stats{gap:32px}.pdf-viewer iframe{height:400px}}
+@media(max-width:640px){.nav-links{display:none}.nav-toggle{display:block}.nav-links.open{display:flex;flex-direction:column;position:absolute;top:var(--nav-h);left:0;right:0;background:var(--bg);border-bottom:1px solid var(--border);padding:20px 32px;gap:16px}.skills-layout{grid-template-columns:1fr}section{padding:64px 20px}.hero{padding:100px 20px 60px}.pdf-viewer iframe{height:300px}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar"><div class="nav-inner"><a href="#" class="nav-logo">Aniol <span>E.</span></a><button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button><ul class="nav-links"><li><a href="#about">About</a></li><li><a href="#experience">Experience</a></li><li><a href="#projects">Projects</a></li><li><a href="#skills">Skills</a></li><li><a href="#contact">Contact</a></li></ul></div></nav>
+
+<!-- HERO -->
+<section class="hero"><div class="hero-content">
+<p class="hero-eyebrow">Industrial Engineer · Vehicle Dynamics · Control Systems</p>
+<h1>I design systems<br>that make vehicles <em>faster</em></h1>
+<p class="hero-desc">Automotive engineer specializing in vehicle dynamics, control systems, and performance simulation. From Formula Student to professional motorsport, I build the algorithms that push machines to their limits.</p>
+<div class="hero-stats">
+<div class="hero-stat"><span class="hero-stat-value counter" data-target="3">0</span><span class="hero-stat-label">Years in Motorsport</span></div>
+<div class="hero-stat"><span class="hero-stat-value counter" data-target="3">0</span><span class="hero-stat-label">Companies</span></div>
+<div class="hero-stat"><span class="hero-stat-value counter" data-target="2">0</span><span class="hero-stat-label">Master's Degrees</span></div>
+<div class="hero-stat"><span class="hero-stat-value">∞</span><span class="hero-stat-label">Laps Simulated</span></div>
+</div></div></section>
+
+<!-- ABOUT -->
+<section id="about" class="parallax-bg">
+<div class="section-header reveal"><span class="section-num">01</span><h2 class="section-title">About Me</h2><div class="section-line"></div></div>
+<div class="about-text reveal" style="max-width:720px">
+<p><strong>I'm Aniol Escofet</strong>, born in 2001 in Catalonia. I grew up fascinated by how things move, and more importantly, how to make them move better. That curiosity led me to industrial engineering, motorsport, and eventually to working on some of the most exciting vehicles being built today.</p>
+<p>Outside of engineering, I value experiences over things. I travel with my closest friends whenever I can, I'm passionate about motorsport both as a career and a hobby, and I believe the best ideas come when you step away from the screen.</p>
+<p>Right now, I'm pursuing <strong>two Master's degrees simultaneously</strong>. One in Industrial Engineering at UPC Barcelona with a Mechanical specialization, and another in Mechanical Engineering at Politecnico di Milano focused on the Automotive and Motorsport track. All of this while working at Stark Future on electric motorcycle simulation and powertrain development.</p>
+<p>My goal is clear: work in Formula 1, where every millisecond of engineering counts.</p>
+<div class="interests-row"><span class="interest-tag">Motorsport</span><span class="interest-tag">Travel</span><span class="interest-tag">Simulation</span><span class="interest-tag">Photography</span><span class="interest-tag">Karting</span><span class="interest-tag">Data Analysis</span><span class="interest-tag">Cooking</span></div>
+</div>
+<div class="reveal stagger-2" style="margin-top:40px">
+<div class="img-slider no-border"><div class="img-slider-track" id="slider-about">
+<div class="slide portrait">Your portrait photo</div>
+<div class="slide">Friends / Travel</div>
+<div class="slide">Hobby / Motorsport</div>
+<div class="slide">Family</div>
+<div class="slide">Another memory</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-about',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-about',1)">→</button></div></div>
+</div></section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+<div class="section-header reveal"><span class="section-num">02</span><h2 class="section-title">Experience</h2><div class="section-line"></div></div>
+
+<div class="exp-item reveal"><div class="exp-date">Jan 2025 — Present</div><div class="exp-role">
+<h3>Junior Power Electronics R&D</h3><div class="exp-company">Stark Future S.L. · Sant Boi de Llobregat</div>
+<div class="exp-desc">Built and validated a full-vehicle 1D simulation tool (the "System Tool") covering battery, inverter, motor, gearbox, chassis and environment. This became the core engineering tool used to dimension and evaluate motorcycles across MX, Supermoto and street platforms. Performed system-level trade-off analysis on battery capacity, torque, gearing, and power output to maximize performance. Also contributed to traction control algorithm development for racing applications.</div>
+<div class="exp-tags"><span class="exp-tag">MATLAB</span><span class="exp-tag">Simulink</span><span class="exp-tag">1D Simulation</span><span class="exp-tag">Traction Control</span><span class="exp-tag">Powertrain</span></div>
+</div></div>
+
+<div class="exp-item reveal"><div class="exp-date">Sep 2023 — Dec 2024</div><div class="exp-role">
+<h3>Software & Electronic Engineer Intern</h3><div class="exp-company">CUPRA Racing · Martorell</div>
+<div class="exp-desc">Developed control systems and vehicle dynamics algorithms using MATLAB/Simulink. Led simulation and validation campaigns across MiL, SiL, HiL and DiL environments. Worked extensively on the CUPRA Exponential Experience, programming and setting up software for CUPRA Leon TCR race cars. Created the control software for a prototype combining a CUPRA Born RWD platform with a Tavascan front motor to create an AWD concept. Supported race operations, optimized CAN/GPS/IMU communication systems, and led vehicle-level testing for performance and durability.</div>
+<div class="exp-tags"><span class="exp-tag">MATLAB</span><span class="exp-tag">Simulink</span><span class="exp-tag">CAN Bus</span><span class="exp-tag">MiL/SiL/HiL/DiL</span><span class="exp-tag">WinTax</span><span class="exp-tag">Vehicle Dynamics</span><span class="exp-tag">Race Support</span></div>
+</div></div>
+
+<div class="exp-item reveal"><div class="exp-date">Sep 2021 — Sep 2024</div><div class="exp-role">
+<h3>Vehicle Controls Engineer</h3><div class="exp-company">BCNeMotorsport (Formula Student) · UPC Barcelona</div>
+<div class="exp-desc">Designed and implemented control systems for a 4WD electric Formula Student single-seater (CAT15x, CAT16x). Developed Torque Vectoring, Traction Control, and Regenerative Braking algorithms. Built dynamic and kinematic vehicle models for simulation using VI-Grade and IPG. Led test planning, execution and data analysis, serving as a bridge between driver feedback and engineering optimization. Managed test sessions, validated systems on track, and analyzed telemetry to improve performance. Won 1st place EV Class at Formula Student Spain 2023.</div>
+<div class="exp-tags"><span class="exp-tag">Torque Vectoring</span><span class="exp-tag">Traction Control</span><span class="exp-tag">Regen Braking</span><span class="exp-tag">VI-Grade</span><span class="exp-tag">IPG</span><span class="exp-tag">ROS</span><span class="exp-tag">C++</span><span class="exp-tag">Python</span></div>
+</div></div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+<div class="section-header reveal"><span class="section-num">03</span><h2 class="section-title">Projects</h2><div class="section-line"></div></div>
+
+<!-- PERSONAL -->
+<div class="projects-category reveal"><h3 class="projects-category-title">Personal Projects</h3><div class="projects-grid">
+<div class="project-card featured reveal"><span class="project-idx">PP — 01</span><h3>LapTime Simulator</h3><div class="project-subtitle">Full-vehicle performance simulation tool</div>
+<div class="project-desc">A custom lap time simulator built from scratch. Starting from real circuit trajectory data and modular vehicle subsystems (tyres, aero, powertrain, suspension), the tool simulates vehicle performance with increasing fidelity. Currently modelling combustion vehicles with plans to expand to hybrid and full-electric powertrains. The goal is to have four vehicle models covering Formula Student, Formula Regional, Formula E and Formula 1. On top of that, automated performance charts and a telemetry comparison module to validate against real driver data.</div>
+<div class="project-tags"><span class="project-tag">Python</span><span class="project-tag">MATLAB</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">Lap Simulation</span><span class="project-tag">Telemetry</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-lts">
+<div class="slide">Screenshot 1</div><div class="slide">Screenshot 2</div><div class="slide">Screenshot 3</div><div class="slide">Screenshot 4</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts',1)">→</button></div></div>
+</div>
+
+<div class="project-card reveal"><span class="project-idx">PP — 02</span><h3>Coming Soon</h3><div class="project-subtitle">Future project</div><div class="project-desc">New personal projects will appear here as they develop. From drone builds to new simulation tools.</div></div>
+<div class="project-card reveal"><span class="project-idx">PP — 03</span><h3>Coming Soon</h3><div class="project-subtitle">Future project</div><div class="project-desc">This portfolio is a living document. Check back for updates.</div></div>
+</div></div>
+
+<!-- FORMULA STUDENT -->
+<div class="projects-category reveal"><h3 class="projects-category-title">Formula Student — BCNeMotorsport</h3><div class="projects-grid">
+
+<div class="project-card featured reveal"><span class="project-idx">FS — 01</span><h3>Model-Based Torque Vectoring</h3><div class="project-subtitle">4WD Electric Vehicle · CAT16x</div>
+<div class="project-desc">Designed and implemented a complete Torque Vectoring system for a 4WD Formula Student car. Built a dual-track nonlinear vehicle model calibrated against real data (96.7% fit on ramp steer). Designed a model-based yaw rate controller with Feed-Forward and PID Feed-Back components, plus a multi-objective torque allocator using quadratic programming. The system achieved a peak lateral acceleration increase of +7.9% in simulation, with multiple driving modes (Eco, Sport, Hardcore) switchable in real-time.</div>
+<div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">VI-Grade</span><span class="project-tag">QP Optimization</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">ROS</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-tv">
+<div class="slide">Control scheme diagram</div><div class="slide">Yaw rate results</div><div class="slide">Torque distribution</div><div class="slide">Vehicle on track</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv',1)">→</button></div></div>
+</div>
+
+<div class="project-card reveal"><span class="project-idx">FS — 02</span><h3>Traction Control</h3><div class="project-subtitle">Wheel slip management · CAT15x/16x</div>
+<div class="project-desc">Developed a traction control algorithm based on the Pacejka Magic Formula tire model. Defined optimal slip ratio targets per wheel and enforced torque limits to prevent wheel spin during acceleration and instability during braking.</div>
+<div class="project-tags"><span class="project-tag">Pacejka</span><span class="project-tag">Slip Control</span><span class="project-tag">MATLAB</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-tc">
+<div class="slide">Slip ratio chart</div><div class="slide">Torque limits</div><div class="slide">Test results</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tc',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tc',1)">→</button></div></div>
+</div>
+
+<div class="project-card reveal"><span class="project-idx">FS — 03</span><h3>Regenerative Braking</h3><div class="project-subtitle">Energy recovery · CAT15x/16x</div>
+<div class="project-desc">Implemented a regenerative braking strategy that recovers kinetic energy during deceleration, respecting battery charging limits, driver feel, and vehicle stability constraints.</div>
+<div class="project-tags"><span class="project-tag">Energy Recovery</span><span class="project-tag">Battery Limits</span><span class="project-tag">Simulink</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-rb">
+<div class="slide">Energy recovery chart</div><div class="slide">Braking profile</div><div class="slide">Efficiency data</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-rb',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-rb',1)">→</button></div></div>
+</div>
+</div></div>
+
+<!-- PROFESSIONAL -->
+<div class="projects-category reveal"><h3 class="projects-category-title">Professional Projects</h3><div class="projects-grid">
+
+<div class="project-card featured reveal"><span class="project-idx">PRO — 01</span><h3>CUPRA Exponential Experience</h3><div class="project-subtitle">CUPRA Racing · Mixed Reality Racing on a CUPRA Raval</div>
+<div class="project-desc"><p>The CUPRA Exponential Experience is a first-of-its-kind mixed reality racing concept. A CUPRA Raval electric prototype is fitted with a full sensor suite, HMI system, a gaming PC and VR headsets. The driver physically drives the car around a parking lot while wearing VR glasses that overlay a virtual racetrack onto the real world. The virtual environment interacts with the real car in real time. If you hit a virtual obstacle, the car brakes. If you grab a boost power-up, you get real acceleration. There are lap counters, lap times, and competitive gameplay on top of actual driving.</p>
+<p>I was responsible for programming and configuring the full software stack that connects the vehicle systems (CAN, sensors, actuators) to the virtual environment. This included designing the physical circuits (aerial layout, understanding both the videogame and real-world track characteristics and limitations), measuring and recording trajectories, and coordinating the game visuals with the external development company. On the positioning and HMI side, I coordinated and tested the software, found and fixed bugs and errors, and independently managed communication between two separate external companies. Finally, I built a real-time automation system that handled the full startup sequence, CAN checks, sensor validation, application coordination, and a safety layer that could record sessions and stop the car when dangerous situations were detected.</p></div>
+<div class="project-tags"><span class="project-tag">VR Integration</span><span class="project-tag">CAN Bus</span><span class="project-tag">Real-Time Control</span><span class="project-tag">HMI</span><span class="project-tag">Sensor Fusion</span><span class="project-tag">Circuit Design</span><span class="project-tag">Safety Systems</span><span class="project-tag">CUPRA Raval</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-cee">
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1ICsGrmZNDrfN__JKWVDrOb5-TmEEr4U-" alt="CUPRA Exponential Experience"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1cwvegHJ3rnEeAOkfGV91xcYqyefozGjw" alt="Aniol with CUPRA prototypes"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1i7QsmGd3WGxc8S5acVKp1t5l5sWIOgIw" alt="CEE setup"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1YU-JF2Zmg9b7_vQIXGw9O8ygZPi4CLs_" alt="CEE track"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1pDiZHDaVFZubwn9bxgcRrcin1b2Bkx-k" alt="CEE event"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1DoAaCw6XMFocw-2Ytx50xasvKUahq5aJ" alt="CEE detail"></div>
+<div class="slide has-video" onclick="window.open('https://www.youtube.com/watch?v=QZFBNFLMVuI','_blank')"><img src="https://img.youtube.com/vi/QZFBNFLMVuI/hqdefault.jpg" alt="CUPRA Exponential Experience video"><div class="play-icon"></div></div>
+<div class="slide has-video" onclick="window.open('https://www.youtube.com/watch?v=kaPSs3EHy-c','_blank')"><img src="https://img.youtube.com/vi/kaPSs3EHy-c/hqdefault.jpg" alt="CUPRA Exponential Experience video 2"><div class="play-icon"></div></div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-cee',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-cee',1)">→</button></div></div>
+</div>
+
+<div class="project-card reveal"><span class="project-idx">PRO — 02</span><h3>CUPRA Leon VZ TCR</h3><div class="project-subtitle">CUPRA Racing · Race Car Software & Setup</div>
+<div class="project-desc"><p>The CUPRA Leon VZ TCR is CUPRA's flagship touring car, launched in May 2024 and crowned TCR Model of the Year after over 100 victories and 17 titles worldwide in 2025 alone. It competes in TCR Europe, TCR Mexico, TCR China, and the IMSA Michelin Pilot Challenge in the US. With 325 PS and 420 Nm, a redesigned front axle, SADEV gearbox upgrade kit and performance suspension, it is the most powerful front-wheel-drive Leon ever built. A street-legal version limited to 499 units was announced for 2026.</p>
+<p>I worked on the software and electronic setup of these race cars, handling vehicle configuration, sensor calibration, CAN communication protocols and making sure the full electronics package was race-ready for track sessions and competition weekends. This included testing at Circuit de Barcelona-Catalunya in Montmeló and shakedowns at IDIADA proving grounds.</p></div>
+<div class="project-tags"><span class="project-tag">Vehicle Software</span><span class="project-tag">CAN</span><span class="project-tag">Sensor Calibration</span><span class="project-tag">Race Ops</span><span class="project-tag">Shakedowns</span><span class="project-tag">Leon VZ TCR</span><span class="project-tag">325 PS / 420 Nm</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-tcr">
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1fjYGYz25bFVuS6mElF367M3mqbhZX4FO" alt="CUPRA Leon VZ TCR"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1FOA7ARFttzlGQZ0VXkotUhZ__0azgpPM" alt="CUPRA Leon VZ TCR on track"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1yn3T3Pf9mU-eW4nKjCc_piPs8tt3aCuY" alt="TCR testing"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1-TiLgKyHYNx41UN81DcTY9l5IaPSNrTX" alt="TCR detail"></div>
+<div class="slide has-video" onclick="window.open('https://www.youtube.com/watch?v=uWAvA10Z7Ps','_blank')"><img src="https://img.youtube.com/vi/uWAvA10Z7Ps/hqdefault.jpg" alt="CUPRA Leon VZ TCR video"><div class="play-icon"></div></div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tcr',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tcr',1)">→</button></div></div>
+</div>
+
+<div class="project-card reveal"><span class="project-idx">PRO — 03</span><h3>CUPRA Born + Tavascan AWD Prototype</h3><div class="project-subtitle">CUPRA Racing · Prototype Control Software</div>
+<div class="project-desc">Developed the control software for a unique prototype that combined a rear-wheel-drive CUPRA Born platform with a front electric motor from the Tavascan, creating an all-wheel-drive concept. The challenge was integrating two different powertrain architectures into a single coherent control system that managed torque distribution, stability and drivability.</div>
+<div class="project-tags"><span class="project-tag">Prototype</span><span class="project-tag">AWD Controls</span><span class="project-tag">Torque Distribution</span><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-born">
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1cwvegHJ3rnEeAOkfGV91xcYqyefozGjw" alt="Aniol with CUPRA prototypes"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/1FOA7ARFttzlGQZ0VXkotUhZ__0azgpPM" alt="CUPRA prototype on track"></div>
+<div class="slide">Prototype photo 3</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-born',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-born',1)">→</button></div></div>
+</div>
+
+<div class="project-card reveal"><span class="project-idx">PRO — 04</span><h3>Stark System Tool</h3><div class="project-subtitle">Stark Future S.L. · 1D Vehicle Simulation</div>
+<div class="project-desc">Built the core simulation tool for Stark's motorcycle lineup. A full 1D model that simulates battery, inverter, motor, gearbox, chassis and environment. Enables engineers to vary models and characteristics to evaluate consumption, losses, acceleration, top speed, thermals, and basically everything needed to initially dimension a motorcycle.</div>
+<div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">System Engineering</span><span class="project-tag">EV Powertrain</span></div></div>
+</div></div>
+
+<!-- UNIVERSITY -->
+<div class="projects-category reveal"><h3 class="projects-category-title">University Projects</h3><div class="projects-grid">
+
+<div class="project-card featured reveal"><span class="project-idx">UNI — 01</span>
+<h3>Bachelor's Thesis (TFG) <span class="grade-badge">Grade: 10/10</span></h3>
+<div class="project-subtitle">Model-Based Torque Vectoring for a 4WD FS Vehicle · ETSEIB, UPC · Jan 2024</div>
+<div class="project-desc">Degree Final Project at ETSEIB (UPC). Designed, implemented and analyzed a complete Torque Vectoring control system for BCNeMotorsport's CAT16x, covering everything from vehicle dynamics theory and nonlinear modelling to real-time multi-objective torque optimization. Supervised by Dr. Stefano De Pinto.</div>
+<div class="project-tags"><span class="project-tag">Thesis</span><span class="project-tag">ETSEIB · UPC</span><span class="project-tag">Jan 2024</span><span class="project-tag">Supervisor: Dr. Stefano De Pinto</span></div>
+
+<!--
+  PDF VIEWER
+  To use Google Drive instead of a local file, replace the iframe src and download href:
+  iframe src = "https://drive.google.com/file/d/YOUR_FILE_ID/preview"
+  download href = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID"
+-->
+<div class="pdf-viewer" id="tfg-viewer">
+<div class="pdf-viewer-header">
+<span class="pdf-viewer-title">TFG Thesis — Aniol Escofet</span>
+<div class="pdf-viewer-nav">
+<a class="pdf-download-btn" href="https://drive.google.com/uc?export=download&id=1L7I7UK2TzI0_8clW1hLJIJKJ0s0_MKcL" target="_blank">↓ Download PDF</a>
+</div>
+</div>
+<iframe src="https://drive.google.com/file/d/1L7I7UK2TzI0_8clW1hLJIJKJ0s0_MKcL/preview" title="TFG Thesis PDF" allow="autoplay"></iframe>
+</div>
+</div>
+
+<div class="project-card reveal"><span class="project-idx">UNI — 02</span><h3>HMI Take-Over Request Design</h3><div class="project-subtitle">Level 3 Autonomous Driving · Course Project</div>
+<div class="project-desc">Designed a Take-Over Request (TOR) handover sequence for Level 3 automotive automation, selecting the prototype approach and designing the HMI interaction flow for safe driver-vehicle control transitions.</div>
+<div class="project-tags"><span class="project-tag">HMI</span><span class="project-tag">Autonomous Driving</span><span class="project-tag">UX Design</span></div></div>
+
+<div class="project-card reveal"><span class="project-idx">UNI — 03</span><h3>More coming soon</h3><div class="project-subtitle">Labs, papers & coursework</div>
+<div class="project-desc">Additional university projects, lab reports, and papers will be added here as they are completed throughout the Master's programs at UPC and Politecnico di Milano.</div></div>
+</div></div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+<div class="section-header reveal"><span class="section-num">04</span><h2 class="section-title">Technical Skills</h2><div class="section-line"></div></div>
+<div class="skills-layout">
+<div class="skill-block reveal stagger-1"><h4>Languages</h4><ul><li>MATLAB</li><li>Python</li><li>C++</li><li>Simulink</li></ul></div>
+<div class="skill-block reveal stagger-2"><h4>Simulation</h4><ul><li>VI-Grade</li><li>IPG CarMaker</li><li>Ecotrons</li><li>Simulink</li></ul></div>
+<div class="skill-block reveal stagger-3"><h4>Tools</h4><ul><li>WinTax</li><li>GEMS Data Analysis</li><li>Git</li><li>SolidWorks</li><li>Excel</li></ul></div>
+<div class="skill-block reveal stagger-4"><h4>Domains</h4><ul><li>Vehicle Dynamics</li><li>Control Systems</li><li>Powertrain Simulation</li><li>Data Acquisition</li><li>Race Engineering</li></ul></div>
+</div></section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+<div class="section-header reveal" style="justify-content:center"><span class="section-num">05</span><h2 class="section-title">Contact</h2></div>
+<h3 class="contact-tagline reveal">Let's build something <em>fast</em></h3>
+<p class="contact-sub reveal">Whether it's about an opportunity in motorsport engineering, a collaboration, or just talking about vehicles, I'd love to hear from you.</p>
+<div class="contact-links reveal">
+<a href="mailto:aniolescofet01@gmail.com" class="contact-link primary">Email me</a>
+<a href="https://www.linkedin.com/in/aniol-escofet" class="contact-link" target="_blank">LinkedIn</a>
+<a href="TFG_Thesis_Aniol_Escofet.pdf" class="contact-link" download>Download CV</a>
+</div></section>
+
+<footer><p>&copy; 2026 Aniol Escofet. Built with precision.</p></footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+<button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+<img id="lightbox-img" src="" alt="Enlarged photo">
+</div>
+
+<script>
+// Nav scroll
+const nav=document.getElementById('navbar');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>40)},{passive:true});
+
+// Reveal animations
+const ro=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting)n.target.classList.add('visible')})},{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(e=>ro.observe(e));
+
+// Counter animation
+const co=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting&&n.target.dataset.target){const t=parseInt(n.target.dataset.target),s=performance.now(),el=n.target;(function tick(now){const p=Math.min((now-s)/1200,1);el.textContent=Math.round((1-Math.pow(1-p,3))*t);if(p<1)requestAnimationFrame(tick)})(s);co.unobserve(el)}})},{threshold:.5});
+document.querySelectorAll('.counter[data-target]').forEach(e=>co.observe(e));
+
+// Active nav highlight
+const secs=document.querySelectorAll('section[id]'),nls=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{let c='';secs.forEach(s=>{if(scrollY>=s.offsetTop-120)c=s.id});nls.forEach(l=>{l.style.color=l.getAttribute('href')==='#'+c?'var(--text)':''})},{passive:true});
+
+// Image slider scroll function
+function scrollSlider(id, dir) {
+  const track = document.getElementById(id);
+  if (!track) return;
+  const slideWidth = track.querySelector('.slide').offsetWidth + 14;
+  track.scrollBy({ left: dir * slideWidth, behavior: 'smooth' });
+}
+
+// Lightbox
+function openLightbox(slideEl) {
+  const img = slideEl.querySelector('img');
+  if (!img) return;
+  const overlay = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightbox-img');
+  lbImg.src = img.src;
+  lbImg.alt = img.alt;
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('active'));
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  const overlay = document.getElementById('lightbox');
+  overlay.classList.remove('active');
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+
+<!--
+==========================================================================
+  PORTFOLIO EDITING GUIDE — How to add photos and videos
+==========================================================================
+
+  ADDING A PHOTO (Google Drive):
+  1. Upload the photo to Google Drive
+  2. Right click > Share > "Anyone with the link can view"
+  3. Copy the file ID from the link (the long string between /d/ and /view)
+  4. Paste this line inside the slider-track div of the project you want:
+
+  <div class="slide has-img" onclick="openLightbox(this)"><img src="https://lh3.googleusercontent.com/d/YOUR_FILE_ID_HERE" alt="Description"></div>
+
+  ADDING A PHOTO (local file, if using hosting):
+  <div class="slide has-img" onclick="openLightbox(this)"><img src="img/folder/filename.jpg" alt="Description"></div>
+
+  ADDING A YOUTUBE VIDEO (always add at the END of the slider):
+  1. Get the video ID from the YouTube URL (the part after v=)
+  2. Paste this line at the end of the slider-track, before the closing </div>:
+
+  <div class="slide has-video" onclick="window.open('https://www.youtube.com/watch?v=VIDEO_ID','_blank')"><img src="https://img.youtube.com/vi/VIDEO_ID/hqdefault.jpg" alt="Video description"><div class="play-icon"></div></div>
+
+  ADDING A NEW PROJECT:
+  Copy any existing project-card block and modify the content.
+  For a full-width card, add class "featured" to the project-card div.
+
+  ADDING A NEW PDF (Google Drive):
+  Replace the iframe src with: https://drive.google.com/file/d/FILE_ID/preview
+  Replace the download href with: https://drive.google.com/uc?export=download&id=FILE_ID
+
+  PORTRAIT PHOTOS (vertical):
+  Add class "portrait" to the slide div for a narrower width:
+  <div class="slide has-img portrait" onclick="openLightbox(this)">...
+
+  REMOVING PLACEHOLDER SLIDES:
+  Just delete the <div class="slide">Placeholder text</div> line.
+
+==========================================================================
+-->
+
+</body>
+</html>
