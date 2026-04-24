@@ -172,9 +172,34 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 
 <!-- PERSONAL -->
 <div class="projects-category reveal"><h3 class="projects-category-title">Personal Projects</h3><div class="projects-grid">
-<div class="project-card featured reveal"><span class="project-idx">PP — 01</span><h3>LapTime Simulator</h3><div class="project-subtitle">Full-vehicle performance simulation tool</div>
-<div class="project-desc">A custom lap time simulator built from scratch. Starting from real circuit trajectory data and modular vehicle subsystems (tyres, aero, powertrain, suspension), the tool simulates vehicle performance with increasing fidelity. Currently modelling combustion vehicles with plans to expand to hybrid and full-electric powertrains. The goal is to have four vehicle models covering Formula Student, Formula Regional, Formula E and Formula 1. On top of that, automated performance charts and a telemetry comparison module to validate against real driver data.</div>
-<div class="project-tags"><span class="project-tag">Python</span><span class="project-tag">MATLAB</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">Lap Simulation</span><span class="project-tag">Telemetry</span></div>
+<div class="project-card featured reveal"><span class="project-idx">PP — 01</span><h3>Lap Time Simulator</h3><div class="project-subtitle">Modular Vehicle Development Platform · MATLAB</div>
+<div class="project-desc">
+<p>A MATLAB-based lap time simulation and vehicle analysis platform designed to support a racing car's full development cycle, from early concept where almost no hardware data exists, all the way through to race-ready validation against real on-track telemetry. The tool is built around the principle that the fidelity of the simulation should match the fidelity of the information available: as the team learns more about the car, the models are upgraded in place without restructuring the workflow.</p>
+
+<p><strong>The problem it solves.</strong> In motorsport development, the decisions with the biggest impact on performance — suspension geometry, aero package, powertrain architecture — are made at the very beginning of a project, when the least data is available. A tool that only works once full hardware data exists arrives too late. Equally, a tool that is too simplified fails to give useful answers once real data starts coming in. This simulator solves that by being continuously useful at every stage of development, from back-of-envelope concept studies to lap-accurate simulation validated against telemetry.</p>
+
+<p><strong>Three-level fidelity architecture.</strong> Every subsystem — Powertrain, Aerodynamics, Brakes, Tyres, Suspension, Chassis — is implemented at three independent levels of physical fidelity, selectable at runtime. L1 (concept stage) uses simple scalar parameters: constant peak power, fixed drag and lift coefficients, constant friction. Enough to produce a credible lap time estimate from a one-page spec sheet. L2 (development stage) introduces physics-based models: torque curves, brake bias and hydraulic geometry, load-sensitive tyre behaviour, lateral load transfer. L3 (validation stage) goes to full fidelity: Pacejka Magic Formula tyres fitted to measured data, full hydraulic brake model with thermal degradation, DRS and ride-height-sensitive aero, ERS energy management. Each upgrade is independent — Tyres L2 can run alongside Suspension L1 if that is all the data available. The simulator loop never knows which level is active: each subsystem exposes a clean interface and higher-fidelity models are drop-in replacements.</p>
+
+<p><strong>Layer 1: QSS spatial sweep.</strong> The spatial engine is built on the Quasi-Steady-State method, the industry standard in motorsport simulation. The car is treated as a point mass navigating a known racing line, assumed to be in steady state at every spatial point. The algorithm runs in three linked sweeps across the track distance domain. First, corner speed limits: at every point with curvature κ, the maximum lateral speed is solved iteratively, since downforce and therefore grip depend on speed itself. Second, a forward acceleration sweep propagates the speed envelope accounting for engine power, drag, rolling resistance, and remaining longitudinal grip after cornering demand is subtracted via the friction ellipse. Third, a backward braking sweep runs the same logic in reverse, propagating maximum entry speeds into each corner. Five alternating passes produce the minimum-time speed envelope: at every track point the car is at exactly one limit — traction, braking, or cornering.</p>
+
+<p><strong>Layer 2: transient temporal integration and iterative coupling.</strong> Once the spatial speed profile is converged, a second pass integrates the trajectory in the time domain, computing the states that evolve continuously along the lap. The tyre thermal model tracks compound temperature using a lumped thermal network, updating friction coefficients and slip stiffness that feed back into Layer 1. Suspension and chassis dynamics compute instantaneous ride height as a function of heave and roll, which directly modifies the aero maps used in the spatial sweep. ERS state of charge is integrated from the power demand profile, determining deployment availability corner by corner. Fuel mass drops continuously, shifting total weight and CG height. These outputs are fed back into Layer 1, which re-solves the speed profile with the updated vehicle state. The two layers iterate to convergence, typically in three to five passes, producing a speed profile that accounts for both instantaneous physics and the evolving state of the car across the full lap.</p>
+
+<p><strong>Sensitivity analysis and signal explorer.</strong> Rather than running the simulator once per configuration, the sensitivity module sweeps a parameter over a range and plots the lap time response directly, answering questions like: at what downforce level does added drag outweigh added cornering grip, what is the weight penalty per second on a technical versus a high-speed circuit, or at what CG height does lateral load transfer start to hurt more than it helps. The signal explorer provides a graphical interface to inspect every computed channel as a function of track position or time — speed, longitudinal and lateral acceleration, tyre load per axle, aerodynamic downforce, brake force distribution, engine operating point, ERS contribution — and overlays channels from different configurations to directly show where one setup gains on another. The GG diagram is included as a standard assessment of how efficiently the tyre friction circle is being used.</p>
+
+<p><strong>Real data validation loop.</strong> Once the car is running on track, the simulator's outputs are compared directly against real telemetry — GPS speed, IMU accelerations, wheel speeds, brake pressure, engine channels — aligned spatially by arc length. Systematic offsets in specific sectors reveal which subsystem model needs refinement: a braking point consistently too early points to the brake model, a corner speed consistently too high points to the lateral tyre model. This closes the loop between simulation and reality and gives each model upgrade a clear validation target.</p>
+
+<p><strong>GUI and software architecture.</strong> The graphical interface is built entirely in programmatic MATLAB with no external toolboxes. The track tab imports GPS or Cartesian data and displays the racing line coloured by curvature, elevation profile, and corner classification. Each subsystem has its own tab with a level selector that dynamically rebuilds the parameter table and live preview plots — torque curve for Powertrain L2, Pacejka curves at nominal and 2× load for Tyres L3. The results tab shows the speed profile, GG diagram, trajectory coloured by speed, and lap time delta versus a reference. The underlying architecture is object-oriented with clean subsystem interfaces, designed so that upgrading one module never requires touching another — the same principle that makes the tool usable at every stage of a project's life.</p>
+</div>
+<div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">OOP Architecture</span><span class="project-tag">QSS Simulation</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">Pacejka MF</span><span class="project-tag">Aerodynamics</span><span class="project-tag">Sensitivity Analysis</span><span class="project-tag">GUI Development</span><span class="project-tag">Telemetry Validation</span><span class="project-tag">ERS</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-lts">
+<div class="slide">GUI overview — speed profile + track coloured by speed</div>
+<div class="slide">Subsystem tab — Tyres L3 Pacejka curves at nominal and 2× load</div>
+<div class="slide">QSS speed envelope — traction / braking / cornering limits coloured</div>
+<div class="slide">Layer 2 output — tyre temperature or ERS SoC vs lap distance</div>
+<div class="slide">Sensitivity sweep — lap time vs downforce level</div>
+<div class="slide">Validation overlay — simulated vs real telemetry speed trace</div>
+<div class="slide">Results tab — GG diagram + trajectory coloured by speed</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts',1)">→</button></div></div>
 </div>
 
 <div class="project-card reveal"><span class="project-idx">PP — 02</span><h3>Coming Soon</h3><div class="project-subtitle">Future project</div><div class="project-desc">New personal projects will appear here as they develop. From drone builds to new simulation tools.</div></div>
@@ -194,6 +219,14 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <p>A key design decision was making the system fully configurable in real time. Three driving modes were defined: Eco, Sport, and Hardcore. Each mode adjusts the aggressiveness of the yaw rate target and the weighting of the QP objectives, letting the driver tune the car behavior from a dashboard switch without stopping. The controller was deployed and validated on the CAT16x for the 2023-2024 competition season.</p>
 </div>
 <div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">VI-Grade</span><span class="project-tag">QP Optimization</span><span class="project-tag">Dual-Track NLTV Model</span><span class="project-tag">Pacejka</span><span class="project-tag">ROS</span><span class="project-tag">CAN Bus</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-tv">
+<div class="slide">NLTV vehicle model diagram — four-wheel layout with load transfer</div>
+<div class="slide">Model calibration fits — Ramp Steer / Skid Pad / AutoX telemetry vs model</div>
+<div class="slide">FF+FB controller block diagram — yaw rate reference tracking</div>
+<div class="slide">QP torque allocator — torque distribution across four wheels</div>
+<div class="slide">VI-Grade HIL simulation — maneuver results and lateral acceleration gain</div>
+<div class="slide">Hardware setup — ROS node, CAN, Lenze inverters, VectorNav INS</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv',1)">→</button></div></div>
 </div>
 
 <div class="project-card reveal"><span class="project-idx">FS — 02</span><h3>Traction Control</h3><div class="project-subtitle">Wheel slip management · CAT15x/16x</div>
@@ -202,6 +235,11 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <p>Beyond torque limiting, the system also enforces a velocity-based control using an optimal slip ratio target per wheel. Since competition surfaces are known and consistent, characterized during pre-season testing, the optimal operating point on the longitudinal force curve is determined in advance. The team modeled the Pacejka Magic Formula for their specific tires, giving a much more accurate peak slip ratio prediction than a generic model. The optimal slip ratio target is then adjusted as a function of slip angle per wheel, coupling the longitudinal and lateral tire behavior for a more complete slip management strategy.</p>
 </div>
 <div class="project-tags"><span class="project-tag">Inverter Control</span><span class="project-tag">Slip Ratio</span><span class="project-tag">Pacejka</span><span class="project-tag">CAN Bus</span><span class="project-tag">ROS</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-tc">
+<div class="slide">Inverter-level control loop architecture — speed controller block diagram</div>
+<div class="slide">Pacejka longitudinal force curve — optimal slip ratio operating point</div>
+<div class="slide">Slip ratio vs slip angle — coupled longitudinal-lateral target map</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tc',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tc',1)">→</button></div></div>
 </div>
 
 <div class="project-card reveal"><span class="project-idx">FS — 03</span><h3>Regenerative Braking</h3><div class="project-subtitle">Energy recovery · CAT15x/16x</div>
@@ -212,6 +250,12 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <p>The system includes a wheel lockup prevention mechanism that compares individual wheel RPMs against the vehicle speed from the INS. If any wheel decelerates faster than physically consistent with the vehicle speed, electrical torque is reduced on that corner. A set of safety limits also monitors battery State of Charge and motor and inverter temperatures. If any threshold is exceeded, regenerative torque is progressively reduced with a smooth transition to pure mechanical braking so the driver is never caught off guard.</p>
 </div>
 <div class="project-tags"><span class="project-tag">Energy Recovery</span><span class="project-tag">Brake Blending</span><span class="project-tag">Anti-Lockup</span><span class="project-tag">SoC Management</span><span class="project-tag">Hydraulic Sensors</span><span class="project-tag">ROS</span></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-rb">
+<div class="slide">Ideal braking distribution curve — mechanical + electrical overlay</div>
+<div class="slide">Parallel braking mode — hydraulic pressure sensor input to regen torque demand</div>
+<div class="slide">Regen-first staging diagram — pedal travel zones and brake engagement</div>
+<div class="slide">Wheel lockup prevention — RPM vs vehicle speed monitoring per corner</div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-rb',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-rb',1)">→</button></div></div>
 </div>
 </div></div>
 
