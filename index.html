@@ -36,7 +36,8 @@ section{padding:100px 32px;max-width:var(--max-w);margin:0 auto}.section-header{
 .img-slider-track::-webkit-scrollbar{display:none}
 .img-slider-track .slide{flex:0 0 auto;scroll-snap-align:start;width:420px;height:280px;background:var(--bg-alt);border:2px dashed var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;text-align:center;padding:16px;transition:.3s;overflow:hidden}
 .img-slider-track .slide:hover{border-color:var(--accent);color:var(--accent)}
-.img-slider-track .slide img{width:100%;height:100%;object-fit:cover;border-radius:2px}
+.img-slider-track .slide.has-img{width:auto;border:1px solid var(--border-light);padding:0}
+.img-slider-track .slide.has-img img{height:100%;width:auto;object-fit:unset;border-radius:2px}
 .img-slider-track .slide.portrait{width:220px}
 .slider-controls{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
 .slider-btn{width:32px;height:32px;border:1px solid var(--border);background:var(--white);border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:.8rem;color:var(--text-muted)}
@@ -147,7 +148,13 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <h3>Software & Electronic Engineer Intern</h3><div class="exp-company">CUPRA Racing · Martorell</div>
 <div class="exp-desc">Developed control systems and vehicle dynamics algorithms using MATLAB/Simulink. Led simulation and validation campaigns across MiL, SiL, HiL and DiL environments. Worked extensively on the CUPRA Exponential Experience, programming and setting up software for CUPRA Leon TCR race cars. Created the control software for a prototype combining a CUPRA Born RWD platform with a Tavascan front motor to create an AWD concept. Supported race operations, optimized CAN/GPS/IMU communication systems, and led vehicle-level testing for performance and durability.</div>
 <div class="exp-tags"><span class="exp-tag">MATLAB</span><span class="exp-tag">Simulink</span><span class="exp-tag">CAN Bus</span><span class="exp-tag">MiL/SiL/HiL/DiL</span><span class="exp-tag">WinTax</span><span class="exp-tag">Vehicle Dynamics</span><span class="exp-tag">Race Support</span></div>
-</div></div>
+</div>
+<div class="img-slider"><div class="img-slider-track" id="slider-exp-cupra">
+<div class="slide has-img" onclick="openLightbox(this)"><img src="CUPRA Racing/1.webp" alt="CUPRA Racing"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="CUPRA Racing/2.jpeg" alt="CUPRA Racing"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="CUPRA Racing/5.jpg" alt="CUPRA Racing"></div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-exp-cupra',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-exp-cupra',1)">→</button></div></div>
+</div>
 
 <div class="exp-item reveal"><div class="exp-date">Sep 2021 — Sep 2024</div><div class="exp-role">
 <h3>Vehicle Controls Engineer</h3><div class="exp-company">BCNeMotorsport (Formula Student) · UPC Barcelona</div>
@@ -174,9 +181,6 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="project-card featured reveal"><span class="project-idx">PP — 01</span><h3>LapTime Simulator</h3><div class="project-subtitle">Full-vehicle performance simulation tool</div>
 <div class="project-desc">A custom lap time simulator built from scratch. Starting from real circuit trajectory data and modular vehicle subsystems (tyres, aero, powertrain, suspension), the tool simulates vehicle performance with increasing fidelity. Currently modelling combustion vehicles with plans to expand to hybrid and full-electric powertrains. The goal is to have four vehicle models covering Formula Student, Formula Regional, Formula E and Formula 1. On top of that, automated performance charts and a telemetry comparison module to validate against real driver data.</div>
 <div class="project-tags"><span class="project-tag">Python</span><span class="project-tag">MATLAB</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">Lap Simulation</span><span class="project-tag">Telemetry</span></div>
-<div class="img-slider"><div class="img-slider-track" id="slider-lts">
-<div class="slide">Screenshot 1</div><div class="slide">Screenshot 2</div><div class="slide">Screenshot 3</div><div class="slide">Screenshot 4</div>
-</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts',1)">→</button></div></div>
 </div>
 
 <div class="project-card reveal"><span class="project-idx">PP — 02</span><h3>Coming Soon</h3><div class="project-subtitle">Future project</div><div class="project-desc">New personal projects will appear here as they develop. From drone builds to new simulation tools.</div></div>
@@ -189,25 +193,16 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="project-card featured reveal"><span class="project-idx">FS — 01</span><h3>Model-Based Torque Vectoring</h3><div class="project-subtitle">4WD Electric Vehicle · CAT16x</div>
 <div class="project-desc">Designed and implemented a complete Torque Vectoring system for a 4WD Formula Student car. Built a dual-track nonlinear vehicle model calibrated against real data (96.7% fit on ramp steer). Designed a model-based yaw rate controller with Feed-Forward and PID Feed-Back components, plus a multi-objective torque allocator using quadratic programming. The system achieved a peak lateral acceleration increase of +7.9% in simulation, with multiple driving modes (Eco, Sport, Hardcore) switchable in real-time.</div>
 <div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">VI-Grade</span><span class="project-tag">QP Optimization</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">ROS</span></div>
-<div class="img-slider"><div class="img-slider-track" id="slider-tv">
-<div class="slide">Coming soon</div>
-</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv',1)">→</button></div></div>
 </div>
 
 <div class="project-card reveal"><span class="project-idx">FS — 02</span><h3>Traction Control</h3><div class="project-subtitle">Wheel slip management · CAT15x/16x</div>
 <div class="project-desc">Developed a traction control algorithm based on the Pacejka Magic Formula tire model. Defined optimal slip ratio targets per wheel and enforced torque limits to prevent wheel spin during acceleration and instability during braking.</div>
 <div class="project-tags"><span class="project-tag">Pacejka</span><span class="project-tag">Slip Control</span><span class="project-tag">MATLAB</span></div>
-<div class="img-slider"><div class="img-slider-track" id="slider-tc">
-<div class="slide">Slip ratio chart</div><div class="slide">Torque limits</div><div class="slide">Test results</div>
-</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tc',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tc',1)">→</button></div></div>
 </div>
 
 <div class="project-card reveal"><span class="project-idx">FS — 03</span><h3>Regenerative Braking</h3><div class="project-subtitle">Energy recovery · CAT15x/16x</div>
 <div class="project-desc">Implemented a regenerative braking strategy that recovers kinetic energy during deceleration, respecting battery charging limits, driver feel, and vehicle stability constraints.</div>
 <div class="project-tags"><span class="project-tag">Energy Recovery</span><span class="project-tag">Battery Limits</span><span class="project-tag">Simulink</span></div>
-<div class="img-slider"><div class="img-slider-track" id="slider-rb">
-<div class="slide">Energy recovery chart</div><div class="slide">Braking profile</div><div class="slide">Efficiency data</div>
-</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-rb',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-rb',1)">→</button></div></div>
 </div>
 </div></div>
 
@@ -256,9 +251,6 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="project-card reveal"><span class="project-idx">PRO — 04</span><h3>Stark System Tool</h3><div class="project-subtitle">Stark Future S.L. · 1D Vehicle Simulation</div>
 <div class="project-desc">Built the core simulation tool for Stark's motorcycle lineup. A full 1D model that simulates battery, inverter, motor, gearbox, chassis and environment. Enables engineers to vary models and characteristics to evaluate consumption, losses, acceleration, top speed, thermals, and basically everything needed to initially dimension a motorcycle.</div>
 <div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">System Engineering</span><span class="project-tag">EV Powertrain</span></div>
-<div class="img-slider"><div class="img-slider-track" id="slider-stark">
-<div class="slide">Coming soon</div>
-</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-stark',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-stark',1)">→</button></div></div>
 </div>
 </div></div>
 
