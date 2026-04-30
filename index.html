@@ -257,10 +257,19 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="project-card reveal"><span class="project-idx">FS — 02</span><h3>Traction Control</h3><div class="project-subtitle">Wheel slip management · CAT15x/16x</div>
 <div class="project-desc">
 <p>The traction control system is implemented as a speed controller running directly inside the inverter, rather than at the Processing Unit level. This is a deliberate architectural choice: the CAN-ROS communication link between the PU and the inverters runs at 50 Hz, which is too slow to react to wheel slip transients effectively. By pushing the control loop inside the inverter, which runs at a significantly higher frequency, the system responds to slip events before they can develop, without being bottlenecked by communication latency.</p>
-<div class="img-slider"><div class="img-slider-track" id="slider-tc-1"><div class="slide">Inverter-level control loop architecture — speed controller block diagram</div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tc-1',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tc-1',1)">→</button></div></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-tc-1">
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TC/P1 - Continuous_vs_Discrete.png" alt="Continuous control vs 50 Hz discrete torque response"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TC/P1 - Speed_Setpoint.png" alt="Ideal slip setpoint angular speed vs vehicle velocity"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TC/P1 - SlipRatio_Control.png" alt="Velocity and slip ratio control response"></div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tc-1',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tc-1',1)">→</button></div></div>
 
 <p>Beyond torque limiting, the system also enforces a velocity-based control using an optimal slip ratio target per wheel. Since competition surfaces are known and consistent, characterized during pre-season testing, the optimal operating point on the longitudinal force curve is determined in advance. The team modeled the Pacejka Magic Formula for their specific tires, giving a much more accurate peak slip ratio prediction than a generic model. The optimal slip ratio target is then adjusted as a function of slip angle per wheel, coupling the longitudinal and lateral tire behavior for a more complete slip management strategy.</p>
-<div class="img-slider"><div class="img-slider-track" id="slider-tc-2"><div class="slide">Pacejka longitudinal force curve — optimal slip ratio operating point</div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tc-2',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tc-2',1)">→</button></div></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-tc-2">
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TC/P2 - Pacejka_Optimal.png" alt="Pacejka Mu_x vs slip ratio — optimal operating point"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TC/P2 - Pacejka_Full.png" alt="Pacejka full longitudinal force curve"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TC/P2 - SlipRatio_vs_SlipAngle.png" alt="Optimal slip ratio vs slip angle coupling"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TC/P2 - DesSR_perWheel.png" alt="Angular velocity limit and desired slip ratio per wheel"></div>
+</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tc-2',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tc-2',1)">→</button></div></div>
 </div>
 <div class="project-tags"><span class="project-tag">Inverter Control</span><span class="project-tag">Slip Ratio</span><span class="project-tag">Pacejka</span><span class="project-tag">CAN Bus</span><span class="project-tag">ROS</span></div>
 </div>
