@@ -254,7 +254,7 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">VI-Grade</span><span class="project-tag">QP Optimization</span><span class="project-tag">Dual-Track NLTV Model</span><span class="project-tag">Pacejka</span><span class="project-tag">ROS</span><span class="project-tag">CAN Bus</span></div>
 </div>
 
-<div class="project-card reveal"><span class="project-idx">FS — 02</span><h3>Traction Control</h3><div class="project-subtitle">Wheel slip management · CAT15x/16x</div>
+<div class="project-card featured reveal"><span class="project-idx">FS — 02</span><h3>Traction Control</h3><div class="project-subtitle">Wheel slip management · CAT15x/16x</div>
 <div class="project-desc">
 <p>The traction control system is implemented as a speed controller running directly inside the inverter, rather than at the Processing Unit level. This is a deliberate architectural choice: the CAN-ROS communication link between the PU and the inverters runs at 50 Hz, which is too slow to react to wheel slip transients effectively. By pushing the control loop inside the inverter, which runs at a significantly higher frequency, the system responds to slip events before they can develop, without being bottlenecked by communication latency.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-tc-1">
@@ -274,7 +274,7 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="project-tags"><span class="project-tag">Inverter Control</span><span class="project-tag">Slip Ratio</span><span class="project-tag">Pacejka</span><span class="project-tag">CAN Bus</span><span class="project-tag">ROS</span></div>
 </div>
 
-<div class="project-card reveal"><span class="project-idx">FS — 03</span><h3>Regenerative Braking</h3><div class="project-subtitle">Energy recovery · CAT15x/16x</div>
+<div class="project-card featured reveal"><span class="project-idx">FS — 03</span><h3>Regenerative Braking</h3><div class="project-subtitle">Energy recovery · CAT15x/16x</div>
 <div class="project-desc">
 <p>The regenerative braking system is designed around a single non-negotiable constraint: the ideal braking force distribution curve must always be maintained. Every mode and configuration operates within this envelope, ensuring vehicle stability and predictable brake bias regardless of how the electrical and mechanical forces are combined.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-rb-1"><div class="slide">Ideal braking distribution curve — mechanical + electrical overlay</div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-rb-1',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-rb-1',1)">→</button></div></div>
