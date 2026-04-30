@@ -218,37 +218,37 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="img-slider"><div class="img-slider-track" id="slider-tv-2">
 <div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - 4WD.png" alt="4WD dual-track NLTV model"></div>
 <div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - FrictionCircle.png" alt="Tyre friction circle per wheel"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - Comparation_RampSteer.png" alt="Model calibration — Ramp Steer"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - Comparation_SkidPad.png" alt="Model calibration — Skid Pad"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - Comparation_AutoX.png" alt="Model calibration — AutoX"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - LuT_Sport.png" alt="NLTV model LuT Sport mode"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - Comparation_RampSteer.jpg" alt="Model calibration — Ramp Steer"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - Comparation_SkidPad.jpg" alt="Model calibration — Skid Pad"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - Comparation_AutoX.jpg" alt="Model calibration — AutoX"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P2 - LuT_Sport.jpg" alt="NLTV model LuT Sport mode"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv-2',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv-2',1)">→</button></div></div>
 
 <p>The yaw rate controller generates the reference corrective yaw moment that the torque allocator then executes. It combines two components: a Feed-Forward path that uses the vehicle model to anticipate the required moment based on steering input and speed, and a PID Feed-Back path that closes the loop on the measured yaw rate error. An anti-windup mechanism (back-calculation) prevents integrator saturation in transients, and a velocity-dependent reset avoids excessive integral buildup. The combined controller tracks the yaw rate reference with average errors of 0.02% in Ramp Steer, 0.18% in Skid Pad, and 0.89% in AutoX conditions.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-tv-3">
 <div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P3 - Scheme.png" alt="FF+FB yaw rate controller block diagram"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P3 - LuT_PID.png" alt="PID gain scheduling"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P3 - LuT_PID.jpg" alt="PID gain scheduling"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv-3',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv-3',1)">→</button></div></div>
 
 <p>The torque allocator translates the desired longitudinal force (from the driver throttle) and corrective yaw moment (from the controller) into four individual motor torque commands. This is posed as a multi-objective quadratic programming problem solved in real time. The optimizer respects motor torque limits, inverter limits, and the tire friction circle per wheel, while simultaneously minimizing the error on both references. Using Ackermann-corrected wheel angles, it distributes torque asymmetrically between left-right and front-rear to generate the exact yaw moment needed without sacrificing traction. Closed-loop tracking errors: Fx average 0.9%, Mz average 3.6%.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-tv-4">
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P4 - AX_TD_1.png" alt="Torque allocator — AutoX torque distribution"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P4 - AX_Trq.png" alt="Torque allocator — AutoX torques"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P4 - SP_TD_1.png" alt="Torque allocator — Skid Pad torque distribution"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P4 - SP_Trq.png" alt="Torque allocator — Skid Pad torques"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P4 - AX_TD_1.jpg" alt="Torque allocator — AutoX torque distribution"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P4 - AX_Trq.jpg" alt="Torque allocator — AutoX torques"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P4 - SP_TD_1.jpg" alt="Torque allocator — Skid Pad torque distribution"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P4 - SP_Trq.jpg" alt="Torque allocator — Skid Pad torques"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv-4',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv-4',1)">→</button></div></div>
 
 <p>The entire system was developed and tested in a Simulink and VI-Grade CarRealTime loop before deployment on the real car. VI-Grade's 14-DOF multibody model replicated the CAT15x dynamics with full suspension, tire-road interaction, and real mass distribution. Three standard maneuvers were used to stress-test each layer independently and combined. Peak lateral acceleration in the AutoX improved by +7.9% over the baseline. On the hardware side, the algorithm runs as a ROS node on the car's Processing Unit, receiving data over CAN from the VectorNav INS, wheel resolvers and suspension sensors, and sending torque commands to two Lenze inverters at real-time rate.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-tv-5">
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P5 - AX_Vehicle.png" alt="VI-Grade simulation — AutoX vehicle response"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P5 - RS_Vehicle.png" alt="VI-Grade simulation — Ramp Steer vehicle response"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P5 - SP_Vehicle.png" alt="VI-Grade simulation — Skid Pad vehicle response"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P5 - AX_Vehicle.jpg" alt="VI-Grade simulation — AutoX vehicle response"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P5 - RS_Vehicle.jpg" alt="VI-Grade simulation — Ramp Steer vehicle response"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P5 - SP_Vehicle.jpg" alt="VI-Grade simulation — Skid Pad vehicle response"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv-5',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv-5',1)">→</button></div></div>
 
 <p>A key design decision was making the system fully configurable in real time. Three driving modes were defined: Eco, Sport, and Hardcore. Each mode adjusts the aggressiveness of the yaw rate target and the weighting of the QP objectives, letting the driver tune the car behavior from a dashboard switch without stopping. The controller was deployed and validated on the CAT16x for the 2023-2024 competition season.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-tv-6">
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P6 - LuT_sa.png" alt="Driving modes — lateral acceleration vs sideslip"></div>
-<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P6 - LuT_stee.png" alt="Driving modes — lateral acceleration vs steering"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P6 - LuT_sa.jpg" alt="Driving modes — lateral acceleration vs sideslip"></div>
+<div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P6 - LuT_stee.jpg" alt="Driving modes — lateral acceleration vs steering"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv-6',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv-6',1)">→</button></div></div>
 </div>
 <div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">VI-Grade</span><span class="project-tag">QP Optimization</span><span class="project-tag">Dual-Track NLTV Model</span><span class="project-tag">Pacejka</span><span class="project-tag">ROS</span><span class="project-tag">CAN Bus</span></div>
