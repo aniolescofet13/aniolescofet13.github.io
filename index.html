@@ -402,9 +402,19 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">UNI — 02</span><h3>HMI Take-Over Request Design</h3><div class="project-subtitle">Level 3 Autonomous Driving · Course Project</div>
-<div class="project-desc">Designed a Take-Over Request (TOR) handover sequence for Level 3 automotive automation, selecting the prototype approach and designing the HMI interaction flow for safe driver-vehicle control transitions.</div>
-<div class="project-tags"><span class="project-tag">HMI</span><span class="project-tag">Autonomous Driving</span><span class="project-tag">UX Design</span></div></div>
+<div class="project-card featured reveal"><span class="project-idx">UNI — 02</span><h3>TrustDrive / Aura</h3><div class="project-subtitle">Advanced Human Machine Interfaces · Politecnico di Milano · 2026</div>
+<div class="project-desc">
+<p>TrustDrive / Aura is a research prototype exploring how adaptive HMI design can support trust calibration in SAE Level 3 autonomous vehicles. Developed as a group capstone for the Advanced Human Machine Interfaces course at Politecnico di Milano, the project addresses a structural problem inherent to L3 automation: while the vehicle handles all lateral and longitudinal control, the driver must remain ready to retake control on demand. This creates the Out-of-the-Loop (OOTL) syndrome, where cognitive disengagement from the driving task makes safe handover costly in situational awareness and reaction time. The central design question was how to build trust gradually, so that drivers feel genuinely confident relying on the system over time rather than just tolerating it.</p>
+
+<p>The answer is Aura, a personalized, voice-driven in-car interface that models each driver across five behavioral dimensions and adapts its communication style, timing, and information density accordingly. The interaction covers the full journey lifecycle: an indirect onboarding interview establishes a driver profile before the first drive; a proactive suggestion overlay invites highway automation with personalized benefit messaging; voice commands allow real-time queries during the automated phase; a three-stage Takeover Request (TOR) sequence reconstructs situational awareness progressively rather than through a sudden alert; and a post-drive feedback screen refines the profile over repeated sessions. Every system decision is surfaced with an explanation, applying Explainable AI (XAI) principles to help each driver build an accurate mental model of what the system can and cannot do.</p>
+
+<p>The prototype runs as a full-stack web application: a React 19 + TanStack Start frontend serves as the in-car display, connected via WebSocket to a Python/FastAPI backend that manages speech-to-text (Whisper), LLM-based intent classification (Groq Llama 3.3 70B), and text-to-speech (Microsoft Edge TTS). The driver profile is stored as a five-dimension JSON object on a continuous [0, 10] scale and visualized as a pentagon radar chart accessible from the home screen. The full presentation and source code are linked below.</p>
+</div>
+<div style="display:flex;gap:10px;margin-top:16px">
+<a class="pdf-download-btn" href="Docs/AHMI.pdf" target="_blank">↓ Slides PDF</a>
+<a class="pdf-download-btn" href="#" target="_blank">⌥ GitHub</a>
+</div>
+<div class="project-tags"><span class="project-tag">HMI Design</span><span class="project-tag">Autonomous Driving</span><span class="project-tag">Explainable AI</span><span class="project-tag">React · Python · FastAPI</span><span class="project-tag">Politecnico di Milano · 2026</span></div></div>
 
 <div class="project-card featured reveal"><span class="project-idx">UNI — 03</span><h3>Advanced Tyre Modelling and Testing</h3><div class="project-subtitle">Vehicle Dynamics Lab · Politecnico di Milano</div>
 <div class="project-desc">
@@ -440,7 +450,25 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div>
 </div>
 
-<div class="project-card reveal"><span class="project-idx">UNI — 05</span><h3>More coming soon</h3><div class="project-subtitle">Labs, papers & coursework</div>
+<div class="project-card featured reveal"><span class="project-idx">UNI — 05</span><h3>Vehicle Dynamics and Control</h3><div class="project-subtitle">Laboratories Report · Politecnico di Milano · 2025–2026</div>
+<div class="project-desc">
+<p>A comprehensive laboratory course at Politecnico di Milano covering the full analytical stack of vehicle dynamics, from tyre contact mechanics through chassis control design and high-fidelity multibody simulation. Working with a SportCar segment model (RWD, 1360 kg, 245/40 R18), the six-chapter report addresses Pacejka Magic Formula tyre modelling including combined slip degradation, vertical load sensitivity, and transient relaxation behavior; vehicle longitudinal dynamics covering mechanical brake distributor sizing, traction and braking manoeuvres, cruise control design, and ABS controller validation against ISO 21994 performance indicators on dry and snow surfaces; vertical dynamics comparing passive, semi-active, and active sky-hook suspension against ISO 8608 road profiles with ISO 2631 comfort assessment; lateral dynamics spanning steady-state cornering (ISO 4138), step steer (ISO 19364), sine-with-dwell stability assessment (ISO 19365), effective axle characteristics, path-follower control with double lane change (ISO 3888), and Torque Vectoring Control; ADAMS Car multibody analysis for suspension geometry sensitivity and full-vehicle response; and a VI-CarRealTime 14-DOF simulation for directional response and lateral stability validation.</p>
+</div>
+<div style="display:flex;gap:10px;margin-top:16px">
+<a class="pdf-download-btn" href="Docs/VDC_Report.pdf" download>↓ Download PDF</a>
+</div>
+<div class="project-tags"><span class="project-tag">Pacejka MF</span><span class="project-tag">ABS</span><span class="project-tag">Active Suspension</span><span class="project-tag">Lateral Dynamics</span><span class="project-tag">Torque Vectoring</span><span class="project-tag">ADAMS Car</span><span class="project-tag">VI-CarRealTime</span><span class="project-tag">Politecnico di Milano · 2026</span></div></div>
+
+<div class="project-card featured reveal"><span class="project-idx">UNI — 06</span><h3>Advanced Motorsport Engineering</h3><div class="project-subtitle">Laboratories Report · Politecnico di Milano · 2025–2026</div>
+<div class="project-desc">
+<p>A laboratory course at Politecnico di Milano using lap time simulation as the central engineering thread, supported by tyre, braking, and data acquisition labs. The basics session covers constant-radius cornering, minimum-time optimization on an oval, coast-down parameter identification, vertical loads under braking, and aerodynamic estimation from GPS data. Two progressive lap time simulation labs build from a quasi-steady-state framework with ride height and lift-and-coast sensitivity studies up to an advanced optimal control formulation using Direct Legendre Collocation, generating optimal racing lines, speed profiles, driver inputs, and tyre friction utilization maps. Supporting labs characterize tyre thermal behavior and its effect on lap time through toe angle, weight distribution, and aero balance sweeps, and identify the friction law from experimental data. A braking lab covers disc thermal analysis, braking system sizing, and bicycle model validation. A hands-on session with Marelli Wintax addresses real-car data acquisition and telemetry processing, and industry seminars from Scuderia Ferrari, Pirelli, and Ducati Corse round out the course with applied perspectives on F1 performance engineering, racing tyre design, and motorcycle lap time simulation.</p>
+</div>
+<div style="display:flex;gap:10px;margin-top:16px">
+<a class="pdf-download-btn" href="Docs/AME_Report.pdf" download>↓ Download PDF</a>
+</div>
+<div class="project-tags"><span class="project-tag">Lap Time Simulation</span><span class="project-tag">Optimal Control</span><span class="project-tag">Tyre Thermal Model</span><span class="project-tag">Braking Systems</span><span class="project-tag">Marelli Wintax</span><span class="project-tag">Politecnico di Milano · 2026</span></div></div>
+
+<div class="project-card reveal"><span class="project-idx">UNI — 07</span><h3>More coming soon</h3><div class="project-subtitle">Labs, papers & coursework</div>
 <div class="project-desc">Additional university projects, lab reports, and papers will be added here as they are completed throughout the Master's programs at UPC and Politecnico di Milano.</div></div>
 </div></div>
 </section>
