@@ -74,9 +74,19 @@ section{padding:100px 32px;max-width:var(--max-w);margin:0 auto}.section-header{
 .lightbox-overlay img{max-width:92vw;max-height:90vh;object-fit:contain;border-radius:4px;box-shadow:0 8px 60px rgba(0,0,0,.5)}
 .lightbox-close{position:absolute;top:20px;right:28px;color:#fff;font-size:1.6rem;cursor:pointer;background:none;border:none;font-family:var(--sans);opacity:.7;transition:.2s}
 .lightbox-close:hover{opacity:1}
+.lightbox-overlay img{cursor:default}
+.lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.35);color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;opacity:.75;z-index:2;font-family:var(--sans)}
+.lightbox-nav:hover{opacity:1;background:rgba(0,0,0,.65);border-color:rgba(255,255,255,.5)}
+.lightbox-nav.prev{left:24px}
+.lightbox-nav.next{right:24px}
+.lightbox-nav[hidden]{display:none}
+.lightbox-counter{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;z-index:2}
+.lightbox-counter[hidden]{display:none}
+@media(max-width:600px){.lightbox-nav{width:38px;height:38px;font-size:1.2rem}.lightbox-nav.prev{left:8px}.lightbox-nav.next{right:8px}}
 .img-slider-track .slide.has-img{cursor:zoom-in;border:1px solid var(--border-light);padding:0}
 .img-slider-track .slide.has-video{padding:0;border:1px solid var(--border-light);width:500px;position:relative;cursor:pointer;overflow:hidden}
 .img-slider-track .slide.has-video iframe{width:100%;height:100%;border:none;border-radius:2px}
+.slide.has-video video{width:100%;height:100%;border:none;border-radius:2px;display:block;background:#0a0c10;object-fit:contain}
 .img-slider-track .slide.has-video img{width:100%;height:100%;object-fit:cover}
 .img-slider-track .slide.has-video .play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:rgba(0,0,0,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.3s}
 .img-slider-track .slide.has-video:hover .play-icon{background:var(--accent)}
@@ -210,10 +220,10 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts-5',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts-5',1)">→</button></div></div>
 
 <p><strong>Sensitivity analysis and signal explorer.</strong> Rather than running the simulator once per configuration, the sensitivity module sweeps a parameter over a range and plots the lap time response directly, answering questions like: at what downforce level does added drag outweigh added cornering grip, what is the weight penalty per second on a technical versus a high-speed circuit, or at what CG height does lateral load transfer start to hurt more than it helps. The signal explorer provides a graphical interface to inspect every computed channel as a function of track position or time — speed, longitudinal and lateral acceleration, tyre load per axle, aerodynamic downforce, brake force distribution, engine operating point, ERS contribution — and overlays channels from different configurations to directly show where one setup gains on another. The GG diagram is included as a standard assessment of how efficiently the tyre friction circle is being used.</p>
-<div class="img-slider"><div class="img-slider-track" id="slider-lts-6"><div class="slide">Sensitivity sweep — lap time vs downforce level</div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts-6',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts-6',1)">→</button></div></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-lts-6"><div class="slide has-img" onclick="openLightbox(this)"><img src="LapTime/P6 - Web Sweep.png" alt="Sensitivity sweep — lap time vs downforce level"></div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts-6',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts-6',1)">→</button></div></div>
 
 <p><strong>Real data validation loop.</strong> Once the car is running on track, the simulator's outputs are compared directly against real telemetry — GPS speed, IMU accelerations, wheel speeds, brake pressure, engine channels — aligned spatially by arc length. Systematic offsets in specific sectors reveal which subsystem model needs refinement: a braking point consistently too early points to the brake model, a corner speed consistently too high points to the lateral tyre model. This closes the loop between simulation and reality and gives each model upgrade a clear validation target.</p>
-<div class="img-slider"><div class="img-slider-track" id="slider-lts-7"><div class="slide">Validation overlay — simulated vs real telemetry speed trace</div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts-7',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts-7',1)">→</button></div></div>
+<div class="img-slider"><div class="img-slider-track" id="slider-lts-7"><div class="slide has-img" onclick="openLightbox(this)"><img src="LapTime/P7 - Web Validation.png" alt="Validation overlay — simulated vs real telemetry speed trace"></div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts-7',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts-7',1)">→</button></div></div>
 
 <p><strong>GUI and software architecture.</strong> The graphical interface is built entirely in programmatic MATLAB with no external toolboxes. The track tab imports GPS or Cartesian data and displays the racing line coloured by curvature, elevation profile, and corner classification. Each subsystem has its own tab with a level selector that dynamically rebuilds the parameter table and live preview plots — torque curve for Powertrain L2, Pacejka curves at nominal and 2× load for Tyres L3. The results tab shows the speed profile, GG diagram, trajectory coloured by speed, and lap time delta versus a reference. The underlying architecture is object-oriented with clean subsystem interfaces, designed so that upgrading one module never requires touching another — the same principle that makes the tool usable at every stage of a project's life.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-lts-8">
@@ -233,13 +243,13 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <p><strong>Placing a car from position, not distance.</strong> The obvious way to animate a lap is to drive each car along its recorded distance travelled. Doing that produced cars that stuttered and, at times, jumped. The cause turned out to be measurable: consecutive distance fixes imply speeds ranging from 9 to 5 533 km/h, because the channel is accumulated and its errors accumulate with it. Rebuilding the animation from the position channel instead places every car within about 4 m of where it actually was, which is narrower than the track. The lap is then resampled with a clamped cubic Hermite so the pace is right at every knot and continuous in between: only about 45 samples survive decimation, and straight lines between them held a car at one average speed for two seconds at a time, up to 43 km/h away from its real pace.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-ps-2">
 <div class="slide has-img shot" onclick="openLightbox(this)"><img src="PurpleStint/P2 - Lap analysis.png" alt="Lap analysis — multi-driver telemetry comparison and delta"></div>
-</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-ps-2',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-ps-2',1)">→</button></div></div>
+<div class="slide has-img shot" onclick="openLightbox(this)"><img src="PurpleStint/P2 - Telemetry channels.png" alt="Telemetry channels — speed, throttle, brake, gear and RPM against lap distance"></div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-ps-2',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-ps-2',1)">→</button></div></div>
 
 <p><strong>Reading a race, not a results table.</strong> The progression view draws the race trace, every driver's gap to a selectable reference lap by lap, with pit stops, safety cars and virtual safety cars marked in place, so an undercut shows up as what it is: a gap that closes across two laps rather than a number in a column. The strategy view is a tyre-stint Gantt built as a custom ECharts series, with compound, stint length and tyre age per driver. The undercut view goes further and detects the pit battles automatically, pairing drivers whose gap swings across a stop and charting each one.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-ps-3">
 <div class="slide has-img shot" onclick="openLightbox(this)"><img src="PurpleStint/P3 - Race progression.png" alt="Race progression — race trace with pit stop and safety car marks"></div>
 <div class="slide has-img shot" onclick="openLightbox(this)"><img src="PurpleStint/P4 - Strategy.png" alt="Strategy — tyre stint Gantt by driver"></div>
-</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-ps-3',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-ps-3',1)">→</button></div></div>
+<div class="slide has-img shot" onclick="openLightbox(this)"><img src="PurpleStint/P5 - Undercut.png" alt="Undercut detection — pit battles found from the gap swing across a stop"></div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-ps-3',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-ps-3',1)">→</button></div></div>
 
 <p><strong>Time in the pit lane is not time stopped.</strong> A pit stop as usually reported is the pit lane delta, entry to exit, which folds in the approach, the speed limit and the exit, and is mostly a property of the circuit. What a viewer wants is the time the car was stationary with the wheels off. That is not in the data, but it is recoverable from it: the out-lap speed trace runs to zero while the car is on the jacks, and the length of that zero is the stop. Applied across both seasons it resolves 873 of 1 216 stops, with a median of 2.56 s and a 5th percentile of 1.80 s. The 1.80 is the check that the method is sound rather than merely plausible: it is the world record, so the floor of the distribution lands exactly where physics puts it.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-ps-4">
@@ -268,10 +278,12 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <p><strong>Colour as data, not decoration.</strong> Every colour is a token in one stylesheet and no component may hold a literal, which a test enforces. Each of the eleven sections owns its own accent hue, and the hues are chosen by search rather than by taste: a sweep of the sRGB cube for the colour furthest in CIEDE2000 from all 53 already in use, meaning the other accents, the timing and compound semantics, and the 21 team colours the data carries. The most recent one came out at 6.03:1 contrast and ΔE00 17.35 from its nearest neighbour, against a spec minimum of 15. Team colours are reserved for identity and never reused as interface colour, because a series colour on a chart is data. The whole thing exports to 8 220 files at 41 % of Cloudflare Pages' file cap, with a median page of 130 KB and no page over 0.4 MB, and the build fails if either limit is crossed.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-ps-8">
 <div class="slide has-img shot" onclick="openLightbox(this)"><img src="PurpleStint/P10 - Circuits globe.png" alt="Circuits — WebGL globe of the season calendar"></div>
-</div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-ps-8',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-ps-8',1)">→</button></div></div>
+<div class="slide has-img shot" onclick="openLightbox(this)"><img src="PurpleStint/P11 - Mobile.png" alt="The same tyre-strategy view at phone width"></div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-ps-8',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-ps-8',1)">→</button></div></div>
 
 <p><strong>What it is not.</strong> The site is unofficial and non-commercial, not associated with the Formula 1 companies, and carries that notice on every page. The calendar source is CC BY-NC-SA and the only non-permissive dependency in the project, which is why it is isolated and why the repository's NOTICE.md says so plainly. One browser test is flaky, a draw-call assertion that fails roughly one run in three and passes on re-run, known and not yet fixed. The live-timing half of the project is not in the public repository and never will be, because it reads F1's own feed with a personal subscription.</p>
 </div>
+<p><strong>The whole thing, in one pass.</strong> A recorded walkthrough of the site as it is used: a session opened and compared lap by lap, the race read through its progression and strategy, the circuit driven from three of its five cameras, and then the season — standings, calendar and the globe. Rendered from the static export, so it is the site itself rather than a mock-up.</p>
+<div class="img-slider"><div class="img-slider-track" id="slider-ps-9"><div class="slide has-video"><video src="PurpleStint/walkthrough.mp4" poster="PurpleStint/walkthrough-poster.jpg" controls preload="none" playsinline title="Purple Stint — walkthrough"></video></div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-ps-9',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-ps-9',1)">→</button></div></div>
 <div class="project-tags"><span class="project-tag">Next.js</span><span class="project-tag">TypeScript</span><span class="project-tag">WebGL</span><span class="project-tag">react-three-fiber</span><span class="project-tag">ECharts</span><span class="project-tag">Telemetry</span><span class="project-tag">Data Pipeline</span><span class="project-tag">Static Export</span><span class="project-tag">Design Systems</span><span class="project-tag">Testing</span></div>
 </div>
 </div></div>
@@ -569,8 +581,11 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 
 <!-- LIGHTBOX -->
 <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
-<button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-<img id="lightbox-img" src="" alt="Enlarged photo">
+<button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+<button class="lightbox-nav prev" id="lb-prev" onclick="lightboxStep(-1,event)" aria-label="Previous image">&#8249;</button>
+<img id="lightbox-img" src="" alt="Enlarged photo" onclick="event.stopPropagation()">
+<button class="lightbox-nav next" id="lb-next" onclick="lightboxStep(1,event)" aria-label="Next image">&#8250;</button>
+<div class="lightbox-counter" id="lb-counter"></div>
 </div>
 
 <script>
@@ -598,17 +613,38 @@ function scrollSlider(id, dir) {
   track.scrollBy({ left: dir * slideWidth, behavior: 'smooth' });
 }
 
-// Lightbox
+// Lightbox — navigable within the slider the image belongs to
+let lbGroup = [], lbIndex = 0;
 function openLightbox(slideEl) {
   const img = slideEl.querySelector('img');
   if (!img) return;
+  const track = slideEl.closest('.img-slider-track');
+  lbGroup = track ? Array.from(track.querySelectorAll('.slide.has-img img')) : [img];
+  lbIndex = Math.max(0, lbGroup.indexOf(img));
+  renderLightbox();
   const overlay = document.getElementById('lightbox');
-  const lbImg = document.getElementById('lightbox-img');
-  lbImg.src = img.src;
-  lbImg.alt = img.alt;
   overlay.style.display = 'flex';
   requestAnimationFrame(() => overlay.classList.add('active'));
   document.body.style.overflow = 'hidden';
+}
+function renderLightbox() {
+  const cur = lbGroup[lbIndex];
+  if (!cur) return;
+  const lbImg = document.getElementById('lightbox-img');
+  lbImg.src = cur.src;
+  lbImg.alt = cur.alt;
+  const multi = lbGroup.length > 1;
+  document.getElementById('lb-prev').hidden = !multi;
+  document.getElementById('lb-next').hidden = !multi;
+  const counter = document.getElementById('lb-counter');
+  counter.hidden = !multi;
+  counter.textContent = multi ? (lbIndex + 1) + ' / ' + lbGroup.length : '';
+}
+function lightboxStep(dir, ev) {
+  if (ev) ev.stopPropagation();
+  if (lbGroup.length < 2) return;
+  lbIndex = (lbIndex + dir + lbGroup.length) % lbGroup.length;
+  renderLightbox();
 }
 function closeLightbox() {
   const overlay = document.getElementById('lightbox');
@@ -616,7 +652,26 @@ function closeLightbox() {
   setTimeout(() => { overlay.style.display = 'none'; }, 300);
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+document.addEventListener('keydown', e => {
+  const overlay = document.getElementById('lightbox');
+  if (!overlay || !overlay.classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  else if (e.key === 'ArrowRight') { e.preventDefault(); lightboxStep(1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); lightboxStep(-1); }
+});
+// Swipe between images on touch
+(function () {
+  const overlay = document.getElementById('lightbox');
+  if (!overlay) return;
+  let startX = null;
+  overlay.addEventListener('touchstart', e => { startX = e.changedTouches[0].clientX; }, { passive: true });
+  overlay.addEventListener('touchend', e => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 45) lightboxStep(dx < 0 ? 1 : -1);
+    startX = null;
+  }, { passive: true });
+})();
 </script>
 
 <!--
