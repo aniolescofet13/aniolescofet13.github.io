@@ -25,7 +25,31 @@ section{padding:100px 32px;max-width:var(--max-w);margin:0 auto}.section-header{
 .exp-item{display:grid;grid-template-columns:200px 1fr;gap:44px;padding:36px 0;border-top:1px solid var(--border)}.exp-item>.img-slider{grid-column:1/-1;margin-top:0}.exp-item:last-child{border-bottom:1px solid var(--border)}.exp-date{font-family:var(--mono);font-size:.78rem;color:var(--text-muted);padding-top:3px}.exp-logo{display:block;max-width:110px;margin-top:20px;opacity:.45;filter:grayscale(100%);transition:opacity .3s}.exp-item:hover .exp-logo{opacity:.75}.exp-role h3{font-size:1.2rem;font-weight:500;margin-bottom:2px}.exp-company{font-family:var(--mono);font-size:.78rem;color:var(--accent);letter-spacing:.02em;margin-bottom:10px}.exp-desc{color:var(--text-muted);font-size:.94rem;line-height:1.72}.exp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.exp-tag{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;padding:3px 10px;border:1px solid var(--border-light);border-radius:2px;color:var(--text-muted);transition:.2s}.exp-tag:hover{border-color:var(--accent);color:var(--accent)}
 
 /* PROJECTS */
-.projects-category{margin-bottom:64px}.projects-category-title{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:24px;padding-bottom:10px;border-bottom:1px solid var(--border-light)}.projects-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.project-card{background:var(--card);border:1px solid var(--border-light);padding:36px;position:relative;overflow:hidden;transition:all .35s ease;cursor:default}.project-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}.project-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow-md)}.project-card:hover::before{transform:scaleX(1)}.project-card.featured{grid-column:span 2}.project-idx{font-family:var(--mono);font-size:.65rem;color:var(--border);margin-bottom:16px;display:block}.project-card h3{font-family:var(--serif);font-size:1.35rem;font-weight:400;margin-bottom:6px}.project-subtitle{font-family:var(--mono);font-size:.68rem;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}.project-desc{color:var(--text-muted);font-size:.9rem;line-height:1.72}
+.projects-category{margin-bottom:64px}.projects-category-title{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:24px;padding-bottom:10px;border-bottom:1px solid var(--border-light)}.projects-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.project-card{background:var(--card);border:1px solid var(--border-light);padding:36px;position:relative;overflow:hidden;transition:all .35s ease;cursor:default}.project-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}.project-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow-md)}.project-card:hover::before{transform:scaleX(1)}.project-card.featured{grid-column:span 2}.project-idx{font-family:var(--mono);font-size:.65rem;color:var(--border);margin-bottom:16px;display:block}
+/* Collapsible project cards */
+details.pcard{margin:0}
+.pcard-head{list-style:none;cursor:pointer;display:block;position:relative;padding-right:46px}
+.pcard-head::-webkit-details-marker{display:none}
+.pcard-head::marker{content:''}
+.pcard-head .project-subtitle{margin-bottom:0}
+.pcard-head .project-tags{margin-top:14px}
+.pcard-head:hover h3{color:var(--accent)}
+.pcard-head:focus-visible{outline:2px solid var(--accent);outline-offset:6px}
+.pcard-cue{position:absolute;top:0;right:0;width:30px;height:30px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.25s}
+.pcard-cue::before{content:'';width:6px;height:6px;border-right:1.5px solid var(--text-muted);border-bottom:1.5px solid var(--text-muted);transform:translateY(-2px) rotate(45deg);transition:.25s}
+.pcard-head:hover .pcard-cue,.pcard[open] .pcard-cue{border-color:var(--accent)}
+.pcard-head:hover .pcard-cue::before,.pcard[open] .pcard-cue::before{border-color:var(--accent)}
+.pcard[open] .pcard-cue::before{transform:translateY(2px) rotate(-135deg)}
+.pcard>.project-desc{margin-top:22px;padding-top:22px;border-top:1px solid var(--border-light)}
+.project-card:has(.pcard[open]):hover{transform:none;box-shadow:none;border-color:var(--border-light)}
+.project-card:has(.pcard[open]):hover::before{transform:scaleX(0)}
+/* Project category tabs */
+.projects-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:34px}
+.ptab{font-family:var(--mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;padding:9px 16px;border:1px solid var(--border);background:var(--white);color:var(--text-muted);border-radius:2px;cursor:pointer;transition:.2s}
+.ptab:hover{border-color:var(--accent);color:var(--accent)}
+.ptab.active{background:var(--text);border-color:var(--text);color:var(--text-light)}
+.ptab .n{opacity:.5;margin-left:7px}
+.projects-category[hidden]{display:none}.project-card h3{font-family:var(--serif);font-size:1.35rem;font-weight:400;margin-bottom:6px}.project-subtitle{font-family:var(--mono);font-size:.68rem;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}.project-desc{color:var(--text-muted);font-size:.9rem;line-height:1.72}
 .project-desc p{margin-bottom:14px}
 .project-desc p:last-child{margin-bottom:0}.project-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}.project-tag{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);background:var(--bg-alt);padding:3px 10px;border-radius:2px}
 
@@ -181,9 +205,25 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <section id="projects">
 <div class="section-header reveal"><span class="section-num">03</span><h2 class="section-title">Projects</h2><div class="section-line"></div></div>
 
+<div class="projects-tabs reveal" role="tablist" aria-label="Project categories">
+<button class="ptab active" type="button" role="tab" data-cat="all">All<span class="n">16</span></button>
+<button class="ptab" type="button" role="tab" data-cat="personal">Personal<span class="n">2</span></button>
+<button class="ptab" type="button" role="tab" data-cat="fs">Formula Student<span class="n">3</span></button>
+<button class="ptab" type="button" role="tab" data-cat="pro">Professional<span class="n">4</span></button>
+<button class="ptab" type="button" role="tab" data-cat="uni">University<span class="n">7</span></button>
+</div>
+
 <!-- PERSONAL -->
-<div class="projects-category reveal"><h3 class="projects-category-title">Personal Projects</h3><div class="projects-grid">
-<div class="project-card featured reveal"><span class="project-idx">PP — 01</span><h3>Lap Time Simulator</h3><div class="project-subtitle">Modular Vehicle Development Platform · MATLAB</div>
+<div class="projects-category reveal" data-cat="personal"><h3 class="projects-category-title">Personal Projects</h3><div class="projects-grid">
+<div class="project-card featured reveal" id="pp-01">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">PP — 01</span><h3>Lap Time Simulator</h3><div class="project-subtitle">Modular Vehicle Development Platform · MATLAB</div>
+<p><strong>The simulator as a web application.</strong> The MATLAB engine has been ported to a Python physics core behind a FastAPI service, with a React and three.js front end over it — the same models and the same results, reachable from a browser instead of a MATLAB licence. The walkthrough below runs through it: the garage, where the car is chosen and each subsystem’s fidelity level is raised independently; the circuit; a lap solved; the signal explorer; the replay from four of its five cameras; and the sensitivity sweep and telemetry validation at the end. Raising the chassis and tyres from L1 to L3 partway through changes the lap time on screen, which is the whole argument for the modular fidelity architecture in one action.</p>
+<div class="img-slider"><div class="img-slider-track" id="slider-lts-9"><div class="slide has-video"><video src="LapTime/walkthrough.mp4" poster="LapTime/walkthrough-poster.jpg" controls preload="none" playsinline title="LapTime — walkthrough of the web application"></video></div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts-9',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts-9',1)">→</button></div></div>
+<div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Python</span><span class="project-tag">FastAPI</span><span class="project-tag">React</span><span class="project-tag">OOP Architecture</span><span class="project-tag">QSS Simulation</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">Pacejka MF</span><span class="project-tag">Aerodynamics</span><span class="project-tag">Sensitivity Analysis</span><span class="project-tag">GUI Development</span><span class="project-tag">Telemetry Validation</span><span class="project-tag">ERS</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>A MATLAB-based lap time simulation and vehicle analysis platform designed to support a racing car's full development cycle, from early concept where almost no hardware data exists, all the way through to race-ready validation against real on-track telemetry. The tool is built around the principle that the fidelity of the simulation should match the fidelity of the information available: as the team learns more about the car, the models are upgraded in place without restructuring the workflow.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-lts-1">
@@ -230,10 +270,16 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="slide has-img" onclick="openLightbox(this)"><img src="LapTime/P8 - OOP architecture diagram.png" alt="OOP architecture — classes, interfaces and subsystem connections"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-lts-8',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-lts-8',1)">→</button></div></div>
 </div>
-<div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">OOP Architecture</span><span class="project-tag">QSS Simulation</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">Pacejka MF</span><span class="project-tag">Aerodynamics</span><span class="project-tag">Sensitivity Analysis</span><span class="project-tag">GUI Development</span><span class="project-tag">Telemetry Validation</span><span class="project-tag">ERS</span></div>
+</details>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">PP — 02</span><h3>Purple Stint</h3><div class="project-subtitle">F1 Timing & Telemetry Analysis · Next.js · WebGL</div>
+<div class="project-card featured reveal" id="pp-02">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">PP — 02</span><h3>Purple Stint</h3><div class="project-subtitle">F1 Timing & Telemetry Analysis · Next.js · WebGL</div>
+<div class="project-tags"><span class="project-tag">Next.js</span><span class="project-tag">TypeScript</span><span class="project-tag">WebGL</span><span class="project-tag">react-three-fiber</span><span class="project-tag">ECharts</span><span class="project-tag">Telemetry</span><span class="project-tag">Data Pipeline</span><span class="project-tag">Static Export</span><span class="project-tag">Design Systems</span><span class="project-tag">Testing</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p><strong>The tool.</strong> Purple Stint takes two seasons of Formula 1 timing and telemetry, around 200 sessions, and publishes them as a static site: every page pre-rendered at build time, no API behind it, no runtime network calls. Each session gets nine views, from a results table through telemetry comparison to a 3D reconstruction of the lap. The analysis itself is written as plain TypeScript modules with no framework in them, so it is tested directly rather than through a browser: 270 unit tests against the real data on disk, and 39 Playwright tests against the built export, which is what a host would actually serve.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-ps-1">
@@ -284,14 +330,20 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div>
 <p><strong>The whole thing, in one pass.</strong> A recorded walkthrough of the site as it is used: a session opened and compared lap by lap, the race read through its progression and strategy, the circuit driven from three of its five cameras, and then the season — standings, calendar and the globe. Rendered from the static export, so it is the site itself rather than a mock-up.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-ps-9"><div class="slide has-video"><video src="PurpleStint/walkthrough.mp4" poster="PurpleStint/walkthrough-poster.jpg" controls preload="none" playsinline title="Purple Stint — walkthrough"></video></div></div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-ps-9',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-ps-9',1)">→</button></div></div>
-<div class="project-tags"><span class="project-tag">Next.js</span><span class="project-tag">TypeScript</span><span class="project-tag">WebGL</span><span class="project-tag">react-three-fiber</span><span class="project-tag">ECharts</span><span class="project-tag">Telemetry</span><span class="project-tag">Data Pipeline</span><span class="project-tag">Static Export</span><span class="project-tag">Design Systems</span><span class="project-tag">Testing</span></div>
+</details>
 </div>
 </div></div>
 
 <!-- FORMULA STUDENT -->
-<div class="projects-category reveal"><h3 class="projects-category-title">Formula Student — BCNeMotorsport</h3><div class="projects-grid">
+<div class="projects-category reveal" data-cat="fs"><h3 class="projects-category-title">Formula Student — BCNeMotorsport</h3><div class="projects-grid">
 
-<div class="project-card featured reveal"><span class="project-idx">FS — 01</span><h3>Model-Based Torque Vectoring</h3><div class="project-subtitle">4WD Electric Vehicle · CAT16x · BCNeMotorsport</div>
+<div class="project-card featured reveal" id="fs-01">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">FS — 01</span><h3>Model-Based Torque Vectoring</h3><div class="project-subtitle">4WD Electric Vehicle · CAT16x · BCNeMotorsport</div>
+<div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">VI-Grade</span><span class="project-tag">QP Optimization</span><span class="project-tag">Dual-Track NLTV Model</span><span class="project-tag">Pacejka</span><span class="project-tag">ROS</span><span class="project-tag">CAN Bus</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>Torque Vectoring on a 4WD vehicle with one independent motor per wheel is one of the most complete chassis control problems in motorsport. The system has three layers running in sequence: a nonlinear vehicle model that represents what the car is doing, a yaw rate controller that decides how much corrective yaw moment to apply, and a torque allocator that distributes that moment across all four motors in real time. Each layer feeds the next, and the whole chain runs in the processing unit of the CAT16x during competition.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-tv-1">
@@ -335,10 +387,16 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TV/P6 - LuT_stee.jpg" alt="Driving modes — lateral acceleration vs steering"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tv-6',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tv-6',1)">→</button></div></div>
 </div>
-<div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">VI-Grade</span><span class="project-tag">QP Optimization</span><span class="project-tag">Dual-Track NLTV Model</span><span class="project-tag">Pacejka</span><span class="project-tag">ROS</span><span class="project-tag">CAN Bus</span></div>
+</details>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">FS — 02</span><h3>Traction Control</h3><div class="project-subtitle">Wheel slip management · CAT15x/16x</div>
+<div class="project-card featured reveal" id="fs-02">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">FS — 02</span><h3>Traction Control</h3><div class="project-subtitle">Wheel slip management · CAT15x/16x</div>
+<div class="project-tags"><span class="project-tag">Inverter Control</span><span class="project-tag">Slip Ratio</span><span class="project-tag">Pacejka</span><span class="project-tag">CAN Bus</span><span class="project-tag">ROS</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>The traction control system is implemented as a speed controller running directly inside the inverter, rather than at the Processing Unit level. This is a deliberate architectural choice: the CAN-ROS communication link between the PU and the inverters runs at 50 Hz, which is too slow to react to wheel slip transients effectively. By pushing the control loop inside the inverter, which runs at a significantly higher frequency, the system responds to slip events before they can develop, without being bottlenecked by communication latency.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-tc-1">
@@ -355,10 +413,16 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/TC/P2 - DesSR_perWheel.png" alt="Angular velocity limit and desired slip ratio per wheel"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tc-2',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tc-2',1)">→</button></div></div>
 </div>
-<div class="project-tags"><span class="project-tag">Inverter Control</span><span class="project-tag">Slip Ratio</span><span class="project-tag">Pacejka</span><span class="project-tag">CAN Bus</span><span class="project-tag">ROS</span></div>
+</details>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">FS — 03</span><h3>Regenerative Braking</h3><div class="project-subtitle">Energy recovery · CAT15x/16x</div>
+<div class="project-card featured reveal" id="fs-03">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">FS — 03</span><h3>Regenerative Braking</h3><div class="project-subtitle">Energy recovery · CAT15x/16x</div>
+<div class="project-tags"><span class="project-tag">Energy Recovery</span><span class="project-tag">Brake Blending</span><span class="project-tag">Anti-Lockup</span><span class="project-tag">SoC Management</span><span class="project-tag">Hydraulic Sensors</span><span class="project-tag">ROS</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>The regenerative braking system is designed around a single non-negotiable constraint: the ideal braking force distribution curve must always be maintained. Every mode and configuration operates within this envelope, ensuring vehicle stability and predictable brake bias regardless of how the electrical and mechanical forces are combined.</p>
 <div class="img-slider"><div class="img-slider-track" id="slider-rb-1">
@@ -383,17 +447,22 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="slide has-img" onclick="openLightbox(this)"><img src="BCNeMotorsport/RB/P4 - WheelTorque_Simulation.png" alt="Per-wheel braking torque simulation — FL/FR/RL/RR"></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-rb-4',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-rb-4',1)">→</button></div></div>
 </div>
-<div class="project-tags"><span class="project-tag">Energy Recovery</span><span class="project-tag">Brake Blending</span><span class="project-tag">Anti-Lockup</span><span class="project-tag">SoC Management</span><span class="project-tag">Hydraulic Sensors</span><span class="project-tag">ROS</span></div>
+</details>
 </div>
 </div></div>
 
 <!-- PROFESSIONAL -->
-<div class="projects-category reveal"><h3 class="projects-category-title">Professional Projects</h3><div class="projects-grid">
+<div class="projects-category reveal" data-cat="pro"><h3 class="projects-category-title">Professional Projects</h3><div class="projects-grid">
 
-<div class="project-card featured reveal"><span class="project-idx">PRO — 01</span><h3>CUPRA Exponential Experience</h3><div class="project-subtitle">CUPRA Racing · Mixed Reality Racing on a CUPRA Raval</div>
+<div class="project-card featured reveal" id="pro-01">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">PRO — 01</span><h3>CUPRA Exponential Experience</h3><div class="project-subtitle">CUPRA Racing · Mixed Reality Racing on a CUPRA Raval</div>
+<div class="project-tags"><span class="project-tag">VR Integration</span><span class="project-tag">CAN Bus</span><span class="project-tag">Real-Time Control</span><span class="project-tag">HMI</span><span class="project-tag">Sensor Fusion</span><span class="project-tag">Circuit Design</span><span class="project-tag">Safety Systems</span><span class="project-tag">CUPRA Raval</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc"><p>The CUPRA Exponential Experience is a first-of-its-kind mixed reality racing concept. A CUPRA Raval electric prototype is fitted with a full sensor suite, HMI system, a gaming PC and VR headsets. The driver physically drives the car around a parking lot while wearing VR glasses that overlay a virtual racetrack onto the real world. The virtual environment interacts with the real car in real time. If you hit a virtual obstacle, the car brakes. If you grab a boost power-up, you get real acceleration. There are lap counters, lap times, and competitive gameplay on top of actual driving.</p>
 <p>I was responsible for programming and configuring the full software stack that connects the vehicle systems (CAN, sensors, actuators) to the virtual environment. This included designing the physical circuits (aerial layout, understanding both the videogame and real-world track characteristics and limitations), measuring and recording trajectories, and coordinating the game visuals with the external development company. On the positioning and HMI side, I coordinated and tested the software, found and fixed bugs and errors, and independently managed communication between two separate external companies. Finally, I built a real-time automation system that handled the full startup sequence, CAN checks, sensor validation, application coordination, and a safety layer that could record sessions and stop the car when dangerous situations were detected.</p></div>
-<div class="project-tags"><span class="project-tag">VR Integration</span><span class="project-tag">CAN Bus</span><span class="project-tag">Real-Time Control</span><span class="project-tag">HMI</span><span class="project-tag">Sensor Fusion</span><span class="project-tag">Circuit Design</span><span class="project-tag">Safety Systems</span><span class="project-tag">CUPRA Raval</span></div>
 <div class="img-slider"><div class="img-slider-track" id="slider-cee">
 <div class="slide has-img" onclick="openLightbox(this)"><img src="CUPRA Racing/CEE/1.webp" alt="CUPRA Exponential Experience"></div>
 <div class="slide has-img" onclick="openLightbox(this)"><img src="CUPRA Racing/CEE/2.1.jpg" alt="Aniol with CUPRA prototypes"></div>
@@ -404,13 +473,19 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="slide has-video"><iframe src="https://www.youtube.com/embed/QZFBNFLMVuI" title="CUPRA Exponential Experience video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
 <div class="slide has-video"><iframe src="https://www.youtube.com/embed/kaPSs3EHy-c" title="CUPRA Exponential Experience video 2" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-cee',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-cee',1)">→</button></div></div>
+</details>
 </div>
 
 <div style="display:flex;flex-direction:column;gap:20px">
-<div class="project-card reveal"><span class="project-idx">PRO — 02</span><h3>CUPRA Leon VZ TCR</h3><div class="project-subtitle">CUPRA Racing · Race Car Software & Setup</div>
+<div class="project-card reveal" id="pro-02">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">PRO — 02</span><h3>CUPRA Leon VZ TCR</h3><div class="project-subtitle">CUPRA Racing · Race Car Software & Setup</div>
+<div class="project-tags"><span class="project-tag">Vehicle Software</span><span class="project-tag">CAN</span><span class="project-tag">Sensor Calibration</span><span class="project-tag">Race Ops</span><span class="project-tag">Shakedowns</span><span class="project-tag">Leon VZ TCR</span><span class="project-tag">325 PS / 420 Nm</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc"><p>The CUPRA Leon VZ TCR is CUPRA's flagship touring car, launched in May 2024 and crowned TCR Model of the Year after over 100 victories and 17 titles worldwide in 2025 alone. It competes in TCR Europe, TCR Mexico, TCR China, and the IMSA Michelin Pilot Challenge in the US. With 325 PS and 420 Nm, a redesigned front axle, SADEV gearbox upgrade kit and performance suspension, it is the most powerful front-wheel-drive Leon ever built. A street-legal version limited to 499 units was announced for 2026.</p>
 <p>I worked on the software and electronic setup of these race cars, handling vehicle configuration, sensor calibration, CAN communication protocols and making sure the full electronics package was race-ready for track sessions and competition weekends. This included testing at Circuit de Barcelona-Catalunya in Montmeló and shakedowns at IDIADA proving grounds.</p></div>
-<div class="project-tags"><span class="project-tag">Vehicle Software</span><span class="project-tag">CAN</span><span class="project-tag">Sensor Calibration</span><span class="project-tag">Race Ops</span><span class="project-tag">Shakedowns</span><span class="project-tag">Leon VZ TCR</span><span class="project-tag">325 PS / 420 Nm</span></div>
 <div class="img-slider"><div class="img-slider-track" id="slider-tcr">
 <div class="slide has-img" onclick="openLightbox(this)"><img src="CUPRA Racing/TCR/1.png" alt="CUPRA Leon VZ TCR"></div>
 <div class="slide has-img" onclick="openLightbox(this)"><img src="CUPRA Racing/TCR/2.jpeg" alt="TCR on track"></div>
@@ -419,31 +494,49 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <div class="slide has-img" onclick="openLightbox(this)"><img src="CUPRA Racing/TCR/5.jpeg" alt="TCR race"></div>
 <div class="slide has-video"><iframe src="https://www.youtube.com/embed/uWAvA10Z7Ps" title="CUPRA Leon VZ TCR video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
 </div><div class="slider-controls"><button class="slider-btn" onclick="scrollSlider('slider-tcr',-1)">←</button><button class="slider-btn" onclick="scrollSlider('slider-tcr',1)">→</button></div></div>
+</details>
 </div>
 </div>
 
 <div style="display:flex;flex-direction:column;gap:20px">
-<div class="project-card reveal"><span class="project-idx">PRO — 03</span><h3>AWD Motorsport Prototype</h3><div class="project-subtitle">CUPRA Racing · Cross-Platform Powertrain Integration</div>
+<div class="project-card reveal" id="pro-03">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">PRO — 03</span><h3>AWD Motorsport Prototype</h3><div class="project-subtitle">CUPRA Racing · Cross-Platform Powertrain Integration</div>
+<div class="project-tags"><span class="project-tag">Prototype</span><span class="project-tag">AWD Controls</span><span class="project-tag">Torque Distribution</span><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc"><p>A motorsport prototype project aimed at combining two electrically distinct vehicle platforms into a single all-wheel-drive architecture. The core challenge was bridging two separate powertrains, each with its own control logic, communication stack and operating envelope, and making them behave as one coherent system under real driving conditions.</p>
 <p>I designed and implemented the full control software that tied both platforms together. This covered the inter-system communication layer, the torque distribution strategy between axles, and the validation of stability and drivability across a range of operating conditions from low-speed maneuvering to dynamic motorsport scenarios.</p></div>
-<div class="project-tags"><span class="project-tag">Prototype</span><span class="project-tag">AWD Controls</span><span class="project-tag">Torque Distribution</span><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span></div>
+</details>
 </div>
 
-<div class="project-card reveal"><span class="project-idx">PRO — 04</span><h3>STARK System Tool</h3><div class="project-subtitle">STARK Future S.L. · 1D Vehicle Simulation</div>
-<div class="project-desc">Built the core simulation tool for STARK's motorcycle lineup. A full 1D model that simulates battery, inverter, motor, gearbox, chassis and environment. Enables engineers to vary models and characteristics to evaluate consumption, losses, acceleration, top speed, thermals, and basically everything needed to initially dimension a motorcycle.</div>
+<div class="project-card reveal" id="pro-04">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">PRO — 04</span><h3>STARK System Tool</h3><div class="project-subtitle">STARK Future S.L. · 1D Vehicle Simulation</div>
 <div class="project-tags"><span class="project-tag">MATLAB</span><span class="project-tag">Simulink</span><span class="project-tag">System Engineering</span><span class="project-tag">EV Powertrain</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
+<div class="project-desc">Built the core simulation tool for STARK's motorcycle lineup. A full 1D model that simulates battery, inverter, motor, gearbox, chassis and environment. Enables engineers to vary models and characteristics to evaluate consumption, losses, acceleration, top speed, thermals, and basically everything needed to initially dimension a motorcycle.</div>
+</details>
 </div>
 </div>
 </div></div>
 
 <!-- UNIVERSITY -->
-<div class="projects-category reveal"><h3 class="projects-category-title">University Projects</h3><div class="projects-grid">
+<div class="projects-category reveal" data-cat="uni"><h3 class="projects-category-title">University Projects</h3><div class="projects-grid">
 
-<div class="project-card featured reveal"><span class="project-idx">UNI — 01</span>
+<div class="project-card featured reveal" id="uni-01">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">UNI — 01</span>
 <h3>Bachelor's Thesis (TFG) <span class="grade-badge">Grade: 10/10</span></h3>
 <div class="project-subtitle">Model-Based Torque Vectoring for a 4WD FS Vehicle · ETSEIB, UPC · Jan 2024</div>
-<div class="project-desc">Degree Final Project at ETSEIB (UPC). Designed, implemented and analyzed a complete Torque Vectoring control system for BCNeMotorsport's CAT16x, covering everything from vehicle dynamics theory and nonlinear modelling to real-time multi-objective torque optimization. Supervised by Dr. Stefano De Pinto.</div>
 <div class="project-tags"><span class="project-tag">Thesis</span><span class="project-tag">ETSEIB · UPC</span><span class="project-tag">Jan 2024</span><span class="project-tag">Supervisor: Dr. Stefano De Pinto</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
+<div class="project-desc">Degree Final Project at ETSEIB (UPC). Designed, implemented and analyzed a complete Torque Vectoring control system for BCNeMotorsport's CAT16x, covering everything from vehicle dynamics theory and nonlinear modelling to real-time multi-objective torque optimization. Supervised by Dr. Stefano De Pinto.</div>
 
 <!--
   PDF VIEWER
@@ -462,9 +555,16 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 <!-- Google Drive fallback: src="https://drive.google.com/file/d/1L7I7UK2TzI0_8clW1hLJIJKJ0s0_MKcL/preview" -->
 <iframe src="Docs/TFG_Thesis_Aniol_Escofet.pdf#toolbar=0&navpanes=0&scrollbar=0" title="TFG Thesis PDF" allow="autoplay"></iframe>
 </div>
+</details>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">UNI — 02</span><h3>TrustDrive / Aura</h3><div class="project-subtitle">Advanced Human Machine Interfaces · Politecnico di Milano · 2026</div>
+<div class="project-card featured reveal" id="uni-02">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">UNI — 02</span><h3>TrustDrive / Aura</h3><div class="project-subtitle">Advanced Human Machine Interfaces · Politecnico di Milano · 2026</div>
+<div class="project-tags"><span class="project-tag">HMI Design</span><span class="project-tag">Autonomous Driving</span><span class="project-tag">Explainable AI</span><span class="project-tag">React · Python · FastAPI</span><span class="project-tag">Politecnico di Milano · 2026</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>TrustDrive / Aura is a research prototype exploring how adaptive HMI design can support trust calibration in SAE Level 3 autonomous vehicles. Developed as a group capstone for the Advanced Human Machine Interfaces course at Politecnico di Milano, the project addresses a structural problem inherent to L3 automation: while the vehicle handles all lateral and longitudinal control, the driver must remain ready to retake control on demand. This creates the Out-of-the-Loop (OOTL) syndrome, where cognitive disengagement from the driving task makes safe handover costly in situational awareness and reaction time. The central design question was how to build trust gradually, so that drivers feel genuinely confident relying on the system over time rather than just tolerating it.</p>
 
@@ -472,7 +572,6 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 
 <p>The prototype runs as a full-stack web application: a React 19 + TanStack Start frontend serves as the in-car display, connected via WebSocket to a Python/FastAPI backend that manages speech-to-text (Whisper), LLM-based intent classification (Groq Llama 3.3 70B), and text-to-speech (Microsoft Edge TTS). The driver profile is stored as a five-dimension JSON object on a continuous [0, 10] scale and visualized as a pentagon radar chart accessible from the home screen. The full presentation and source code are linked below.</p>
 </div>
-<div class="project-tags"><span class="project-tag">HMI Design</span><span class="project-tag">Autonomous Driving</span><span class="project-tag">Explainable AI</span><span class="project-tag">React · Python · FastAPI</span><span class="project-tag">Politecnico di Milano · 2026</span></div>
 <div class="pdf-viewer">
 <div class="pdf-viewer-header">
 <span class="pdf-viewer-title">AHMI Final Presentation</span>
@@ -483,14 +582,20 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div>
 <iframe src="Docs/AHMI.pdf#toolbar=0&navpanes=0&scrollbar=0" title="AHMI Presentation PDF" allow="autoplay"></iframe>
 </div>
+</details>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">UNI — 03</span><h3>Advanced Tyre Modelling and Testing</h3><div class="project-subtitle">Vehicle Dynamics Lab · Politecnico di Milano</div>
+<div class="project-card featured reveal" id="uni-03">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">UNI — 03</span><h3>Advanced Tyre Modelling and Testing</h3><div class="project-subtitle">Vehicle Dynamics Lab · Politecnico di Milano</div>
+<div class="project-tags"><span class="project-tag">Pacejka Magic Formula</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">Tyre Characterization</span><span class="project-tag">ABS</span><span class="project-tag">Thermal Modelling</span><span class="project-tag">Politecnico di Milano</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>A laboratory study in Advanced Tyre Modelling and Testing at Politecnico di Milano, covering four interconnected areas of vehicle dynamics. The work spans steady-state cornering analysis with Pacejka Magic Formula parameter optimization, tyre thermal characterization under controlled slip angle inputs, sensitivity analysis of key tyre parameters on ABS performance, and lateral force characterization including relaxation length effects.</p>
 <p>I worked through the full analysis pipeline across all four topics. On vehicle handling, I optimized front and rear cornering stiffness coefficients to achieve neutral attitude up to 5 m/s² lateral acceleration, quantifying the responsiveness-stability trade-off. On thermal testing, I characterized tyre temperature rise across different input waveforms, vertical loads, and speeds. The ABS study established clear sensitivity relationships between Pacejka parameters and braking performance, providing a structured picture of which tyre properties matter most under longitudinal slip.</p>
 </div>
-<div class="project-tags"><span class="project-tag">Pacejka Magic Formula</span><span class="project-tag">Vehicle Dynamics</span><span class="project-tag">Tyre Characterization</span><span class="project-tag">ABS</span><span class="project-tag">Thermal Modelling</span><span class="project-tag">Politecnico di Milano</span></div>
 <div class="pdf-viewer">
 <div class="pdf-viewer-header">
 <span class="pdf-viewer-title">ATMT Laboratory Report</span>
@@ -500,14 +605,20 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div>
 <iframe src="Docs/ATMT_Report.pdf#toolbar=0&navpanes=0&scrollbar=0" title="ATMT Report PDF" allow="autoplay"></iframe>
 </div>
+</details>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">UNI — 04</span><h3>Optimal Vehicle Design</h3><div class="project-subtitle">Vehicle Optimization Methods · Politecnico di Milano</div>
+<div class="project-card featured reveal" id="uni-04">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">UNI — 04</span><h3>Optimal Vehicle Design</h3><div class="project-subtitle">Vehicle Optimization Methods · Politecnico di Milano</div>
+<div class="project-tags"><span class="project-tag">Optimization</span><span class="project-tag">Genetic Algorithms</span><span class="project-tag">Neural Networks</span><span class="project-tag">Topology Optimization</span><span class="project-tag">VI-Grade</span><span class="project-tag">MATLAB</span><span class="project-tag">Altair Inspire</span><span class="project-tag">Politecnico di Milano</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>A multi-topic optimization course at Politecnico di Milano that builds through eleven problem sets from classical gradient-based methods up to machine learning approaches, applied across vehicle subsystem design problems. Topics covered include braking force distribution, passive suspension tuning, suspension kinematics, vehicle lateral dynamics, and structural lightweight design of a lower control arm.</p>
 <p>I worked across all eleven assignments, implementing solvers in MATLAB and applying the appropriate method to each problem: nonlinear minimization and Pareto optimization for multi-objective suspension trade-offs, genetic algorithms for suspension kinematics, artificial neural networks trained on VI-Grade simulation data for lateral dynamics prediction, and topology optimization in Altair Inspire for structural design. The project builds a practical understanding of when to use each method depending on problem dimensionality, continuity, and simulation cost.</p>
 </div>
-<div class="project-tags"><span class="project-tag">Optimization</span><span class="project-tag">Genetic Algorithms</span><span class="project-tag">Neural Networks</span><span class="project-tag">Topology Optimization</span><span class="project-tag">VI-Grade</span><span class="project-tag">MATLAB</span><span class="project-tag">Altair Inspire</span><span class="project-tag">Politecnico di Milano</span></div>
 <div class="pdf-viewer">
 <div class="pdf-viewer-header">
 <span class="pdf-viewer-title">Optimal Vehicle Design Report</span>
@@ -517,13 +628,19 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div>
 <iframe src="Docs/OPTIMAL_VEHICLE_DESIGN.pdf#toolbar=0&navpanes=0&scrollbar=0" title="Optimal Vehicle Design PDF" allow="autoplay"></iframe>
 </div>
+</details>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">UNI — 05</span><h3>Vehicle Dynamics and Control</h3><div class="project-subtitle">Laboratories Report · Politecnico di Milano · 2025–2026</div>
+<div class="project-card featured reveal" id="uni-05">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">UNI — 05</span><h3>Vehicle Dynamics and Control</h3><div class="project-subtitle">Laboratories Report · Politecnico di Milano · 2025–2026</div>
+<div class="project-tags"><span class="project-tag">Pacejka MF</span><span class="project-tag">ABS</span><span class="project-tag">Active Suspension</span><span class="project-tag">Lateral Dynamics</span><span class="project-tag">Torque Vectoring</span><span class="project-tag">ADAMS Car</span><span class="project-tag">VI-CarRealTime</span><span class="project-tag">Politecnico di Milano · 2026</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>A comprehensive laboratory course at Politecnico di Milano covering the full analytical stack of vehicle dynamics, from tyre contact mechanics through chassis control design and high-fidelity multibody simulation. Working with a SportCar segment model (RWD, 1360 kg, 245/40 R18), the six-chapter report addresses Pacejka Magic Formula tyre modelling including combined slip degradation, vertical load sensitivity, and transient relaxation behavior; vehicle longitudinal dynamics covering mechanical brake distributor sizing, traction and braking manoeuvres, cruise control design, and ABS controller validation against ISO 21994 performance indicators on dry and snow surfaces; vertical dynamics comparing passive, semi-active, and active sky-hook suspension against ISO 8608 road profiles with ISO 2631 comfort assessment; lateral dynamics spanning steady-state cornering (ISO 4138), step steer (ISO 19364), sine-with-dwell stability assessment (ISO 19365), effective axle characteristics, path-follower control with double lane change (ISO 3888), and Torque Vectoring Control; ADAMS Car multibody analysis for suspension geometry sensitivity and full-vehicle response; and a VI-CarRealTime 14-DOF simulation for directional response and lateral stability validation.</p>
 </div>
-<div class="project-tags"><span class="project-tag">Pacejka MF</span><span class="project-tag">ABS</span><span class="project-tag">Active Suspension</span><span class="project-tag">Lateral Dynamics</span><span class="project-tag">Torque Vectoring</span><span class="project-tag">ADAMS Car</span><span class="project-tag">VI-CarRealTime</span><span class="project-tag">Politecnico di Milano · 2026</span></div>
 <div class="pdf-viewer">
 <div class="pdf-viewer-header">
 <span class="pdf-viewer-title">Vehicle Dynamics and Control Report</span>
@@ -533,13 +650,19 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div>
 <iframe src="Docs/VDC_Report.pdf#toolbar=0&navpanes=0&scrollbar=0" title="VDC Report PDF" allow="autoplay"></iframe>
 </div>
+</details>
 </div>
 
-<div class="project-card featured reveal"><span class="project-idx">UNI — 06</span><h3>Advanced Motorsport Engineering</h3><div class="project-subtitle">Laboratories Report · Politecnico di Milano · 2025–2026</div>
+<div class="project-card featured reveal" id="uni-06">
+<details class="pcard">
+<summary class="pcard-head">
+<span class="project-idx">UNI — 06</span><h3>Advanced Motorsport Engineering</h3><div class="project-subtitle">Laboratories Report · Politecnico di Milano · 2025–2026</div>
+<div class="project-tags"><span class="project-tag">Lap Time Simulation</span><span class="project-tag">Optimal Control</span><span class="project-tag">Tyre Thermal Model</span><span class="project-tag">Braking Systems</span><span class="project-tag">Marelli Wintax</span><span class="project-tag">Politecnico di Milano · 2026</span></div>
+<span class="pcard-cue" aria-hidden="true"></span>
+</summary>
 <div class="project-desc">
 <p>A laboratory course at Politecnico di Milano using lap time simulation as the central engineering thread, supported by tyre, braking, and data acquisition labs. The basics session covers constant-radius cornering, minimum-time optimization on an oval, coast-down parameter identification, vertical loads under braking, and aerodynamic estimation from GPS data. Two progressive lap time simulation labs build from a quasi-steady-state framework with ride height and lift-and-coast sensitivity studies up to an advanced optimal control formulation using Direct Legendre Collocation, generating optimal racing lines, speed profiles, driver inputs, and tyre friction utilization maps. Supporting labs characterize tyre thermal behavior and its effect on lap time through toe angle, weight distribution, and aero balance sweeps, and identify the friction law from experimental data. A braking lab covers disc thermal analysis, braking system sizing, and bicycle model validation. A hands-on session with Marelli Wintax addresses real-car data acquisition and telemetry processing, and industry seminars from Scuderia Ferrari, Pirelli, and Ducati Corse round out the course with applied perspectives on F1 performance engineering, racing tyre design, and motorcycle lap time simulation.</p>
 </div>
-<div class="project-tags"><span class="project-tag">Lap Time Simulation</span><span class="project-tag">Optimal Control</span><span class="project-tag">Tyre Thermal Model</span><span class="project-tag">Braking Systems</span><span class="project-tag">Marelli Wintax</span><span class="project-tag">Politecnico di Milano · 2026</span></div>
 <div class="pdf-viewer">
 <div class="pdf-viewer-header">
 <span class="pdf-viewer-title">Advanced Motorsport Engineering Report</span>
@@ -549,6 +672,7 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 </div>
 <iframe src="Docs/AME_Report.pdf#toolbar=0&navpanes=0&scrollbar=0" title="AME Report PDF" allow="autoplay"></iframe>
 </div>
+</details>
 </div>
 
 <div class="project-card reveal"><span class="project-idx">UNI — 07</span><h3>More coming soon</h3><div class="project-subtitle">Labs, papers & coursework</div>
@@ -604,6 +728,43 @@ document.querySelectorAll('.counter[data-target]').forEach(e=>co.observe(e));
 // Active nav highlight
 const secs=document.querySelectorAll('section[id]'),nls=document.querySelectorAll('.nav-links a');
 window.addEventListener('scroll',()=>{let c='';secs.forEach(s=>{if(scrollY>=s.offsetTop-120)c=s.id});nls.forEach(l=>{l.style.color=l.getAttribute('href')==='#'+c?'var(--text)':''})},{passive:true});
+
+// Project category tabs + deep links to a single project
+(function () {
+  const tabs = document.querySelectorAll('.ptab');
+  const cats = document.querySelectorAll('.projects-category');
+  if (!tabs.length) return;
+  function show(cat, force) {
+    cats.forEach(c => {
+      const on = (cat === 'all' || c.dataset.cat === cat);
+      c.hidden = !on;
+      // categories hidden before they were ever scrolled to never got their
+      // reveal class, so force it when the user switches tabs
+      if (on && force) c.querySelectorAll('.reveal').forEach(e => e.classList.add('visible'));
+    });
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.cat === cat));
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.cat, true)));
+  function openFromHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const card = document.getElementById(id);
+    if (!card || !card.classList.contains('project-card')) return;
+    show('all', true);
+    const d = card.querySelector('details.pcard');
+    if (d) d.open = true;
+    requestAnimationFrame(() => card.scrollIntoView({ block: 'start' }));
+  }
+  window.addEventListener('hashchange', openFromHash);
+  openFromHash();
+})();
+
+// Collapsing a long card should not leave you stranded below its header
+document.querySelectorAll('details.pcard').forEach(d => {
+  d.addEventListener('toggle', () => {
+    if (!d.open && d.getBoundingClientRect().top < 0) d.scrollIntoView({ block: 'start' });
+  });
+});
 
 // Image slider scroll function
 function scrollSlider(id, dir) {
