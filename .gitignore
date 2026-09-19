@@ -1,0 +1,13 @@
+# This repository is public: it is the GitHub Pages site. Anything listed here
+# stays on disk and out of it.
+
+# A one-pager written for a job application. It summarises the torque-vectoring
+# work that is already a project in its own right on this site, so it would only
+# repeat it — and an application document is not portfolio content.
+TeslaOnePage/
+Tesla_OnePager.tex
+
+# Working notes for the Purple Stint entry: the numbers and their provenance,
+# written to draft from. It names a private repository and reads as instructions
+# rather than as anything a visitor should find.
+PurpleStint/BRIEF.md
