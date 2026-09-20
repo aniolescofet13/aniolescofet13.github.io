@@ -11,3 +11,7 @@ Tesla_OnePager.tex
 # written to draft from. It names a private repository and reads as instructions
 # rather than as anything a visitor should find.
 PurpleStint/BRIEF.md
+
+# A briefing written to hand to a Claude Code session so it can edit this file.
+# It reads as instructions, names local paths, and is not portfolio content.
+CLAUDE_CODE_CONTEXT.md
