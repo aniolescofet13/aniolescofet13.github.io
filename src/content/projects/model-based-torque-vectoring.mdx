@@ -1,0 +1,139 @@
+---
+title: "Model-Based Torque Vectoring"
+subtitle: "4WD Electric Vehicle · CAT16x · BCNeMotorsport"
+category: fs
+order: 1
+tags:
+  - "MATLAB"
+  - "Simulink"
+  - "VI-Grade"
+  - "QP Optimization"
+  - "Dual-Track NLTV Model"
+  - "Pacejka"
+  - "ROS"
+  - "CAN Bus"
+visibility: listed
+repoPublic: false
+---
+
+import Slider from '../../components/Slider.astro';
+
+Torque Vectoring on a 4WD vehicle with one independent motor per wheel is one of the most complete chassis control problems in motorsport. The system has three layers running in sequence: a nonlinear vehicle model that represents what the car is doing, a yaw rate controller that decides how much corrective yaw moment to apply, and a torque allocator that distributes that moment across all four motors in real time. Each layer feeds the next, and the whole chain runs in the processing unit of the CAT16x during competition.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P1 - Scheme.png",
+    "alt": "TV system architecture — three-layer pipeline"
+  }
+]} />
+
+The vehicle model is a Dual-Track Nonlinear Time Varying (NLTV) formulation. Unlike a simple bicycle model, it tracks all four wheels individually, accounting for lateral and longitudinal load transfer, aerodynamic downforce, Ackermann steering geometry, and a Pacejka Magic Formula tire model per wheel. Parameters vary nonlinearly with vertical load and slip angle, making it accurate both in the linear and limit handling regimes. The model was calibrated against real CAT15x telemetry from three maneuvers: Ramp Steer (96.7% fit), Skid Pad (98.8% fit), and the AutoX at Formula Student Spain 2023 (82.5% fit).
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - 4WD.png",
+    "alt": "4WD dual-track NLTV model"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - FrictionCircle.png",
+    "alt": "Tyre friction circle per wheel"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - Comparation_RampSteer.jpg",
+    "alt": "Model calibration — Ramp Steer"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - Comparation_SkidPad.jpg",
+    "alt": "Model calibration — Skid Pad"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - Comparation_AutoX.jpg",
+    "alt": "Model calibration — AutoX"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - LuT_Sport.jpg",
+    "alt": "NLTV model LuT Sport mode"
+  }
+]} />
+
+The yaw rate controller generates the reference corrective yaw moment that the torque allocator then executes. It combines two components: a Feed-Forward path that uses the vehicle model to anticipate the required moment based on steering input and speed, and a PID Feed-Back path that closes the loop on the measured yaw rate error. An anti-windup mechanism (back-calculation) prevents integrator saturation in transients, and a velocity-dependent reset avoids excessive integral buildup. The combined controller tracks the yaw rate reference with average errors of 0.02% in Ramp Steer, 0.18% in Skid Pad, and 0.89% in AutoX conditions.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P3 - Scheme.png",
+    "alt": "FF+FB yaw rate controller block diagram"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P3 - LuT_PID.jpg",
+    "alt": "PID gain scheduling"
+  }
+]} />
+
+The torque allocator translates the desired longitudinal force (from the driver throttle) and corrective yaw moment (from the controller) into four individual motor torque commands. This is posed as a multi-objective quadratic programming problem solved in real time. The optimizer respects motor torque limits, inverter limits, and the tire friction circle per wheel, while simultaneously minimizing the error on both references. Using Ackermann-corrected wheel angles, it distributes torque asymmetrically between left-right and front-rear to generate the exact yaw moment needed without sacrificing traction. Closed-loop tracking errors: Fx average 0.9%, Mz average 3.6%.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P4 - SP_Trq.jpg",
+    "alt": "Torque allocator — Skid Pad torques"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P4 - SP_TD_1.jpg",
+    "alt": "Torque allocator — Skid Pad torque distribution"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P4 - AX_Trq.jpg",
+    "alt": "Torque allocator — AutoX torques"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P4 - AX_TD_1.jpg",
+    "alt": "Torque allocator — AutoX torque distribution"
+  }
+]} />
+
+The entire system was developed and tested in a Simulink and VI-Grade CarRealTime loop before deployment on the real car. VI-Grade's 14-DOF multibody model replicated the CAT15x dynamics with full suspension, tire-road interaction, and real mass distribution. Three standard maneuvers were used to stress-test each layer independently and combined. Peak lateral acceleration in the AutoX improved by +7.9% over the baseline. On the hardware side, the algorithm runs as a ROS node on the car's Processing Unit, receiving data over CAN from the VectorNav INS, wheel resolvers and suspension sensors, and sending torque commands to two Lenze inverters at real-time rate.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P5 - AX_Vehicle.jpg",
+    "alt": "VI-Grade simulation — AutoX vehicle response"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P5 - RS_Vehicle.jpg",
+    "alt": "VI-Grade simulation — Ramp Steer vehicle response"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P5 - SP_Vehicle.jpg",
+    "alt": "VI-Grade simulation — Skid Pad vehicle response"
+  }
+]} />
+
+A key design decision was making the system fully configurable in real time. Three driving modes were defined: Eco, Sport, and Hardcore. Each mode adjusts the aggressiveness of the yaw rate target and the weighting of the QP objectives, letting the driver tune the car behavior from a dashboard switch without stopping. The controller was deployed and validated on the CAT16x for the 2023-2024 competition season.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P6 - LuT_sa.jpg",
+    "alt": "Driving modes — lateral acceleration vs sideslip"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P6 - LuT_stee.jpg",
+    "alt": "Driving modes — lateral acceleration vs steering"
+  }
+]} />

@@ -1,0 +1,11 @@
+---
+// The image is filled in by openLightbox() from the slide's data-full URL,
+// so it starts empty and must stay a plain <img>.
+---
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+<button aria-label="Close" class="lightbox-close" onclick="closeLightbox()">×</button>
+<button aria-label="Previous image" class="lightbox-nav prev" id="lb-prev" onclick="lightboxStep(-1,event)">‹</button>
+<img id="lightbox-img" src="" alt="Enlarged photo" onclick="event.stopPropagation()" />
+<button aria-label="Next image" class="lightbox-nav next" id="lb-next" onclick="lightboxStep(1,event)">›</button>
+<div class="lightbox-counter" id="lb-counter"></div>
+</div>

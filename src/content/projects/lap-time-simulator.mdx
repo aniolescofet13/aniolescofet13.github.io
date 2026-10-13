@@ -1,0 +1,258 @@
+---
+title: "Lap Time Simulator"
+subtitle: "Modular Vehicle Development Platform · Python · React · WebGL"
+category: personal
+order: 1
+tags:
+  - "Python"
+  - "FastAPI"
+  - "React · TypeScript"
+  - "WebGL · three.js"
+  - "QSS Simulation"
+  - "Vehicle Dynamics"
+  - "Pacejka MF"
+  - "Telemetry Validation"
+  - "ERS"
+visibility: listed
+repoPublic: false
+---
+
+import Note from '../../components/Note.astro';
+import Slider from '../../components/Slider.astro';
+
+A Python lap time simulation and vehicle analysis platform designed to support a racing car's full development cycle, from early concept where almost no hardware data exists, all the way through to race-ready validation against real on-track telemetry. The tool is built around the principle that the fidelity of the simulation should match the fidelity of the information available: as the team learns more about the car, the models are upgraded in place without restructuring the workflow.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Garage.png",
+    "alt": "Garage — six subsystems at independent fidelity levels, with the g-g-V envelope",
+    "shot": true
+  }
+]} />
+
+**The problem it solves.** In motorsport development, the decisions with the biggest impact on performance — suspension geometry, aero package, powertrain architecture — are made at the very beginning of a project, when the least data is available. A tool that only works once full hardware data exists arrives too late. Equally, a tool that is too simplified fails to give useful answers once real data starts coming in. This simulator solves that by being continuously useful at every stage of development, from back-of-envelope concept studies to lap-accurate simulation validated against telemetry.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P2 - The problem it solves.png",
+    "alt": "Development cycle — tool fidelity vs project stage",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P2 - Comparison.png",
+    "alt": "Tool comparison — simple vs complex vs modular",
+    "shot": true
+  }
+]} />
+
+**Modular fidelity architecture.** Every subsystem carries its own ladder of physical fidelity, selectable at runtime, and the ladders are deliberately different lengths: each one stops where the extra physics stops paying for itself. L1 is the concept stage, simple scalar parameters such as constant peak power, fixed drag and lift coefficients and constant friction, enough for a credible lap time from a one-page spec sheet. L2 is development, with physics-based models: torque curves, brake bias and hydraulic geometry, load-sensitive tyre behaviour, lateral load transfer. Brakes finish here, at the full hydraulic model. L3 is validation, where Pacejka Magic Formula tyres fitted to measured data arrive with thermal, wear and pressure on top of them, and the chassis gains pitch compliance. L4 is the detail stage, and only three subsystems have one: Powertrain for ERS energy management, Aerodynamics for the ground-effect and ride-height map, and Suspension for roll centres. Levels mix freely, so Tyres L3 can run beside Suspension L1 when that is all the data supports, which leaves 4 × 4 × 4 × 3 × 3 × 2 = **1,152 model combinations** behind a single call signature. The solver never knows which level is active: every subsystem exposes the same interface, and higher-fidelity models are drop-in replacements.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P3 - 6 subsystems.png",
+    "alt": "Modular fidelity architecture — 6 subsystems × levels",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P8 - OOP architecture diagram.png",
+    "alt": "Object model — Vehicle, the six subsystem ladders behind one Subsystem interface, and the solve_lap and run_race engines",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L1.png",
+    "alt": "Tyres at L1 — constant µ, two parameters",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L2.png",
+    "alt": "Tyres at L2 — load sensitivity, five parameters",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L3.png",
+    "alt": "Tyres at L3 — Pacejka Magic Formula, twenty-seven parameters",
+    "shot": true
+  }
+]} />
+
+**Layer 1: QSS spatial sweep.** The spatial engine is built on the Quasi-Steady-State method, the industry standard in motorsport simulation. The car is treated as a point mass navigating a known racing line, assumed to be in steady state at every spatial point. The algorithm runs in three linked sweeps across the track distance domain. First, corner speed limits: at every point with curvature κ, the maximum lateral speed is solved iteratively, since downforce and therefore grip depend on speed itself. Second, a forward acceleration sweep propagates the speed envelope accounting for engine power, drag, rolling resistance, and remaining longitudinal grip after cornering demand is subtracted via the friction ellipse. Third, a backward braking sweep runs the same logic in reverse, propagating maximum entry speeds into each corner. Five alternating passes produce the minimum-time speed envelope: at every track point the car is at exactly one limit — traction, braking, or cornering.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P4 - Triple sweep scheme.png",
+    "alt": "QSS triple sweep — corner speed, forward accel, backward braking",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P4 - Results.png",
+    "alt": "Solved lap — track map, g-g-V operating points and speed profile",
+    "shot": true
+  }
+]} />
+
+**Layer 2: transient temporal integration and iterative coupling.** Once the spatial speed profile is converged, a second pass integrates the trajectory in the time domain, computing the states that evolve continuously along the lap. The tyre thermal model tracks compound temperature using a lumped thermal network, updating friction coefficients and slip stiffness that feed back into Layer 1. Suspension and chassis dynamics compute instantaneous ride height as a function of heave and roll, which directly modifies the aero maps used in the spatial sweep. ERS state of charge is integrated from the power demand profile, determining deployment availability corner by corner. Fuel mass drops continuously, shifting total weight and CG height. These outputs are fed back into Layer 1, which re-solves the speed profile with the updated vehicle state. The two layers iterate to convergence, typically in three to five passes, producing a speed profile that accounts for both instantaneous physics and the evolving state of the car across the full lap.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Layer 1 - Layer 2.png",
+    "alt": "Iterative coupling — Layer 1 QSS and Layer 2 temporal integration",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Tyre Temperatures.png",
+    "alt": "Tyre temperatures vs lap distance — all four corners",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Ride height.png",
+    "alt": "Ride height vs lap distance",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Fuel consumption.png",
+    "alt": "Fuel mass vs lap distance",
+    "shot": true
+  }
+]} />
+
+**Sensitivity analysis and signal explorer.** Rather than running the simulator once per configuration, the sensitivity module sweeps a parameter over a range and plots the lap time response directly, answering questions like: at what downforce level does added drag outweigh added cornering grip, what is the weight penalty per second on a technical versus a high-speed circuit, or at what CG height does lateral load transfer start to hurt more than it helps. The signal explorer provides a graphical interface to inspect every computed channel as a function of track position or time — speed, longitudinal and lateral acceleration, tyre load per axle, aerodynamic downforce, brake force distribution, engine operating point, ERS contribution — and overlays channels from different configurations to directly show where one setup gains on another. The GG diagram is included as a standard assessment of how efficiently the tyre friction circle is being used.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P6 - Web Sweep.png",
+    "alt": "Parameter sweep — lap time response streamed point by point",
+    "shot": true
+  }
+]} />
+
+**Real data validation loop.** Once the car is running on track, the simulator's outputs are compared directly against real telemetry — GPS speed, IMU accelerations, wheel speeds, brake pressure, engine channels — aligned spatially by arc length. Systematic offsets in specific sectors reveal which subsystem model needs refinement: a braking point consistently too early points to the brake model, a corner speed consistently too high points to the lateral tyre model. This closes the loop between simulation and reality and gives each model upgrade a clear validation target.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - Web Validation.png",
+    "alt": "Validation against the Suzuka qualifying telemetry lap",
+    "shot": true
+  }
+]} />
+
+**The application.** The simulator runs as a FastAPI service behind a React front end, in seven screens: a garage where the car is built subsystem by subsystem with live capability curves, a track browser, the lap and race runner, a signal explorer, a 3D replay, a parameter sweep streamed over a WebSocket, and telemetry validation. A qualifying lap solves in about 0.05 s, and the heaviest configuration, with every thermal, wear and energy feedback enabled, in 5.7 s. That is down from 66 s before the interpolation tables were cached: profiling found the solver constructing 231,000 spline interpolators per lap.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web GGV 3D.png",
+    "alt": "The g-g-V envelope as a surface — capability against speed",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web GGV DRS open.png",
+    "alt": "The same envelope with the movable wing pinned open",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Track.png",
+    "alt": "Track browser — racing line, curvature and elevation",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Run.png",
+    "alt": "Run — speed profile with traction, cornering and braking zones",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Run Race.png",
+    "alt": "Race mode — per-lap table with fuel burn, wear and degradation",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Signals.png",
+    "alt": "Signal explorer — stacked channels against lap distance",
+    "shot": true
+  }
+]} />
+
+**The whole thing, in one pass.** A single run through the application as it is actually used: a car built subsystem by subsystem, a lap solved and read channel by channel, and that same lap replayed in three dimensions.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/LapTime/walkthrough.mp4",
+    "poster": "/LapTime/walkthrough-poster.jpg",
+    "title": "LapTime — walkthrough of the web application"
+  }
+]} />
+
+**3D replay.** The solved lap is replayed in WebGL with the car posed from prebuilt interpolants, so a frame costs four table lookups rather than a search. Five cameras: chase, a chassis-mounted onboard, a planted trackside vantage, an overhead, and a free orbit that rides with the car. The onboard is the one worth explaining — it is parented into the car's own body group rather than having its pose recomputed each frame from the racing line's heading. Heading derived from a resampled line carries noise, and aiming a camera forty metres down the track multiplies a small angular error into a visibly shaking picture; bolting the camera to the car makes that class of error impossible, because any residual noise turns the camera and the bodywork together. The car is a scanned AMR25 reduced to 2.3 MB — Draco geometry, WebP textures — which loads in 14 ms and keeps its wheels as separate nodes so they turn; the whole replay route is lazy-loaded, because three.js has no business in the bundle of a screen that never draws it.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Onboard.png",
+    "alt": "Replay — chassis-mounted onboard camera",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Chase.png",
+    "alt": "Replay — chase camera",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Trackside.png",
+    "alt": "Replay — trackside broadcast camera",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Free.png",
+    "alt": "Replay — free orbit, riding with the car",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Top.png",
+    "alt": "Replay — overhead",
+    "shot": true
+  }
+]} />
+
+<Note>Car model <a href="https://sketchfab.com/3d-models/aston-martin-aramco-amr25-72ff2e7d2a56468d946f81fdffacc0b8" rel="noreferrer noopener" target="_blank">“Aston Martin Aramco AMR25”</a> by Abu Saif, licensed <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC-BY-4.0</a>.</Note>
+
+**How far the models go.** Suspension carries a fourth level that splits lateral load transfer into its geometric and elastic paths through the roll centres, because routing every newton through the springs and dividing by roll stiffness alone cannot express two cars with identical roll rates and different roll-centre heights. Tyre inflation pressure is an opt-in feedback, modelled as a window either side of an optimum rather than a slope, since a linear term would reward ever-lower pressure. Drive torque distribution across an axle is explicit: evaluating the friction ellipse on the whole axle load only holds if torque can follow load, so the parameter adds no torque-vectoring bonus, it charges for its absence, with an open differential costing 1.3 s a lap at Catalunya. Formula Student has its own dynamic events, because every circuit in the database is a Grand Prix track and an FS car simulated on one spends 86 % of the lap above 120 km/h, a regime the class never reaches.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Garage FS Electric.png",
+    "alt": "The Formula Student Electric car in the garage",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web FS Events.png",
+    "alt": "Formula Student dynamic events — acceleration and skidpad from the rulebook",
+    "shot": true
+  }
+]} />

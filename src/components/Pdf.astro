@@ -1,0 +1,20 @@
+---
+// The old viewer embedded the PDF directly, so all six reports — 130 MB —
+// were requested on page load, inside cards most visitors never open.
+// Now the frame is created only when someone asks to read it.
+interface Props { src: string; title?: string }
+const { src, title = 'Document' } = Astro.props;
+const viewer = `${src}#toolbar=0&navpanes=0&scrollbar=0`;
+---
+<div class="pdf-viewer">
+  <div class="pdf-viewer-header">
+    <span class="pdf-viewer-title">{title}</span>
+    <div class="pdf-viewer-nav">
+      <a class="pdf-download-btn" href={src} download>↓ Download PDF</a>
+    </div>
+  </div>
+  <div class="pdf-facade" data-pdf={viewer} data-title={title}>
+    <button class="pdf-open-btn" type="button">Read the report here</button>
+    <span class="pdf-facade-hint">Opens in the page · or download it above</span>
+  </div>
+</div>

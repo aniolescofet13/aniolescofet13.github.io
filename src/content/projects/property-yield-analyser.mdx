@@ -1,0 +1,252 @@
+---
+title: "Property Yield Analyser"
+subtitle: "Real Estate Investment Analysis · Next.js · MapLibre · Supabase"
+category: personal
+order: 3
+tags:
+  - "Next.js"
+  - "React · TypeScript"
+  - "MapLibre GL"
+  - "H3"
+  - "Supabase · Postgres"
+  - "Data Collection"
+  - "Open Data"
+  - "Financial Modelling"
+  - "Testing"
+visibility: listed
+repoPublic: false
+---
+
+import Note from '../../components/Note.astro';
+import Slider from '../../components/Slider.astro';
+
+**The tool.** Property Yield Analyser (Rendibilitat Immobiliària, in the Catalan its interface is written in) answers two questions about buying a flat to let: what will this one return, and which flats in this neighbourhood return the most. A calculator works out cash flow, return on equity, gross yield and equity built for a single flat, in six modes and with the purchase taxes of whichever Spanish region it is in. A search reads five property portals over an area drawn on a map, merges the listings that are the same flat, estimates what each one would earn under the goal chosen and ranks them by return. It is a personal, non-commercial tool, built in seven days, from 7 to 13 October 2026, in 65 commits: about 23,000 lines of TypeScript and 382 tests.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P1 - Results.png",
+    "alt": "An area drawn around Sant Antoni, Barcelona: 100 flats from 195 listings, ranked by return on equity",
+    "shot": true
+  }
+]} />
+
+**The problem it solves.** Judging a flat as an investment usually takes three portal tabs, a spreadsheet and a guess. The guess is the rent: a sale listing says what a flat costs, not what it would let for, and a fair answer depends on what similar flats nearby are asking, which is another search on other pages. Purchase taxes change from one region to the next, letting rules change from one municipality to the next, and the same flat appears on several portals at slightly different prices. The tool was inspired by commercial investment analysis tools and set out to do all of it in one place for Catalonia, with every figure traceable to where it came from. A search starts with three questions: where, what for, and the details.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P2 - Where.png",
+    "alt": "Where: Barcelona found by its postcode, and the search area drawn as a polygon on the map",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P2 - Goal.png",
+    "alt": "What for: let it whole, by the room, to tourists, renovate and sell, rent to rent, or look for a flat to rent",
+    "shot": true
+  }
+]} />
+
+**The calculator.** Six modes: a long let, letting by the room, short-term tourist letting, rent to rent, buying to renovate and sell, and buying to live in, compared with renting. Purchase taxes are the real ones for each of the 19 autonomous communities and cities, transfer tax for second-hand homes and VAT plus stamp duty for new builds, each value stored with its source and the date it was checked. Where a rate could not be verified it is marked as such and stays editable, rather than guessed. The 88 reduced transfer-tax rates for a main residence are there too, shown with their conditions, and the municipal property tax comes with its legal range and the official rate of several large cities. The mortgage payment is split into interest, which is a cost, and principal, which is equity, and the ten-year projection runs three appreciation scenarios. The whole state lives in the URL, so a calculation is saved or shared as a link, and it prints to PDF. The formulas are pure functions with no interface code in them, and 24 golden tests pin them to the outputs of a reference calculator: if one of those fails, the change is wrong, not the test.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Calculator.png",
+    "alt": "The calculator opened from a listing: initial investment, cash flow with interest and principal apart, and return on equity",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Tax source.png",
+    "alt": "The source behind the transfer tax rate, with the law, the brackets and the date it was checked",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Projection.png",
+    "alt": "Equity built per year and the ten-year projection in three appreciation scenarios",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Flipping.png",
+    "alt": "Renovate and sell: total investment, net profit after tax and the annualised return",
+    "shot": true
+  }
+]} />
+
+**One search, five portals.** The area is a municipality with a radius, or a polygon drawn on the map. Portals are searched by place, not by polygon, so the search plans first: it reads the first page of each district, goes down only into the districts with flats near the area, and into their neighbourhoods if those are still large, then keeps or drops each listing by its coordinates. Those first pages are kept for a week, so the next search in the same municipality skips the planning. Five sources are read in parallel: Fotocasa, Habitaclia and pisos.com, plus Aliseda and Solvia, which sell bank-owned homes. Aliseda also states what the large portals often leave out: whether a flat is occupied, let to tenants or under a social rent. Each source is its own adapter, and each was vetted before it was written: an API or official alerts first, then its robots.txt, its terms and whether it sits behind an anti-bot service. Requests go out one every four to six seconds per site, and a site that answers with a block is left alone for the rest of the search. Idealista, the largest portal, is protected by DataDome, so it is not scraped at all and waits for its official API. Progress streams live, with an estimate of the time left.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P4 - Search running.png",
+    "alt": "A search in progress: listings found so far, the rentals and rooms read for the rent estimate, and the time left",
+    "shot": true
+  }
+]} />
+
+**One flat, many listings.** The same flat is often on three portals at once. Fotocasa and Habitaclia now run on one platform and serve the same photographs, so two listings that share two or more image IDs are the same flat with almost no doubt, and so are two with the same agency and the same agency reference. Beyond that, pairs closer than 300 m are scored on rooms, bathrooms, floor area, floor, price and how alike their descriptions are, and merged with union-find above a threshold. Between the lower and the upper threshold they are shown as possible duplicates for the user to settle, and later searches respect the decision. The scores were tuned on real listings: the same exact price, area, rooms and bathrooms already means the same flat, unless both state a floor and the floors differ. Two listings from the same bank are never merged, because a bank publishes one listing per flat, and identical units in one development, placed by their street alone, used to collapse into one. In the Sant Antoni search in these pictures, 195 listings became 100 flats.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P5 - Listing.png",
+    "alt": "One flat, two listings: Habitaclia and Fotocasa at the same price and the same reduction, with the user's note and tags",
+    "shot": true
+  }
+]} />
+
+**Estimating the rent when comparables are few.** Every sale search also reads the whole-flat rentals around the area, with a kilometre of margin, and adds the ones earlier searches have seen in the last 120 days. Seasonal lets are left out: in an early test, 13 of 30 rentals were seasonal. Comparables are taken in steps, within 250 m and ±10 % of the floor area first, then 500 m and ±20 %, 1 km and ±30 %, 2 km and ±40 %, until there are three. The estimate is their median rent per square metre times the flat's area, and the prudent figure is 85 % of it, because asking rents run high. When three cannot be found anywhere, the fallback is the municipality's average asking rent per square metre from a portal's public price index, used only up to 150 m², since an all-sizes average overstates large homes. Some returns are still not worth trusting, and real data made that obvious: the first ranking for a coastal town was topped by a listing claiming 976 m², at a 281 % return, and by houses priced against three luxury villas 2 km away. So an estimate from too few comparables, an impossible area, a price far below the area's, an auction, or an estimate more than 1.5 times the municipal index is labelled unreliable, with the reason, and ranked after the rest. A flat that is occupied, under a social rent or sold as bare ownership shows the return it would have if it were vacant, and is ranked after the vacant ones.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P6 - Rent estimate.png",
+    "alt": "The return of one flat: prudent rent, market median, the municipal index beside it, and the same flat let by the room",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P6 - Comparables.png",
+    "alt": "Comparables: similar flats for sale with their price per square metre, and the rentals the estimate was built from",
+    "shot": true
+  }
+]} />
+
+**A return for each goal.** The same search can be read five ways, and switching between them needs no new search. Letting it whole uses the estimate above. Letting by the room uses the room listings nearby, which are scarce on these portals, so the price can also be typed in. Tourist letting uses Inside Airbnb's open data rather than Airbnb itself, whose robots.txt forbids its search pages: entire homes with the same bedrooms, active and priced, between 300 m and 2 km away, at 85 % of their median nightly price and their median occupancy, capped at 70 %. Renovating to sell prices the flat at the median per square metre of listings in the same search whose text says they are renovated, something the portals do not state as a field, less the 6.2 % average gap between asking and selling price. Rent to rent reads the rooms around a rental and works out the profit of subletting all of them. Every goal hands its numbers to the calculator in one click.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Tourist.png",
+    "alt": "The tourist goal: the licence rules for Barcelona and how the Inside Airbnb comparables were used",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Tourist ROI.png",
+    "alt": "A flat's tourist return: nightly price, occupancy and the income it implies",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Renovate and sell.png",
+    "alt": "The renovate-and-sell goal: the sale price from the renovated flats of the same search",
+    "shot": true
+  }
+]} />
+
+**The law, checked at the source.** Letting rules in Catalonia change from one municipality to the next, so the tool states them where they matter, from official texts and with the date they were read. In the 271 municipalities declared stressed residential markets by resolutions TER/800/2024 and TER/2408/2024, the rent of a new contract is capped. The cap for a given flat cannot be computed, since it depends on its last contract or on the reference index for its cadastral number, which no open API provides, so the search summary and each flat say how to find it and the calculator takes it. A revision to 302 municipalities was still out for consultation on 9 October 2026, and the tool flags it as unverified rather than assuming either list. The tourist goal carries the 262 municipalities of Decree-law 3/2023, where a tourist flat needs a prior planning licence, and rent to rent carries the subletting conditions of article 8.2 of the Urban Leases Act.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P8 - Rent cap.png",
+    "alt": "The rent cap in a stressed market: when it applies, how to find the figure for a flat, and the revision still pending approval",
+    "shot": true
+  }
+]} />
+
+**The map and the neighbourhood.** The map has five layers. Besides the listings themselves, three are H3 hexagons holding the median price per square metre, gross yield or return of the flats inside them, at a resolution from 75 m to 1.4 km a side that follows the size of the area, coloured by quantile, with the two return layers built only from rents worth trusting. The fifth is net income per person for each census section, from the open map services of INE, Spain's statistics office. Each flat then has a sheet in seven sections: summary, return, comparables, market trend, neighbourhood, nearby places and an analysis. The market trend is five years of asking prices and rents per square metre for the municipality. The neighbourhood compares the flat's census section with its municipality, from income and inequality to age, origin and the share of tourist homes, using INE's income atlas and annual census, queried straight from the browser. Nearby places come from OpenStreetMap, with walking minutes. The analysis is rule-based: strengths and weaknesses drawn from the return, the cash flow, the price against the area and the neighbourhood figures.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - ROI hexagons.png",
+    "alt": "Return on equity by H3 hexagon, median of the flats with a trustworthy rent",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Price hexagons.png",
+    "alt": "Price per square metre by H3 hexagon",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Income.png",
+    "alt": "Net income per person by census section, INE 2023",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Market.png",
+    "alt": "Market trend: the prices this flat has been seen at, and five years of sale and rent prices in the municipality",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Neighbourhood.png",
+    "alt": "Neighbourhood: the flat's census section against the whole of Barcelona",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Nearby.png",
+    "alt": "Nearby places from OpenStreetMap with walking minutes, names blurred",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Analysis.png",
+    "alt": "Analysis: strengths and weaknesses worked out by rules",
+    "shot": true
+  }
+]} />
+
+**Big cities.** A 300 m search in Barcelona's Eixample took more than 14 minutes and was still reading comparables, over 2,400 rooms within 5 km and 1,100 rentals within 1 km. The listings for sale, which are the point of the search, are still read in full. The comparables no longer are: each portal reads at most 15 pages of them, starting with the zones that have most flats nearby, and stops at 150 inside the area, and rooms are looked for within 1 km first and only out to 5 km when fewer than 30 turn up. The same search then took 108 s. A polite pace has a cost that stays: the Sant Antoni search in these pictures, at normal depth, took about six minutes, nearly all of it spent waiting between pages. Opening a past search from the history asks the portals nothing, because it is rebuilt from the database, 43 flats in 0.9 s.
+
+**Around the search.** Every search is kept, and reopening one costs nothing. An alert repeats a search daily or weekly in the background while the app is open and reports the flats that are new, or cheaper by at least 1 %, that still meet its filters with a trustworthy return, through a browser notification. Its first run is only the baseline. Another kind of alert watches the saved flats and warns when one drops in price, instantly, from the prices later searches have seen. Saved flats live on a board by status, interested, visited, offer made and discarded, with notes, tags and drag and drop between columns, and saved calculations compare side by side with the best of each row in green. The filtered list exports to Excel, and the municipality finder takes a postcode and answers instantly from a local GeoNames list of 8,124 municipalities.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Saved board.png",
+    "alt": "Saved flats on a board by status, with notes and tags, and the saved calculations below",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Compare.png",
+    "alt": "Three saved calculations side by side, the best of each row in green",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Alerts.png",
+    "alt": "Alerts: a search repeated every day, and the form for price-drop alerts on saved flats",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - History.png",
+    "alt": "Search history: reopening a search rebuilds it from the database",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Postcode finder.png",
+    "alt": "The municipality finder, answering a postcode from a local GeoNames list",
+    "shot": true
+  }
+]} />
+
+**How it is built.** Next.js 16 with the App Router and cache components, React 19, TypeScript, Tailwind v4 and shadcn/ui. Anything that should survive a reload or a shared link lives in the URL, through nuqs. The map is MapLibre GL on OpenFreeMap tiles, with terra-draw for the polygon and h3-js for the hexagons. Supabase holds the listings and their price history, the searches, the saved flats and the alerts, in Postgres with row-level security, behind a Google sign-in limited to an allow-listed account. The calculation logic is pure functions kept apart from the components, and each portal adapter is tested against saved pages. It runs on a personal computer rather than a server, partly because portals tend to block data-centre addresses, so the background alerts run only while it is open.
+
+**What it is not.** A personal tool, not a product: one user, no advertising, no tracking, and no financial advice. Listings are read for personal analysis only, at a slow pace, within each site's robots.txt, without getting past any anti-bot protection, and nothing is published or redistributed. In these pictures and in the video, listing photos, addresses, agencies, descriptions and the names of nearby places are blurred in the browser before capture, and the saved flats, notes, history and alerts belong to a local demo account rather than real use. The repository is private.
+
+**The whole thing, in one pass.** A recorded run through the tool as it is used: a postcode, an area drawn around Sant Antoni, a goal and a search, its wait fast-forwarded, the results read through the map layers, an alert, one flat opened section by section, saved with a note, taken to the calculator and saved there, and then the board, the comparison, the history and the alerts. Recorded at 1080p60 from the running app, with the same blurring as the pictures.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PropertyYield/walkthrough.mp4",
+    "poster": "/PropertyYield/walkthrough-poster.jpg",
+    "title": "Property Yield Analyser, walkthrough"
+  }
+]} />
+
+<Note>Data: <a href="https://www.geonames.org/" rel="noreferrer noopener" target="_blank">GeoNames</a> and <a href="https://insideairbnb.com/" rel="noreferrer noopener" target="_blank">Inside Airbnb</a>, both licensed <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC BY 4.0</a>. Income, census and tourist-home statistics from <a href="https://www.ine.es/" rel="noreferrer noopener" target="_blank">INE</a>. Places and map data © <a href="https://www.openstreetmap.org/copyright" rel="noreferrer noopener" target="_blank">OpenStreetMap contributors</a> (ODbL). Map tiles by <a href="https://openfreemap.org/" rel="noreferrer noopener" target="_blank">OpenFreeMap</a>, © <a href="https://www.openmaptiles.org/" rel="noreferrer noopener" target="_blank">OpenMapTiles</a>.</Note>

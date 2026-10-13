@@ -1,0 +1,71 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { resolveImage } from '../lib/assets';
+
+type Item =
+  | { type: 'image'; src: string; alt?: string; shot?: boolean }
+  | { type: 'video'; src: string; poster?: string | null; title?: string }
+  | { type: 'youtube'; src: string; title?: string };
+
+interface Props { items: Item[]; id?: string }
+const { items, id } = Astro.props;
+
+// Tallest a slide is ever drawn (CSS: 280px, 360px from 1280px up).
+const SLIDE_H = 360;
+// Lightbox ceiling: past this nobody sees a difference, and it is downloaded
+// only when the image is actually opened.
+const FULL_W = 2200;
+
+// Stable per-slider id for scrollSlider(): derived from the content, so it
+// does not change between builds.
+function hash(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+const sliderId = id ?? 'slider-' + hash(items.map((i) => i.src).join('|'));
+
+const slides = await Promise.all(
+  items.map(async (it) => {
+    if (it.type !== 'image') return it;
+    const meta = resolveImage(it.src);
+    const shownW = Math.round(SLIDE_H * (meta.width / meta.height));
+    const widths = [...new Set([shownW, shownW * 2].map((w) => Math.min(w, meta.width)))];
+    const full = await getImage({ src: meta, width: Math.min(meta.width, FULL_W), format: 'webp' });
+    return { ...it, meta, widths, sizes: `${shownW}px`, full: full.src };
+  }),
+);
+
+const ytId = (u: string) => u.split('/embed/')[1]?.split(/[?&#]/)[0] ?? '';
+---
+<div class="img-slider">
+  <div class="img-slider-track" id={sliderId}>
+    {slides.map((s: any) =>
+      s.type === 'image' ? (
+        <div class:list={['slide', 'has-img', { shot: s.shot }]} onclick="openLightbox(this)">
+          <Image src={s.meta} alt={s.alt ?? ''} widths={s.widths} sizes={s.sizes}
+                 format="webp" loading="lazy" decoding="async" data-full={s.full} />
+        </div>
+      ) : s.type === 'video' ? (
+        <div class="slide has-video">
+          <video src={s.src} poster={s.poster ?? undefined} controls preload="none"
+                 playsinline title={s.title}></video>
+        </div>
+      ) : (
+        // A click-to-load facade: the YouTube player is ~1 MB of script, and
+        // the old embeds fetched it for every video on page load.
+        <div class="slide has-video yt-facade" data-yt={ytId(s.src)} title={s.title}>
+          <img src={`https://i.ytimg.com/vi/${ytId(s.src)}/hqdefault.jpg`}
+               alt={s.title || 'YouTube video'} loading="lazy" decoding="async" />
+          <span class="play-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </div>
+      )
+    )}
+  </div>
+  <div class="slider-controls">
+    <button class="slider-btn" type="button" aria-label="Previous" onclick={`scrollSlider('${sliderId}',-1)`}>←</button>
+    <button class="slider-btn" type="button" aria-label="Next" onclick={`scrollSlider('${sliderId}',1)`}>→</button>
+  </div>
+</div>

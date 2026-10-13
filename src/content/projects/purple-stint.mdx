@@ -1,0 +1,288 @@
+---
+title: "Purple Stint"
+subtitle: "F1 Timing & Telemetry Analysis · Next.js · WebGL"
+category: personal
+order: 2
+tags:
+  - "Next.js"
+  - "TypeScript"
+  - "WebGL"
+  - "react-three-fiber"
+  - "ECharts"
+  - "Telemetry"
+  - "Data Pipeline"
+  - "Static Export"
+  - "Design Systems"
+  - "Testing"
+visibility: listed
+repoPublic: false
+---
+
+import Slider from '../../components/Slider.astro';
+
+**The tool.** Purple Stint takes two seasons of Formula 1 timing and telemetry, around 200 sessions, and publishes them as a static site: every page pre-rendered at build time, no API behind it, no runtime network calls. Each session gets nine views, from a results table through telemetry comparison to a 3D reconstruction of the lap. The analysis itself is written as plain TypeScript modules with no framework in them, so it is tested directly rather than through a browser: 334 unit tests against the real data on disk, and 43 Playwright tests against the built export, which is what a host would actually serve.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P1 - Session overview.png",
+    "alt": "Purple Stint — session overview with results and conditions",
+    "shot": true
+  }
+]} />
+
+**Placing a car from position, not distance.** The obvious way to animate a lap is to drive each car along its recorded distance travelled. Doing that produced cars that stuttered and, at times, jumped. The cause turned out to be measurable: consecutive distance fixes imply speeds ranging from 9 to 5 533 km/h, because the channel is accumulated and its errors accumulate with it. Rebuilding the animation from the position channel instead places every car within about 4 m of where it actually was, which is narrower than the track. The lap is then resampled with a clamped cubic Hermite so the pace is right at every knot and continuous in between: only about 45 samples survive decimation, and straight lines between them held a car at one average speed for two seconds at a time, up to 43 km/h away from its real pace.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P2 - Lap analysis.png",
+    "alt": "Lap analysis — multi-driver telemetry comparison and delta",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P2 - Telemetry channels.png",
+    "alt": "Telemetry channels — speed, throttle, brake, gear and RPM against lap distance",
+    "shot": true
+  }
+]} />
+
+**Reading a race, not a results table.** The progression view draws the race trace, every driver's gap to a selectable reference lap by lap, with pit stops, safety cars and virtual safety cars marked in place, so an undercut shows up as what it is: a gap that closes across two laps rather than a number in a column. The strategy view is a tyre-stint Gantt built as a custom ECharts series, with compound, stint length and tyre age per driver. The undercut view goes further and detects the pit battles automatically, pairing drivers whose gap swings across a stop and charting each one.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P3 - Race progression.png",
+    "alt": "Race progression — race trace with pit stop and safety car marks",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P4 - Strategy.png",
+    "alt": "Strategy — tyre stint Gantt by driver",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P5 - Undercut.png",
+    "alt": "Undercut detection — pit battles found from the gap swing across a stop",
+    "shot": true
+  }
+]} />
+
+**Time in the pit lane is not time stopped.** A pit stop as usually reported is the pit lane delta, entry to exit, which folds in the approach, the speed limit and the exit, and is mostly a property of the circuit. What a viewer wants is the time the car was stationary with the wheels off. That is not in the data, but it is recoverable from it: the out-lap speed trace runs to zero while the car is on the jacks, and the length of that zero is the stop. Applied across both seasons it resolves 873 of 1 216 stops, with a median of 2.56 s and a 5th percentile of 1.80 s. The 1.80 is the check that the method is sound rather than merely plausible: it is the world record, so the floor of the distribution lands exactly where physics puts it.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P5 - Pit stops.png",
+    "alt": "Pit stops — stop durations, pit lane delta versus stationary time",
+    "shot": true
+  }
+]} />
+
+**Everything in the scene is scaled from the data.** The circuit outline is fitted into a fixed box, so a world unit is 27 m at Jeddah and 10 m at Monaco, and every constant tuned by eye was right for exactly one circuit. The scene therefore derives its sizes rather than setting them: the road is a fixed share of the frame, and the car's width is derived from the road's, so about seven and a half cars fit across the track, as they do in reality. That relation cannot drift when someone adjusts the other, which it had twice, once to a car three times the width of its own lane and once to a car a third of what it should be, and neither is visible until you count. Measured off the rendered pixels afterwards: 404 px of road, 53 px of car, 7.6 abreast. Five cameras ride with the car. The onboard is placed off the model rather than by eye, on its own roll hoop, and is the one view with its own field of view: from there the front wheels fall 25° below the lens, and at the scene's 34° a tilt steep enough to catch them would be aimed at the tarmac. It runs at 62° instead, which is why a broadcast onboard is a wide lens. The car is a CC BY 4.0 model decimated from 267 632 to 14 019 triangles and baked into a 300 KiB binary, repainted per team from an instance colour buffer. The whole scene, road, kerbs, six cars and six telemetry ribbons, is six draw calls.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D onboard.png",
+    "alt": "Track 3D — onboard camera at 313 km/h with telemetry HUD",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D top.png",
+    "alt": "Track 3D — top camera showing car width against road width",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D free.png",
+    "alt": "Track 3D — free camera with speed ribbons over the circuit",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D chase.png",
+    "alt": "Track 3D — chase camera",
+    "shot": true
+  }
+]} />
+
+**Standings derived, not fetched.** Both championships are computed from the classifications on disk rather than taken from a standings API, which means they can be checked: across the 49 scoring sessions of a season the points awarded come to exactly 101 per race and 36 per sprint, and the win counts equal the calendar. The season page also carries the round-by-round history behind the table: points per round, finishing and qualifying positions, the championship bump chart, and every team-mate head-to-head. The ideal lap view reconstructs each driver's theoretical best from their own fastest sectors.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P8 - Season standings.png",
+    "alt": "Season standings — championship tables and team points share",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P6 - Ideal lap.png",
+    "alt": "Ideal lap — theoretical best reconstructed from best sectors",
+    "shot": true
+  }
+]} />
+
+**The data stops where the season does.** A telemetry export only holds weekends that have been run, and carries one date per event, the Sunday, recovered from the first race-control message. A calendar built on it alone ends at the last race, which on a season in progress reads as a season that finishes in September. So the fixture list comes from a second source and the two are merged: the calendar says what the rounds are and when each session starts, the export says what happened at the ones already run. A round is done only when the data has a race for it, and only then does it carry a winner, a pole or a link into its telemetry. Each card draws its circuit as a single path resampled from the same outline the 3D scene is built from. That second source is CC BY-NC-SA, non-commercial with a ShareAlike term, and it is the only such dependency in the project, so it is deliberately quarantined: one script writes it, one module reads it, and deleting its two files makes the page fall back to the rounds on disk without touching anything else. A test asserts that fallback, including that no session then claims a start time it cannot have.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P9 - Season calendar.png",
+    "alt": "Season calendar — rounds, countdown and circuit outlines",
+    "shot": true
+  }
+]} />
+
+**The qualifying cut-off, and how well it can be known.** A new view for qualifying sessions answers the question every fan asks on Saturday: what time do you need to get through? Each stage is estimated from the times available just before it — from practice, only the qualifying simulations, a lap on new softs, since the rest of practice is long runs and set-up work; then the k-th best Q1 time for Q2 and the best Q2 time for the pole — scaled by the gain the field usually makes by then. How many go through is read off the data, not assumed: 15 of 20 in 2025, 16 of 22 in 2026. Counting only the simulations halves the error against any lap at all, from 0.27 s to 0.155 s at the median, measured leave-one-out on the 27 conventional weekends so that no session grades itself.
+
+The honest finding is what the estimate *cannot* do. The day’s gain from practice to Q1 runs from −1.06 % to +0.37 % and nothing known before the session predicts it — practice evolution correlates 0.23, track temperature 0.03, and every regression tried was worse than the flat median; updating during Q1 from the laps set so far does not beat the pre-session estimate until the whole field has done a first run. Against a Q1 cut decided by 0.06 s on a typical weekend, the guess is a zone, not a number, and the page says so in seconds. What does hold is which side of the zone a driver sits on: over every weekend on disk, 95 % of drivers estimated quicker than the whole zone went through Q1 and 20 % of those estimated slower; from Q1 to Q2, 95 % and 3 %. So the view leads with three groups — safe, on the bubble, out — with those rates printed beside them and recomputed at build, and the estimated time takes second place. Madrid 2026, a circuit the field was still learning, is the extreme case: the cut fell 0.95 s past the estimate, and the groups still called 12 of the 13 safe drivers and 5 of the 6 marked out.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P12 - Cut-off Madrid.png",
+    "alt": "Cut-off — Madrid 2026: safe, on the bubble and out, with the measured rate beside each group",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P12 - Cut-off Hungary.png",
+    "alt": "Cut-off — Hungary 2025: the estimate 0.150 s from the cut, a normal miss",
+    "shot": true
+  }
+]} />
+
+**Watching a session as it runs.** A second way into the data: a live timing screen, a map and a panel of analysis that changes with the session. It reads Formula 1’s own timing feed through a small adapter that runs on one machine, or replays an exported session at real time so it can be lined up with a broadcast. That feed carries no licence, so the page is built and then *deleted* from the published export by the same script that reports the deployment’s size, and a test fails the build if the route ever survives it; what ships is the replay path and the analysis, both built from the Apache-2.0 data. The two sources meet at one frame format and one reducer, so the live tool and the replay share every line except the adapter — which is what lets the live path be tested at all: 52 tests drive it by folding whole real sessions off disk and checking the state against the session’s own classification.
+
+**Each session asks its own question.** Friday reads the long runs — stints between pit visits with at least five clean laps, with the median pace, the interquartile spread as consistency and the slope of the run as degradation — where clean means within 12 % of the stint’s best, a rule added after one cool-down lap put a 41 s lap inside a Friday run. Saturday carries the cut-off above, and beside it each car on a lap against the time that matters to it: inside the cut you chase P1, outside it the car on the cut, sector by sector. Sunday leads with the battles — consecutive cars within a second and a half, or closing fast enough to be soon, with the cumulative delta at each sector both have passed and the laps until the chaser arrives — and then the net order, where a stop’s worth of time is added to whoever still owes the mandatory change. What a stop costs is measured from the stops that race has already had rather than assumed: 20.2 s over 23 stops at Hungary 2025, against the 19 s of pit lane the site reports elsewhere. The session clock is derived the same way, from the moment the pit lane opened plus the regulation length, and refused where it cannot be trusted — a red-flagged qualifying stops the clock and nothing in the export says for how long, so Monaco 2025 offers a clock for Q3 and none for Q1 or Q2.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online practice.png",
+    "alt": "Online — practice: long runs with pace, spread and degradation, beside the qualifying simulations",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online qualifying.png",
+    "alt": "Online — qualifying at Monza: the Q2 flag has fallen and the last laps are still running; the estimated cut 1:22.473 against the 1:22.516 it took",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online race.png",
+    "alt": "Online — race: the order beside the circuit, and the battles with what the chaser is taking at each sector",
+    "shot": true
+  }
+]} />
+
+**The map was empty, and the measurement said so.** The circuit map looked broken and the first job was to find out why rather than to style it. Instrumented in a real browser it held 60 fps with no long tasks, and drew no car at all for twenty seconds at a stretch: the exported telemetry is one lap per driver, which over twenty cars is 41 % of a qualifying’s clock and 28 % of a race’s — fewer than one car on screen at any moment. So the map is driven from the timing instead, which is complete, and the telemetry is kept for the one thing timing cannot give: the shape of a lap. A car a third of the way through a lap in *time* is not a third of the way round in *distance*, and that relation is measured once off a real lap and every car placed through it. Checked against the telemetry it does not use, the placement lands 6 m from the truth at the median and 12 m at the ninetieth percentile on a qualifying lap, 7 m and 17 m on a race lap, on a 4.35 km circuit. A car whose telemetry is running is still drawn from it, solid; the rest are hollow, because an estimate should look like one.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online map.png",
+    "alt": "Online — the map: hollow cars placed from the timing, solid ones from their own telemetry, with the circuit's numbered corners",
+    "shot": true
+  }
+]} />
+
+**The harness was green and the feed was not.** The adapter had been built against a synthetic session and a replay of exported data, both of which passed. Pointing it at Formula 1’s own archive for the first time — one Friday practice, fetched by session key — turned up four faults, two of which would have been just as wrong in a live session. The archive’s per-session streams carry what *changed* while the session ran; who is driving, which session it is and which tyre each car is on are stated once, in files the replay never opened, so it sent lap times for car 81 without ever saying that is Piastri, and could not tell a practice from a race. The countdown to the flag is written hours:minutes:seconds and was going through a parser that reads one colon as minutes and rejects two, so the time left was never set at all. And no frame carried a time: the replay dropped the sample times it had just merge-sorted by, the live path never had any, and every frame arrived stamped zero, so nothing measured in session seconds could move. The harness had hidden both of those for different reasons: it sent no clock at all, so the parser was never asked the question; and it stamped its own frames with times, which neither real source does. It sends a clock now, the adapter stamps every frame itself, and a test holds each. Measured against that practice afterwards: the session names itself, twenty-two cars carry a compound, the clock runs, and sixteen drivers land in the practice baseline, which is the number the Q1 estimate needs.
+
+The pictures below are the synthetic session, not the real one, and that is the licence rule rather than a shortcut. The feed carries none, so its data is not published in any form — not in the build, not in a screenshot — and what a reader can be shown of the live half is the adapter, the session it names and the clock it runs.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P14 - Live adapter.png",
+    "alt": "Online — the adapter connected on the loopback, the session named from the feed, and the clock to the flag running",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P14 - Baseline sources.png",
+    "alt": "Online — the qualifying panel with no practice on disk, saying where the baseline can come from instead",
+    "shot": true
+  }
+]} />
+
+**Then a real race ran, and the live half was wrong in ways no test could have found.** Everything until now had been checked against a session on disk or a synthetic one. Watching an actual Grand Prix through the adapter turned up a cluster of faults with a single shape: the feed states a thing once and never repeats it. Over forty-five seconds of running it sent *two* positions and *three hundred* gaps, because a position is news only when it changes — so a screen opened after the subscription snapshot knew where nobody was running, and put a car lying eighteenth at the top. The leader was shown half a minute behind itself, because “no gap” is said by sending nothing and what was left over was the gap from when that car was still chasing. The adapter now keeps every timing line it has seen and replays the lot to each new arrival. The same reasoning fixed the pit window, which told a reader joining on lap thirty that nobody had stopped: the feed states each car’s stints, one at a time and by position, so they are merged by index rather than replaced. Joining a race at lap 48 now reads thirty-five stops across twenty cars.
+
+**A subscription that carries timing and nothing else.** The basic tier has no car positions, no telemetry and no circuit, which left the map permanently empty — and it cannot be fixed by trying harder, because the data is not there. What the feed does send is micro-sectors: each sector cut into fixed stretches of road, with a note of which ones a car has been through. That is a statement of track position that needs no lap time at all, and the circuit to put it on is already on disk from a session that has run, so the map is read from there and the cars placed by the furthest stretch they have lit. Counting *how many* are lit rather than *which* put the whole field on the start line, since the feed mentions one sector at a time.
+
+**Matching a broadcast means going backwards, which a queue cannot do.** The delay control held frames back, so raising it froze the screen for as long as the delay and lowering it let the screen catch up. It never showed an earlier moment, which is the entire purpose. It now keeps the last few minutes and rebuilds the view at whatever moment is asked for, forwards or back: 1,517 frames shown, 100 after going forty seconds back, 1,705 on returning. And the instruction beside it — nudge until a car crosses the line on both screens at once — was impossible to follow, because nothing on the page said when a car crossed the line. There is a light for that now.
+
+**And a box for the other kind of question.** The rest of the screen asks about the session — who is where, who is closing, what the cut will be. This one asks what a driver is doing with the car: pick any number of them and read their telemetry against the quickest lap of the session, which is always drawn whether or not it was picked, because it is the thing the others are being read against. Each driver is shown on their own fastest lap rather than a single named one, which is the lap the export actually carries. It is the lap pages’ own chart, so the channels, the synchronised crosshair and the colours are the same ones. Deferred only, and that is not an omission: live, there is no telemetry to draw.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P15 - Online with telemetry.png",
+    "alt": "Online — a qualifying in deferred: the circuit, the clock on its part, each car against the time that matters to it, and the telemetry box below",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P15 - Telemetry box.png",
+    "alt": "Online — four drivers' telemetry over a qualifying lap, each on their own quickest, against the best of the session",
+    "shot": true
+  }
+]} />
+
+**A qualifying clock, put back together when the session was stopped.** The export carries no session clock, so each part’s flag is its green light plus the regulation length — and for 41 of the 153 qualifying parts on disk that came out wrong, because the export also keeps a row for each car’s wait in the garage between parts, untimed and labelled with the part it started in. The test that holds is the one thing a running clock forbids: a flying lap starting after the flag. On it the parts split cleanly — 124 with the last flying lap before the flag, 6 within a minute after, none between one and four minutes, and 23 well past it, which are the real stoppages. Those are rebuilt rather than left blank: the last flying lap of a part starts a median 36 s before the flag, which puts the flag back, and the overrun is how long the clock stood still, laid into the longest stretch with nobody running. All 153 parts have a clock now, and the 23 rebuilt ones carry a tilde, because they are good to half a minute and not to the second.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P16 - Qualifying clock.png",
+    "alt": "How late the last flying lap of each qualifying part starts against its scheduled flag: 130 parts before or just after it, 23 well past it, the stoppages",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P16 - Monaco Q2 rebuilt.png",
+    "alt": "Online — Monaco 2025 Q2 in deferred, a part that was stopped, with its rebuilt clock marked as an estimate",
+    "shot": true
+  }
+]} />
+
+**The stutter was ours, and a profile said so in one run.** Deferred playback at 30× dropped to 53 frames a second with 18 long tasks in ten seconds. A CPU profile put a tenth of the time in a chart wrapper’s effect: three telemetry charts rebuilt from scratch ten times a second, because they were keyed on a list remade every tick and handed an option object built inline. Keyed on the best laps and built once per change, it is 59 frames and one long task. The same pass took the parked cars off the map. A car back in the garage stayed drawn where its lap would have ended, from three sources at once — telemetry that had stopped moving, micro-sectors that had stopped arriving, and a lap estimate that held a late car at the line — and each now lets go: telemetry still for ten seconds, micro-sectors silent for four times their usual gap, a lap more than 4 % overdue. And the screen says less: the cars on a lap are the ones on a push lap, four at most, with everyone else out on track named in a line beneath them.
+
+**Deleting a route from the export does not delete its code.** The live page is removed from the published build, but its JavaScript was still sitting in the static folder as a chunk no published page referred to — the live view, the adapter’s address, the radio player — downloadable by anyone who listed the deployment. The script that prunes the export now reads every chunk the build produces, removes any that carries the local-only code’s own words, and fails the build if a published page refers to one. That mattered because of what came next: the team radio of a session that has already run can be heard on this machine, in the Online page and beside a lap’s telemetry, streamed from Formula 1’s own servers and never stored. The archive is read through a rewrite that exists only in the development server — a static export has none — and the lap page loads the player through an import the production build compiles away, with the same check standing behind it. The radio is broadcast content, so it appears here as a sentence and not as a screenshot.
+
+**Colour as data, not decoration.** Every colour is a token in one stylesheet and no component may hold a literal, which a test enforces. Each of the eleven sections owns its own accent hue, and the hues are chosen by search rather than by taste: a sweep of the sRGB cube for the colour furthest in CIEDE2000 from all 53 already in use, meaning the other accents, the timing and compound semantics, and the 21 team colours the data carries. The most recent one came out at 6.03:1 contrast and ΔE00 17.35 from its nearest neighbour, against a spec minimum of 15. Team colours are reserved for identity and never reused as interface colour, because a series colour on a chart is data. The whole thing exports to 8 220 files at 41 % of Cloudflare Pages' file cap, with a median page of 130 KB and no page over 0.4 MB, and the build fails if either limit is crossed.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P10 - Circuits globe.png",
+    "alt": "Circuits — WebGL globe of the season calendar",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P11 - Mobile.png",
+    "alt": "The same tyre-strategy view at phone width",
+    "shot": true
+  }
+]} />
+
+**What it is not.** The site is unofficial and non-commercial, not associated with the Formula 1 companies, and carries that notice on every page. The calendar source is CC BY-NC-SA and the only non-permissive dependency in the project, which is why it is isolated and declared plainly rather than buried. One browser test is flaky, a draw-call assertion that fails roughly one run in three and passes on re-run, known and not yet fixed. The live-timing half of the project is not in the public repository and never will be, because it reads F1's own feed with a personal subscription.
+
+**The whole thing, in one pass.** A recorded walkthrough of the site as it is used: a session opened and compared lap by lap, the race read through its progression and strategy, the circuit driven from three of its five cameras, and then the season — standings, calendar and the globe. Rendered from the static export, so it is the site itself rather than a mock-up.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PurpleStint/walkthrough.mp4",
+    "poster": "/PurpleStint/walkthrough-poster.jpg",
+    "title": "Purple Stint — walkthrough"
+  }
+]} />

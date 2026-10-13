@@ -1,0 +1,72 @@
+---
+title: "Regenerative Braking"
+subtitle: "Energy recovery · CAT15x/16x"
+category: fs
+order: 3
+tags:
+  - "Energy Recovery"
+  - "Brake Blending"
+  - "Anti-Lockup"
+  - "SoC Management"
+  - "Hydraulic Sensors"
+  - "ROS"
+visibility: listed
+repoPublic: false
+---
+
+import Slider from '../../components/Slider.astro';
+
+The regenerative braking system is designed around a single non-negotiable constraint: the ideal braking force distribution curve must always be maintained. Every mode and configuration operates within this envelope, ensuring vehicle stability and predictable brake bias regardless of how the electrical and mechanical forces are combined.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P1 - IdealBrakeDistribution.png",
+    "alt": "Ideal braking force distribution curve Fr vs Ff"
+  }
+]} />
+
+In performance-oriented scenarios such as AutoX, mechanical and electrical braking work in parallel from the first brake input. Hydraulic pressure sensors on both brake circuits measure the driver's braking demand in real time, allowing the system to calculate the current mechanical braking torque. Electrical braking torque is then adjusted to complement it precisely, giving the driver full pedal sensitivity while maximizing deceleration. The combined force distribution stays on the ideal curve throughout the braking event.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P2 - ParallelBraking.png",
+    "alt": "Parallel braking — hydraulic, electrical and total rear force"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P2 - BrakeDistribution_Simulation.png",
+    "alt": "Brake distribution simulation — distribution on ideal curve and force breakdown"
+  }
+]} />
+
+When energy recovery is the priority, the system gives the driver an initial pedal travel handled entirely by the electric motors. Only when the electrical braking force is insufficient do the mechanical brakes engage, and both systems work in parallel again. This staging maximizes energy sent back to the battery on circuits where recovery matters more than peak deceleration, without the driver needing to change their braking technique.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - BrakingStrategies.png",
+    "alt": "Regenerative braking strategies — Regen-First vs Parallel Mode"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - RegenTorque_Limits.png",
+    "alt": "Maximum regenerative torque limits vs vehicle velocity"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - StateMachine.png",
+    "alt": "Regenerative brake state machine — Simulink implementation"
+  }
+]} />
+
+The system includes a wheel lockup prevention mechanism that compares individual wheel RPMs against the vehicle speed from the INS. If any wheel decelerates faster than physically consistent with the vehicle speed, electrical torque is reduced on that corner. A set of safety limits also monitors battery State of Charge and motor and inverter temperatures. If any threshold is exceeded, regenerative torque is progressively reduced with a smooth transition to pure mechanical braking so the driver is never caught off guard.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P4 - WheelTorque_Simulation.png",
+    "alt": "Per-wheel braking torque simulation — FL/FR/RL/RR"
+  }
+]} />

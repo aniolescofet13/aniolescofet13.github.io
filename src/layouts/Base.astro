@@ -1,0 +1,43 @@
+---
+import '../styles/global.css';
+import Nav from '../components/sections/Nav.astro';
+import Footer from '../components/sections/Footer.astro';
+import Lightbox from '../components/sections/Lightbox.astro';
+// Classic script, not a module: the markup calls its functions from onclick
+// attributes, so they have to live on window.
+import legacyJs from '../scripts/legacy.js?raw';
+
+interface Props {
+  title?: string;
+  description?: string;
+  // An unlisted project is reachable by link only. If a search engine indexed
+  // its page, it would stop being unlisted.
+  noindex?: boolean;
+}
+const {
+  title = 'Aniol Escofet — Industrial Engineer',
+  description = 'Automotive engineer working on vehicle dynamics, control systems and performance simulation.',
+  noindex = false,
+} = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+<meta name="description" content={description}>
+{noindex && <meta name="robots" content="noindex, nofollow">}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
+</head>
+<body>
+<Nav />
+<slot />
+<Footer />
+<Lightbox />
+<script is:inline set:html={legacyJs}></script>
+</body>
+</html>

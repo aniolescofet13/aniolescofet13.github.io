@@ -1,0 +1,37 @@
+---
+title: "STARK System Tool"
+subtitle: "STARK Future S.L. · 1D Vehicle Simulation"
+category: pro
+order: 4
+tags:
+  - "MATLAB"
+  - "Simulink"
+  - "System Engineering"
+  - "EV Powertrain"
+  - "Thermal Modelling"
+visibility: listed
+repoPublic: false
+---
+
+import Slider from '../../components/Slider.astro';
+
+Built the core simulation tool for STARK’s motorcycle lineup: a full 1D model of battery, inverter, motor, gearbox, chassis and environment. Engineers vary models and characteristics to evaluate consumption, losses, acceleration, top speed and thermals — essentially everything needed to dimension a motorcycle before it exists.
+
+The chain runs end to end in one dimension. The battery feeds the inverter, the inverter the motor, the motor the gearbox and the gearbox the wheel, with the environment — gradient, ambient temperature, wind and rider demand — imposed on the parts that feel it, and speed and load closing the loop back up the chain. Every stage reports its own losses, and each of those losses lands in a thermal network, so temperature is not a study run afterwards but a state that feeds straight back into efficiency and into the continuous limits. That is the part that decides whether a bike that is fast for one lap is still fast for twenty.
+
+What comes out is grouped rather than singular: power at every node and the loss split between them; energy over a cycle, including what comes back under recuperation; and temperature at the winding, the junction, the cell and along the coolant path, together with the time it takes to reach a limit. The dimensioning questions reduce to those channels — acceleration, top speed, gradeability, range, and continuous against peak capability — each answered as a function of the component set chosen.
+
+The two drawings below are the architecture and the channel groups. They are topology only: no parameters, no characteristics and no results.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "STARK Future/P1 - System architecture.png",
+    "alt": "Architecture — battery to road, with every loss term routed into a thermal network"
+  },
+  {
+    "type": "image",
+    "src": "STARK Future/P2 - Computed quantities.png",
+    "alt": "Channel groups the model reports — power, energy and thermal"
+  }
+]} />
