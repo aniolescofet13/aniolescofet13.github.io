@@ -5,6 +5,11 @@ backend:
   repo: aniolescofet13/aniolescofet13.github.io
   branch: main
 
+# The live site, for the "Visit Live Site" link and each project's
+# "View on Live Site" button (see preview_path below).
+site_url: https://aniolescofet13.github.io
+display_url: https://aniolescofet13.github.io
+
 # Images uploaded through the editor, kept apart from the project folders.
 media_folder: src/assets/uploads
 public_folder: /src/assets/uploads
@@ -18,7 +23,11 @@ collections:
     format: yaml-frontmatter
     create: true
     slug: "{{slug}}"
-    summary: "{{title}}  ·  {{visibility}}"
+    # Each project's own page, the link to send for a single project. The list
+    # shows it, and the editor's "View on Live Site" opens it. It works for
+    # listed and unlisted projects; a hidden one has no page.
+    preview_path: "projects/{{slug}}/"
+    summary: "{{title}}  ·  {{visibility}}  ·  aniolescofet13.github.io/projects/{{slug}}/"
     sortable_fields: [title, category, order, visibility]
     fields:
       # --- what is shown, and where the code lives ---
@@ -28,8 +37,10 @@ collections:
         default: listed
         hint: >-
           Unlisted keeps the project off the portfolio but gives it its own
-          page, /projects/<name>/, for sending to one person. It stays out of
-          search engines. Hidden publishes nothing.
+          page, for sending to one person. It stays out of search engines.
+          Hidden publishes nothing. The link to share is in the project list,
+          and "View on Live Site" in the editor opens it. A change goes live
+          about two minutes after saving.
         options:
           - { label: "Listed — on the portfolio", value: listed }
           - { label: "Unlisted — own page only, for a direct link", value: unlisted }

@@ -29,9 +29,12 @@ const slides = await Promise.all(
   items.map(async (it) => {
     if (it.type !== 'image') return it;
     const meta = resolveImage(it.src);
-    const shownW = Math.round(SLIDE_H * (meta.width / meta.height));
-    const widths = [...new Set([shownW, shownW * 2].map((w) => Math.min(w, meta.width)))];
-    const full = await getImage({ src: meta, width: Math.min(meta.width, FULL_W), format: 'webp' });
+    // Read the size from `clone`: touching meta.width directly marks the
+    // original as used, and Astro then ships the full-size file as well.
+    const { width, height } = meta.clone;
+    const shownW = Math.round(SLIDE_H * (width / height));
+    const widths = [...new Set([shownW, shownW * 2].map((w) => Math.min(w, width)))];
+    const full = await getImage({ src: meta, width: Math.min(width, FULL_W), format: 'webp' });
     return { ...it, meta, widths, sizes: `${shownW}px`, full: full.src };
   }),
 );
