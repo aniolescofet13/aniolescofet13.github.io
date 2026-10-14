@@ -13,8 +13,6 @@ visibility: listed
 repoPublic: false
 ---
 
-import Pdf from '../../components/Pdf.astro';
-
 TrustDrive / Aura is a research prototype exploring how adaptive HMI design can support trust calibration in SAE Level 3 autonomous vehicles. Developed as a group capstone for the Advanced Human Machine Interfaces course at Politecnico di Milano, the project addresses a structural problem inherent to L3 automation: while the vehicle handles all lateral and longitudinal control, the driver must remain ready to retake control on demand. This creates the Out-of-the-Loop (OOTL) syndrome, where cognitive disengagement from the driving task makes safe handover costly in situational awareness and reaction time. The central design question was how to build trust gradually, so that drivers feel genuinely confident relying on the system over time rather than just tolerating it.
 
 The answer is Aura, a personalized, voice-driven in-car interface that models each driver across five behavioral dimensions and adapts its communication style, timing, and information density accordingly. The interaction covers the full journey lifecycle: an indirect onboarding interview establishes a driver profile before the first drive; a proactive suggestion overlay invites highway automation with personalized benefit messaging; voice commands allow real-time queries during the automated phase; a three-stage Takeover Request (TOR) sequence reconstructs situational awareness progressively rather than through a sudden alert; and a post-drive feedback screen refines the profile over repeated sessions. Every system decision is surfaced with an explanation, applying Explainable AI (XAI) principles to help each driver build an accurate mental model of what the system can and cannot do.

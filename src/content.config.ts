@@ -13,7 +13,7 @@ const projects = defineCollection({
     // a gap in the numbering.
     order: z.number().int(),
     tags: z.array(z.string()).default([]),
-    badge: z.string().optional(),
+    badge: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.string().optional()),
 
     // listed   — on the portfolio
     // unlisted — not on the portfolio, but its own page exists for a direct link
@@ -22,7 +22,9 @@ const projects = defineCollection({
 
     // Independent of visibility. The GitHub icon only appears when the repo is
     // public: a link to a private one is a 404 for anyone who follows it.
-    repo: z.url().optional(),
+    // The CMS writes an empty field as '', which is not a URL. Without this,
+    // saving a project with no repo from /admin would break the build.
+    repo: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.url().optional()),
     repoPublic: z.boolean().default(false),
   }),
 });

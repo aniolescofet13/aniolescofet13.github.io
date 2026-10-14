@@ -13,8 +13,6 @@ visibility: listed
 repoPublic: false
 ---
 
-import Slider from '../../components/Slider.astro';
-
 Built the core simulation tool for STARK’s motorcycle lineup: a full 1D model of battery, inverter, motor, gearbox, chassis and environment. Engineers vary models and characteristics to evaluate consumption, losses, acceleration, top speed and thermals — essentially everything needed to dimension a motorcycle before it exists.
 
 The chain runs end to end in one dimension. The battery feeds the inverter, the inverter the motor, the motor the gearbox and the gearbox the wheel, with the environment — gradient, ambient temperature, wind and rider demand — imposed on the parts that feel it, and speed and load closing the loop back up the chain. Every stage reports its own losses, and each of those losses lands in a thermal network, so temperature is not a study run afterwards but a state that feeds straight back into efficiency and into the continuous limits. That is the part that decides whether a bike that is fast for one lap is still fast for twenty.

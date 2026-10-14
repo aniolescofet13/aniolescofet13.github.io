@@ -18,8 +18,6 @@ visibility: listed
 repoPublic: false
 ---
 
-import Slider from '../../components/Slider.astro';
-
 **The tool.** Purple Stint takes two seasons of Formula 1 timing and telemetry, around 200 sessions, and publishes them as a static site: every page pre-rendered at build time, no API behind it, no runtime network calls. Each session gets nine views, from a results table through telemetry comparison to a 3D reconstruction of the lap. The analysis itself is written as plain TypeScript modules with no framework in them, so it is tested directly rather than through a browser: 337 unit tests against the real data on disk, and 43 Playwright tests against the built export, which is what a host would actually serve.
 
 <Slider items={[
