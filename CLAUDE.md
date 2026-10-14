@@ -29,6 +29,10 @@ repoPublic: true            # true puts a GitHub link on the card
   - `unlisted` — off the portfolio, but its own page exists for a direct link.
     That page carries `noindex`, so it stays out of search engines.
   - `hidden` — not published at all.
+- Every project that is not hidden has its own page, `/projects/<slug>/`, the
+  link to send for a single project. That page has no menu and no link back
+  to the portfolio, on purpose: whoever gets the link sees that project only.
+  Do not add navigation to it.
 - `repo` and `repoPublic` are independent of visibility. Only set
   `repoPublic: true` for a public repository: a link to a private one is a 404
   for anyone who follows it.

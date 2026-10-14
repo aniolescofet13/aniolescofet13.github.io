@@ -1,3 +1,13 @@
 ---
+interface Props {
+  // Off on a project sent on its own: the name stays as a header, but nothing
+  // leads from there to the rest of the portfolio.
+  links?: boolean;
+}
+const { links = true } = Astro.props;
 ---
+{links ? (
 <nav id="navbar"><div class="nav-inner"><a class="nav-logo" href="/">Aniol <span>E.</span></a><button aria-label="Menu" class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')"><span></span><span></span><span></span></button><ul class="nav-links"><li><a href="/#about">About</a></li><li><a href="/#experience">Experience</a></li><li><a href="/#projects">Projects</a></li><li><a href="/#skills">Skills</a></li><li><a href="/#contact">Contact</a></li></ul></div></nav>
+) : (
+<nav id="navbar"><div class="nav-inner"><span class="nav-logo">Aniol <span>E.</span></span></div></nav>
+)}

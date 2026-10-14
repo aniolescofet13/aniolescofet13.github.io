@@ -162,7 +162,4 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 
 /* A project on its own page, for sending a single piece of work */
 .project-page{max-width:var(--max-w);margin:0 auto;padding:110px 32px 70px}
-.back-link{display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.66rem;
-  text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);text-decoration:none}
-.back-link:hover{color:var(--accent)}
 .project-page .project-card{transform:none}

@@ -13,11 +13,15 @@ interface Props {
   // An unlisted project is reachable by link only. If a search engine indexed
   // its page, it would stop being unlisted.
   noindex?: boolean;
+  // A page sent on its own, such as a single project: no menu, so it does not
+  // open onto the rest of the portfolio.
+  standalone?: boolean;
 }
 const {
   title = 'Aniol Escofet — Industrial Engineer',
   description = 'Automotive engineer working on vehicle dynamics, control systems and performance simulation.',
   noindex = false,
+  standalone = false,
 } = Astro.props;
 ---
 <!doctype html>
@@ -34,7 +38,7 @@ const {
 <noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
 </head>
 <body>
-<Nav />
+<Nav links={!standalone} />
 <slot />
 <Footer />
 <Lightbox />

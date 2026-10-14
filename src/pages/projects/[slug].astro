@@ -6,6 +6,8 @@ import { labelFor } from '../../lib/projects';
 
 // One page per project you can send on its own. Hidden projects get no page
 // at all; unlisted ones get a page but stay off the portfolio and out of search.
+// The page has no menu and no link back, so whoever gets the link sees this
+// project only.
 export async function getStaticPaths() {
   const all = await getCollection('projects');
   return all
@@ -17,9 +19,8 @@ const { project } = Astro.props;
 const { label, anchor } = await labelFor(project);
 const unlisted = project.data.visibility === 'unlisted';
 ---
-<Base title={`${project.data.title} — Aniol Escofet`} description={project.data.subtitle} noindex={unlisted}>
+<Base title={`${project.data.title} — Aniol Escofet`} description={project.data.subtitle} noindex={unlisted} standalone>
 <section class="project-page">
-  <a class="back-link" href="/#projects">← Aniol Escofet · all projects</a>
   <ProjectCard project={project} label={label} anchor={anchor} open />
 </section>
 </Base>
