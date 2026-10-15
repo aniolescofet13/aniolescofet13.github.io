@@ -150,6 +150,23 @@ A Python lap time simulation and vehicle analysis platform designed to support a
   }
 ]} />
 
+**Checked on a car I know.** The Formula Student Electric preset is my former team's car, built from the team's own data and then checked, not tuned, against its two best autocross runs at Formula Student Germany 2026: the logged GPS line as the track, the car launched from rest. The model lands within 0-2 % of both times. With the logged speed imposed instead, every other channel is derived and laid over the logs: lateral and longitudinal acceleration, motor speed, battery power, which correlates at 0.98, and the lap's net battery energy, within 2 %. Getting there was the useful part, because each fix was a measurement rather than a fudge: a track smoothing sized for Grand Prix circuits that flattened the slalom and was worth 12 % of the lap on its own, a tyre scaling factor left out of the fit, power channels that missed the tyre scrub the solver already charged, and a fixed draw of a few kilowatts, the low-voltage system through the DC-DC, pumps and inverters at idle, that the electric chain carries on top of its losses. The team's data stays private; the figures show the comparison, not the car's parameters.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Validation channels.png",
+    "alt": "The Formula Student Electric model against its FSG 2026 autocross run: speed, lateral and longitudinal acceleration, battery power and energy along the course",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Validation map.png",
+    "alt": "The autocross course coloured by where the model is quicker or slower than the car, and the g-g diagram of the car against the model",
+    "shot": true
+  }
+]} />
+
 **The application.** The simulator runs as a FastAPI service behind a React front end, in seven screens: a garage where the car is built subsystem by subsystem with live capability curves, a track browser, the lap and race runner, a signal explorer, a 3D replay, a parameter sweep streamed over a WebSocket, and telemetry validation. A qualifying lap solves in about 0.05 s, and the heaviest configuration, with every thermal, wear and energy feedback enabled, in about 6 s. That is down from 66 s before the interpolation tables were cached: profiling found the solver constructing 231,000 spline interpolators per lap.
 
 <Slider items={[
