@@ -68,6 +68,12 @@ provided to every project.
   a dark slide; without it a dark image looks like a hole in the light page.
   Leave it off for light figures and diagrams.
 - Keep the voice of the existing cards: a bold lead-in, then the mechanism.
+- No development history: no commits, start dates, how long something took,
+  lines of code or test counts.
+- No figures that go stale whenever a tool is updated: counts of sessions,
+  files, screens, data points, library versions. Say it in words instead
+  ("every session of the seasons it covers"). Engineering results that prove
+  the work, such as a model fit or a lap time against a real run, stay.
 
 ## Where files go
 
