@@ -195,6 +195,52 @@ A Python lap time simulation and vehicle analysis platform designed to support a
   }
 ]} />
 
+**And on a car everyone knows.** The Formula 1 preset is checked against one car only, Verstappen's 2026 Suzuka qualifying lap (1:30.262) from the public timing data, because no two Formula 1 cars are alike. The same two questions, in the same order. With his speed imposed, the engine speed follows the log within 34 rpm on average and the gear matches on 84 % of the lap, once the gear ratios were measured on that lap and the engine curve shaped by the fuel-flow limits of the 2026 power-unit rules. Lateral acceleration correlates at 0.95 with an estimate from the car's position, and the brake pedal agrees with the model on 94 % of the lap. Below 300 km/h the power the speed trace needs stays under the model's engine-plus-ERS ceiling, and on a third of the time he is flat out it is under what the engine alone gives: the 2026 car recharging its battery at full throttle.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow channels.png",
+    "alt": "Shadow mode on Verstappen's Suzuka qualifying lap: engine speed, gear, lateral acceleration, wheel power and brake, model against telemetry along the lap",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow parity.png",
+    "alt": "Lateral acceleration and gear, model against telemetry point by point",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow power.png",
+    "alt": "The wheel power the lap needs at full throttle against the model's engine and ERS ceiling, by speed",
+    "shot": true
+  }
+]} />
+
+**How close the lap gets.** Driving the lap itself, on the circuit's reference racing line, the model sets 1:29.962, 0.30 s under Verstappen. The sectors are further apart than the lap, and the figures show why: the model spends its electrical energy as fast as the rules allow from the first straight, where a real car saves it for the back straight, 288 km/h there against his 328, and through the esses it has less grip than he uses. An energy-deployment strategy and the medium-speed grip are the next model changes.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance lap.png",
+    "alt": "Speed along the lap, Verstappen against the model, the time the model gains and the model's ERS store",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance sectors.png",
+    "alt": "Sector times and lap time, Verstappen against the model",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance map.png",
+    "alt": "Suzuka coloured by where the model is quicker or slower than Verstappen, and the g-g diagram of both",
+    "shot": true
+  }
+]} />
+
 **The application.** The simulator runs as a FastAPI service behind a React front end, across its screens: a garage where the car is built subsystem by subsystem with live capability curves, a track browser, the lap and race runner, a signal explorer, a 3D replay, a parameter sweep streamed over a WebSocket, and telemetry validation. A qualifying lap solves in about 0.05 s, and the heaviest configuration, with every thermal, wear and energy feedback enabled, in about 6 s. That is down from 66 s before the interpolation tables were cached: profiling found the solver constructing 231,000 spline interpolators per lap.
 
 <Slider items={[
