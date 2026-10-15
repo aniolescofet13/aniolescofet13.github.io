@@ -150,13 +150,19 @@ A Python lap time simulation and vehicle analysis platform designed to support a
   }
 ]} />
 
-**Checked on a car I know.** The Formula Student Electric preset is my former team's car, built from the team's own data and then checked, not tuned, against its two best autocross runs at Formula Student Germany 2026: the logged GPS line as the track, the car launched from rest. The model lands within 0-2 % of both times. With the logged speed imposed instead, every other channel is derived and laid over the logs: lateral and longitudinal acceleration, motor speed, battery power, which correlates at 0.98, and the lap's net battery energy, within 2 %. Getting there was the useful part, because each fix was a measurement rather than a fudge: a track smoothing sized for Grand Prix circuits that flattened the slalom and was worth 12 % of the lap on its own, a tyre scaling factor left out of the fit, power channels that missed the tyre scrub the solver already charged, and a fixed draw of a few kilowatts, the low-voltage system through the DC-DC, pumps and inverters at idle, that the electric chain carries on top of its losses. The team's data stays private; the figures show the comparison, not the car's parameters.
+**Checked on a car I know.** The Formula Student Electric preset is my former team's car, built from the team's own data and checked, not tuned, against its four autocross runs at Formula Student Germany 2026. The check answers two questions in order. First, is the model right? Each run's logged line and speed are imposed, and the model derives everything else: lateral and longitudinal acceleration, motor speed and battery power follow the logs, battery power correlating at 0.98, and the net battery energy of the clean runs lands within 1-3 %. Only then, what was left on the table? The solver drives the same line from a standing start, as a flawless driver would: on the best run, 83.7 s against the 85.4 s driven. Getting there was the useful part, because each fix was a measurement rather than a fudge: a track smoothing sized for Grand Prix circuits that flattened the slalom and was worth 12 % of the lap on its own, a tyre scaling factor left out of the fit, power channels that missed the tyre scrub the solver already charged, and a fixed draw of a few kilowatts, the low-voltage system through the DC-DC, pumps and the inverters' fixed losses, on top of the drive chain's losses. The team's data stays private; the figures show the comparison, not the car's parameters.
 
 <Slider items={[
   {
     "type": "image",
     "src": "LapTime/P7 - FSE Validation channels.png",
     "alt": "The Formula Student Electric model against its FSG 2026 autocross run: speed, lateral and longitudinal acceleration, battery power and energy along the course",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Validation runs.png",
+    "alt": "Each of the four autocross runs as driven, against the model driving the same line from a standing start",
     "shot": true
   },
   {
