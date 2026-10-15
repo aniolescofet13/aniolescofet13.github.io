@@ -143,12 +143,10 @@ footer{text-align:center;padding:32px;border-top:1px solid var(--border);font-fa
 /* --- Added in the Astro migration --- */
 
 /* Source-code link, next to the title so it shows on a folded card too */
-.pcard-head:has(.repo-link){padding-right:118px}
-.repo-link{position:absolute;top:2px;right:44px;display:inline-flex;align-items:center;gap:6px;
-  font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--text-muted);text-decoration:none;border:1px solid var(--border);border-radius:2px;
-  padding:5px 9px;background:var(--surface);transition:.2s}
-.repo-link:hover{color:var(--accent);border-color:var(--accent)}
+.pcard-head:has(.repo-link){padding-right:84px}
+.repo-link{position:absolute;top:0;right:44px;display:inline-flex;padding:2px;
+  color:var(--text-muted);border-radius:50%;transition:color .2s,transform .2s}
+.repo-link:hover{color:var(--accent);transform:translateY(-1px)}
 @media(max-width:600px){.pcard-head:has(.repo-link){padding-right:46px}
   .repo-link{position:static;margin-top:12px}}
 
