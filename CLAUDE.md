@@ -20,7 +20,6 @@ tags:
 badge: "Grade: 10/10"       # optional
 visibility: listed          # listed · unlisted · hidden
 repo: https://github.com/aniolescofet13/lap-time   # optional
-repoPublic: true            # true puts a GitHub link on the card
 ---
 ```
 
@@ -33,9 +32,10 @@ repoPublic: true            # true puts a GitHub link on the card
   link to send for a single project. That page has no menu and no link back
   to the portfolio, on purpose: whoever gets the link sees that project only.
   Do not add navigation to it.
-- `repo` and `repoPublic` are independent of visibility. Only set
-  `repoPublic: true` for a public repository: a link to a private one is a 404
-  for anyone who follows it.
+- `repo` is independent of visibility. The GitHub icon appears on the card by
+  itself when the repository is public: the build asks GitHub, and the site
+  rebuilds every six hours, so making a repo public is all it takes. A private
+  repo shows no icon.
 - The label on the card (`PP — 01` …) is **computed** from the project's
   position among the listed ones, so hiding a project never leaves a gap. Do not
   try to set it.

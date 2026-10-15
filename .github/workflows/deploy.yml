@@ -5,6 +5,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Rebuild every six hours as well, so a repository made public on GitHub
+  # gets its icon on the card without anyone touching the portfolio.
+  schedule:
+    - cron: '17 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -26,6 +30,10 @@ jobs:
       # Builds with the lockfile and uploads dist/ as the Pages artifact.
       # Astro 7 needs Node 22.12+; 24 matches local development.
       - uses: withastro/action@v6
+        # The build asks GitHub which project repositories are public; the
+        # workflow's own token lifts the API rate limit for that.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           node-version: 24
           package-manager: npm

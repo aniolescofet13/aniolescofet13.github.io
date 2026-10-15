@@ -49,14 +49,10 @@ collections:
         label: Repository URL
         widget: string
         required: false
-        hint: For example https://github.com/aniolescofet13/lap-time
-      - name: repoPublic
-        label: Repository is public
-        widget: boolean
-        default: false
         hint: >-
-          Shows a GitHub link on the card. Leave it off for a private repo:
-          the link would be a 404 for anyone who follows it.
+          For example https://github.com/aniolescofet13/lap-time. The GitHub
+          icon appears on the card by itself once the repository is public;
+          the site checks every few hours.
 
       # --- the card ---
       - { name: title, label: Title, widget: string }

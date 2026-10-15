@@ -10,7 +10,6 @@ tags:
   - "CAN Bus"
   - "ROS"
 visibility: listed
-repoPublic: false
 ---
 
 The traction control system is implemented as a speed controller running directly inside the inverter, rather than at the Processing Unit level. This is a deliberate architectural choice: the CAN-ROS communication link between the PU and the inverters runs at 50 Hz, which is too slow to react to wheel slip transients effectively. By pushing the control loop inside the inverter, which runs at a significantly higher frequency, the system responds to slip events before they can develop, without being bottlenecked by communication latency.
