@@ -12,6 +12,8 @@ tags:
   - "Data Collection"
   - "Open Data"
   - "Financial Modelling"
+  - "Tax Modelling"
+  - "Web Crypto"
   - "Testing"
 visibility: unlisted
 repo: https://github.com/aniolescofet13/rendibilitat-immobiliaria
@@ -247,3 +249,189 @@ repo: https://github.com/aniolescofet13/rendibilitat-immobiliaria
 ]} />
 
 <Note>Data: <a href="https://www.geonames.org/" rel="noreferrer noopener" target="_blank">GeoNames</a> and <a href="https://insideairbnb.com/" rel="noreferrer noopener" target="_blank">Inside Airbnb</a>, both licensed <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC BY 4.0</a>. Income, census and tourist-home statistics from <a href="https://www.ine.es/" rel="noreferrer noopener" target="_blank">INE</a>. Places and map data © <a href="https://www.openstreetmap.org/copyright" rel="noreferrer noopener" target="_blank">OpenStreetMap contributors</a> (ODbL). Map tiles by <a href="https://openfreemap.org/" rel="noreferrer noopener" target="_blank">OpenFreeMap</a>, © <a href="https://www.openmaptiles.org/" rel="noreferrer noopener" target="_blank">OpenMapTiles</a>.</Note>
+
+**A second part: the family estate.** Beyond finding flats to buy, the tool keeps a private book of one family's estate: who owns each property and in what share, what each one earns, what the loans still owe, and what all of it means in tax, this year, on a planned sale and at an inheritance decades from now. It is written to prepare the family's conversations with their tax adviser, not to replace them, and it opens only for an allow-listed account.
+
+**Encrypted before it leaves the browser.** The book is encrypted in the browser with a passphrase, under a key derived with PBKDF2 and AES-GCM, so the database only ever holds ciphertext, and so does the backup file the book can be downloaded as. Nothing on the server can read it, and a forgotten passphrase cannot be recovered. Each save is kept as a version, and the book locks itself after 15 minutes without use.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F01 - Book.png",
+    "alt": "The family book: five people, each with their age, pension or salary and the properties they own",
+    "shot": true
+  }
+]} />
+
+**People and properties.** Each person carries what the taxes need: year of birth, salary or pension, savings, a pension plan, dependants and the deductions that apply. A salary is broken down into the employee's social security contributions and what the employer pays on top. Each property has its owners, their shares and whether they hold full ownership or a usufruct, its cadastral value and the land's part of it, what it cost, what it is worth, its yearly expenses and its tenancy. The tenancy decides the income tax reduction on the rent, which under the 2023 housing law depends on when the contract was signed and, for a new one, on whether the rent went down in a stressed market. For the values, the Cadastre is looked up by address or cadastral reference, and the Housing Ministry's average appraised value per square metre, quarter by quarter, since 1995 for each province and since 2005 for the larger municipalities, gives an estimate of what a home is worth and, worked backwards to the year it was bought, of what it cost when nobody remembers.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F02 - Payslip.png",
+    "alt": "A salary broken down: the employee's contributions, the pay before income tax and what the employer pays on top",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F03 - Properties.png",
+    "alt": "The family's properties: a home, let flats, a shop, the eldest son's flat and a rural plot, with their owners",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F04 - Property values.png",
+    "alt": "A let flat: owners, cadastral and market values, and the Housing Ministry's average appraisal for Barcelona applied to its floor area",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F05 - Rent reduction.png",
+    "alt": "A new tenancy in a stressed market with the rent lowered from 900 to 850 euros a month: a 90 % income tax reduction",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F07 - Loan.png",
+    "alt": "A mortgage: monthly payment, amount outstanding, and this year's interest and principal",
+    "shot": true
+  }
+]} />
+
+**A planned sale.** A property can carry a planned sale, with its price, date and costs. The tool works out the gain owner by owner: the price less the selling costs and the municipal tax, against what it cost less the depreciation of every year it was let, and from there the extra income tax and the municipal tax on the land. It notes the tenant's right of first refusal when the flat is let, and the exemption for owners over 65 who put the proceeds into a life annuity. A sale that falls before the inheritance date reaches the inheritance as the cash left, not as the flat.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F06 - Sale.png",
+    "alt": "A planned sale: for each owner, the transfer and purchase values, the gain, the extra income tax and what is left",
+    "shot": true
+  }
+]} />
+
+**Income tax and wealth tax.** Each person's income tax for the year is worked out in full: the state and Catalan scales, the savings base, the personal allowances, rental income net of expenses and depreciation with its reduction, and the pension plan. For a married couple it compares filing individually and jointly. Every figure opens into the steps behind it. Wealth tax follows, with Catalonia's scale and allowance, the exemption for the main home, the debts, the cap that ties it to income tax and the state solidarity tax on large fortunes, and a home left empty gets a warning where the council surcharges its property tax. A decree-law still awaiting ratification changes some of these figures, so it is a switch, and every tab can be read with it or without it.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F08 - Income tax.png",
+    "alt": "Income tax for each person: what is left a year, the tax and the gross income, and the couple's individual and joint returns compared",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F09 - Income tax detail.png",
+    "alt": "How one person's income tax is calculated, step by step",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F10 - Wealth tax.png",
+    "alt": "Wealth tax: each person's assets and debts, the main-home exemption, the allowance and the tax due",
+    "shot": true
+  }
+]} />
+
+**The inheritance, years ahead.** What matters is not the inheritance today but in twenty-five years, so the scenario takes who dies and when, and an assumed yearly revaluation of the properties, and carries everything to that date: the values, what the loans will still owe, the savings and the sales planned before it. The surviving spouse can keep a life interest in everything while the children take the bare ownership, as most Catalan wills provide. Each heir's Catalan inheritance tax then runs through its steps: the kinship reduction, the 95 % reduction for the family home, the scale, and the relief that depends on how much each one receives. By then the children will probably own more than €500,000 themselves, which multiplies their tax by 1.1, so that is a switch too. Each urban property also pays the municipal tax on the increase in land value, and that one is set by each town hall: the ordinances of the main Catalan municipalities are loaded with their rates and their reliefs, which differ in whose home it must have been, how long the heirs must keep it and whether the relief depends on the cadastral value or on the heir's income. Giving a property away during life can be compared with leaving it.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F11 - Inheritance.png",
+    "alt": "The inheritance scenario: who dies, when, the yearly revaluation, the spouse's life interest and the switch for heirs with their own wealth",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F12 - Estate.png",
+    "alt": "What the estate holds: each property's share, its declared and taxable value, and its municipal tax",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F13 - Municipal tax.png",
+    "alt": "The municipal tax of each town: rate, relief for the family home and for the rest, and the conditions of its ordinance",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F14 - Inheritance tax.png",
+    "alt": "One heir's inheritance tax, from the taxable base through the reductions and the scale to the relief and the amount due",
+    "shot": true
+  }
+]} />
+
+**In their own name or through a company.** The same properties can stay with the family or move into a company, and the comparison runs to the inheritance date: what moving them in costs, what the family keeps each year after corporation or income tax, the inheritance and municipal tax at the end, and the gain left latent inside the company. Two kinds of company are compared, a passive holding and one with a full-time employee that can qualify as a family business, whose shares then get a 95 % reduction at inheritance. Large-holder status, which changes the letting rules, is checked as well. For this invented family, keeping the flats in their own name comes out well ahead.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F15 - Company.png",
+    "alt": "Which properties would go into a company, how it would run, and what reaches the family each year",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F16 - Company vs inheritance.png",
+    "alt": "Own name, holding company or family business up to the inheritance: entry cost, yearly income, inheritance and municipal tax, and latent tax",
+    "shot": true
+  }
+]} />
+
+**Mortgages and retirement.** How much a bank would lend any member of the family for a home at a given price, from 35 % of net income and 80 % of the value, criteria that are banks' practice rather than law and so stay editable, the cash needed after transfer tax and costs, and how much could be raised against a flat already paid for. Retirement shows when each person can retire and whether a pensioner is entitled to the minimum-pension top-up, or loses it because of the rents.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F17 - Mortgage.png",
+    "alt": "Buying with a mortgage: the largest loan, the monthly payment and the cash needed for a flat at 285,000 euros",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F18 - Retirement.png",
+    "alt": "Retirement: each pension against the minimum, the other income that removes the top-up, and the children's retirement ages",
+    "shot": true
+  }
+]} />
+
+**The land.** A rural plot that may be rezoned for building is the hardest asset to value. Its worth once rezoned comes from the static residual method: the buildable floor area, less the share ceded to the council, split between free-market and protected housing and sold at the expected prices, less the developer's margin, the construction and the urbanisation works. The family's options are then compared by what each would leave them, and when: sell it now as rural land, wait for the rezoning and sell, urbanise it and sell the plots, swap it for a share of the flats built on it, put it into a company first, or inherit it before or after the rezoning. Each option lists its taxes, its timeline and the questions for the adviser, and when the inheritance date falls after the rezoning, the inheritance counts the plot as urban land at its rezoned value.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F19 - Land.png",
+    "alt": "The rezoning assumptions and the residual value: floor area, sales, developer's margin, construction and urbanisation",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F20 - Land scenarios.png",
+    "alt": "What each option leaves the family, from waiting for the rezoning and selling to inheriting the plot before it",
+    "shot": true
+  }
+]} />
+
+**Every rule, with its source.** All of this rests on a catalogue of the rules it applies, each in plain language with its figures, its article and its source, as they stand in 2026. Figures that are market practice rather than law are marked as unverified and stay editable, and the help icon beside a calculated figure opens the rule behind it.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F21 - Rules.png",
+    "alt": "The rule catalogue: income tax, mortgages and the rest, each with its article, and the figures still to verify marked",
+    "shot": true
+  }
+]} />
+
+**What this part is not.** It is not tax or legal advice: it estimates, and it says what to ask. The family in these pictures and in the video is invented, a father, a mother and three grown children with property in towns around Barcelona, loaded into a local demo account on a test server, and the address and cadastral reference fields are blurred in the browser before capture.
+
+**The family book, in one pass.** A recorded run: the book unlocked with its passphrase, a payslip, a planned sale, income and wealth tax, the inheritance with the switch for wealthy heirs turned off and on again, the company comparison, a mortgage recalculated for a cheaper flat, retirement, the land and its options, the rule catalogue, and the book saved and locked. Recorded the same way as the first video, at 1440p60.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PropertyYield/family-walkthrough.mp4",
+    "poster": "/PropertyYield/family-walkthrough-poster.jpg",
+    "title": "Property Yield Analyser, the family estate"
+  }
+]} />

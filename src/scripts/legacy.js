@@ -2,8 +2,9 @@
 const nav=document.getElementById('navbar');
 window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>40)},{passive:true});
 
-// Reveal animations
-const ro=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting)n.target.classList.add('visible')})},{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+// Reveal animations. Triggered by how far the element has come into view, not by
+// a share of its height: a share never arrives for a card taller than ten screens.
+const ro=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting)n.target.classList.add('visible')})},{threshold:0,rootMargin:'0px 0px -80px 0px'});
 document.querySelectorAll('.reveal').forEach(e=>ro.observe(e));
 // Siblings enter together, which reads as one flat block. Stagger them so the
 // group arrives as a cascade; capped so a long list never feels laggy.
