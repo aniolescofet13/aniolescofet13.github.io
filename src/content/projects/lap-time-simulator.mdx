@@ -150,25 +150,48 @@ A Python lap time simulation and vehicle analysis platform designed to support a
   }
 ]} />
 
-**Checked on a car I know.** The Formula Student Electric preset is my former team's car, built from the team's own data and checked, not tuned, against its four autocross runs at Formula Student Germany 2026. The check answers two questions in order. First, is the model right? Each run's logged line and speed are imposed, and the model derives everything else: lateral and longitudinal acceleration, motor speed and battery power follow the logs, battery power correlating at 0.98, and the net battery energy of the clean runs lands within 1-3 %. Only then, what was left on the table? The solver drives the same line from a standing start, as a flawless driver would: on the best run, 83.7 s against the 85.4 s driven. Getting there was the useful part, because each fix was a measurement rather than a fudge: a track smoothing sized for Grand Prix circuits that flattened the slalom and was worth 12 % of the lap on its own, a tyre scaling factor left out of the fit, power channels that missed the tyre scrub the solver already charged, and a fixed draw of a few kilowatts, the low-voltage system through the DC-DC, pumps and the inverters' fixed losses, on top of the drive chain's losses. The team's data stays private; the figures show the comparison, not the car's parameters.
+**Checked on a car I know.** The Formula Student Electric preset is my former team's car, built from the team's own data and checked, not tuned, against its four autocross runs at Formula Student Germany 2026. The first question is whether the model is right. Shadow mode imposes each run's logged line and speed, and the model derives everything else: lateral and longitudinal acceleration, motor speed and battery power follow the logs, battery power correlating at 0.98-0.99 on every run, and the net battery energy of the two clean runs lands within 1-3 %. Getting there was the useful part, because each fix was a measurement rather than a fudge: a track smoothing sized for Grand Prix circuits that flattened the slalom, a tyre scaling factor left out of the fit, power channels that missed the tyre scrub the solver already charged, and a fixed draw of a few kilowatts, the low-voltage system through the DC-DC, pumps and the inverters' fixed losses, on top of the drive chain's losses. The team's data stays private; the figures show the comparison, not the car's parameters.
 
 <Slider items={[
   {
     "type": "image",
-    "src": "LapTime/P7 - FSE Validation channels.png",
-    "alt": "The Formula Student Electric model against its FSG 2026 autocross run: speed, lateral and longitudinal acceleration, battery power and energy along the course",
+    "src": "LapTime/P7 - FSE Shadow channels.png",
+    "alt": "Shadow mode on the FSG 2026 autocross: lateral and longitudinal acceleration, motor speed, battery power and energy, model against telemetry along the course",
     "shot": true
   },
   {
     "type": "image",
-    "src": "LapTime/P7 - FSE Validation runs.png",
-    "alt": "Each of the four autocross runs as driven, against the model driving the same line from a standing start",
+    "src": "LapTime/P7 - FSE Shadow parity.png",
+    "alt": "Battery power and lateral acceleration, model against telemetry point by point, for all four autocross runs",
     "shot": true
   },
   {
     "type": "image",
-    "src": "LapTime/P7 - FSE Validation map.png",
-    "alt": "The autocross course coloured by where the model is quicker or slower than the car, and the g-g diagram of the car against the model",
+    "src": "LapTime/P7 - FSE Shadow energy.png",
+    "alt": "Net battery energy of each autocross run, model against telemetry",
+    "shot": true
+  }
+]} />
+
+**What the driver left on the table.** With the model trusted, the solver drives the same line itself, from a standing start and following no speed profile, as fast as grip, power and brakes allow: the time a flawless driver would have set on the line that was actually driven. On the best run that is 83.7 s against the 85.4 s driven; the time trace and the map show where along the course it opens.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance lap.png",
+    "alt": "Speed along the course, the driver against the model driving the same line, and the time the model gains",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance runs.png",
+    "alt": "Each of the four autocross runs as driven, against the model driving the same line",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance map.png",
+    "alt": "The course coloured by where the model is quicker or slower than the driver, and the g-g diagram of the driver against the model",
     "shot": true
   }
 ]} />
