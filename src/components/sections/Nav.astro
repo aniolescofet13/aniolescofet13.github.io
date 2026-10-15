@@ -6,8 +6,16 @@ interface Props {
 }
 const { links = true } = Astro.props;
 ---
-{links ? (
-<nav id="navbar"><div class="nav-inner"><a class="nav-logo" href="/">Aniol <span>E.</span></a><button aria-label="Menu" class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')"><span></span><span></span><span></span></button><ul class="nav-links"><li><a href="/#about">About</a></li><li><a href="/#experience">Experience</a></li><li><a href="/#projects">Projects</a></li><li><a href="/#skills">Skills</a></li><li><a href="/#contact">Contact</a></li></ul></div></nav>
-) : (
-<nav id="navbar"><div class="nav-inner"><span class="nav-logo">Aniol <span>E.</span></span></div></nav>
-)}
+<nav id="navbar"><div class="nav-inner">
+{links
+  ? <a class="nav-logo" href="/">Aniol <span>E.</span></a>
+  : <span class="nav-logo">Aniol <span>E.</span></span>}
+<div class="nav-actions">
+{links && <ul class="nav-links"><li><a href="/#about">About</a></li><li><a href="/#experience">Experience</a></li><li><a href="/#projects">Projects</a></li><li><a href="/#skills">Skills</a></li><li><a href="/#contact">Contact</a></li></ul>}
+<button class="theme-toggle" type="button" aria-label="Switch to dark mode" data-theme-toggle>
+  <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/></svg>
+  <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
+</button>
+{links && <button aria-label="Menu" class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')"><span></span><span></span><span></span></button>}
+</div>
+</div></nav>

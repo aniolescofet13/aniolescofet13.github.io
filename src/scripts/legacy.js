@@ -160,3 +160,30 @@ document.addEventListener('keydown', e => {
     startX = null;
   }, { passive: true });
 })();
+
+// Light / dark switch. A choice is remembered; until one is made, the page
+// follows the system setting, live. The head script already set the theme.
+(function () {
+  var root = document.documentElement;
+  var btns = document.querySelectorAll('[data-theme-toggle]');
+  if (!btns.length) return;
+  function stored() { try { return localStorage.getItem('theme'); } catch (e) { return null; } }
+  function label() {
+    var dark = root.dataset.theme === 'dark';
+    btns.forEach(function (b) { b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode'); });
+  }
+  function set(theme, remember) {
+    root.classList.add('theme-switching');
+    root.dataset.theme = theme;
+    label();
+    if (remember) { try { localStorage.setItem('theme', theme); } catch (e) {} }
+    setTimeout(function () { root.classList.remove('theme-switching'); }, 400);
+  }
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () { set(root.dataset.theme === 'dark' ? 'light' : 'dark', true); });
+  });
+  var mq = matchMedia('(prefers-color-scheme: dark)');
+  var onChange = function (e) { if (!stored()) set(e.matches ? 'dark' : 'light', false); };
+  if (mq.addEventListener) mq.addEventListener('change', onChange); else mq.addListener(onChange);
+  label();
+})();
