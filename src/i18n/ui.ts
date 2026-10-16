@@ -51,8 +51,8 @@ const en = {
       },
       {
         dates: 'Sep 2023 — Dec 2024', role: 'Software & Electronic Engineer Intern', company: 'CUPRA Racing · Martorell',
-        desc: 'Developed control systems and vehicle dynamics algorithms using MATLAB/Simulink. Led simulation and validation campaigns across MiL, SiL, HiL and DiL environments. Worked extensively on the CUPRA Exponential Experience, programming and setting up software for CUPRA Leon TCR race cars. Created the control software for a prototype combining a CUPRA Born RWD platform with a Tavascan front motor to create an AWD concept. Supported race operations, optimized CAN/GPS/IMU communication systems, and led vehicle-level testing for performance and durability.',
-        tags: ['MATLAB', 'Simulink', 'CAN Bus', 'MiL/SiL/HiL/DiL', 'WinTax', 'Vehicle Dynamics', 'Race Support'],
+        desc: 'Developed control systems and vehicle dynamics algorithms using MATLAB/Simulink. Built vehicle dynamics models for offline simulation and correlated them against measured track data. Worked extensively on the CUPRA Exponential Experience, programming and setting up software for CUPRA Leon TCR race cars. Created the control software for a prototype combining a CUPRA Born RWD platform with a Tavascan front motor to create an AWD concept. Supported race operations, optimized CAN/GPS/IMU communication systems, and led vehicle-level testing for performance and durability.',
+        tags: ['MATLAB', 'Simulink', 'CAN Bus', 'Offline Simulation', 'WinTax', 'Vehicle Dynamics', 'Race Support'],
       },
       {
         dates: 'Sep 2021 — Sep 2024', role: 'Vehicle Controls Engineer', company: 'BCNeMotorsport (Formula Student) · UPC Barcelona',
@@ -127,8 +127,8 @@ const ca: Dict = {
       },
       {
         dates: 'Set. 2023 – Des. 2024', role: 'Software & Electronic Engineer Intern', company: 'CUPRA Racing · Martorell',
-        desc: 'Vaig desenvolupar sistemes de control i algoritmes de dinàmica vehicular amb MATLAB/Simulink. Vaig liderar campanyes de simulació i validació en entorns MiL, SiL, HiL i DiL. Vaig treballar a fons en la CUPRA Exponential Experience, programant i configurant el software dels cotxes de competició CUPRA Leon TCR. Vaig crear el software de control d\'un prototip que combinava una plataforma CUPRA Born de tracció posterior amb un motor davanter de Tavascan per obtenir un concepte de tracció integral. Vaig donar suport a les operacions de cursa, optimitzar els sistemes de comunicació CAN/GPS/IMU i liderar proves a nivell de vehicle de prestacions i durabilitat.',
-        tags: ['MATLAB', 'Simulink', 'CAN Bus', 'MiL/SiL/HiL/DiL', 'WinTax', 'Dinàmica vehicular', 'Suport a cursa'],
+        desc: 'Vaig desenvolupar sistemes de control i algoritmes de dinàmica vehicular amb MATLAB/Simulink. Vaig construir models de dinàmica vehicular per a simulació offline i els vaig correlacionar amb dades mesurades a pista. Vaig treballar a fons en la CUPRA Exponential Experience, programant i configurant el software dels cotxes de competició CUPRA Leon TCR. Vaig crear el software de control d\'un prototip que combinava una plataforma CUPRA Born de tracció posterior amb un motor davanter de Tavascan per obtenir un concepte de tracció integral. Vaig donar suport a les operacions de cursa, optimitzar els sistemes de comunicació CAN/GPS/IMU i liderar proves a nivell de vehicle de prestacions i durabilitat.',
+        tags: ['MATLAB', 'Simulink', 'CAN Bus', 'Simulació offline', 'WinTax', 'Dinàmica vehicular', 'Suport a cursa'],
       },
       {
         dates: 'Set. 2021 – Set. 2024', role: 'Vehicle Controls Engineer', company: 'BCNeMotorsport (Formula Student) · UPC Barcelona',
@@ -201,8 +201,8 @@ const es: Dict = {
       },
       {
         dates: 'Sep. 2023 – Dic. 2024', role: 'Software & Electronic Engineer Intern', company: 'CUPRA Racing · Martorell',
-        desc: 'Desarrollé sistemas de control y algoritmos de dinámica vehicular con MATLAB/Simulink. Lideré campañas de simulación y validación en entornos MiL, SiL, HiL y DiL. Trabajé a fondo en la CUPRA Exponential Experience, programando y configurando el software de los coches de competición CUPRA Leon TCR. Creé el software de control de un prototipo que combinaba una plataforma CUPRA Born de propulsión trasera con un motor delantero de Tavascan para obtener un concepto de tracción total. Di soporte a las operaciones de carrera, optimicé los sistemas de comunicación CAN/GPS/IMU y lideré pruebas a nivel de vehículo de prestaciones y durabilidad.',
-        tags: ['MATLAB', 'Simulink', 'CAN Bus', 'MiL/SiL/HiL/DiL', 'WinTax', 'Dinámica vehicular', 'Soporte en carrera'],
+        desc: 'Desarrollé sistemas de control y algoritmos de dinámica vehicular con MATLAB/Simulink. Construí modelos de dinámica vehicular para simulación offline y los correlacioné con datos medidos en pista. Trabajé a fondo en la CUPRA Exponential Experience, programando y configurando el software de los coches de competición CUPRA Leon TCR. Creé el software de control de un prototipo que combinaba una plataforma CUPRA Born de propulsión trasera con un motor delantero de Tavascan para obtener un concepto de tracción total. Di soporte a las operaciones de carrera, optimicé los sistemas de comunicación CAN/GPS/IMU y lideré pruebas a nivel de vehículo de prestaciones y durabilidad.',
+        tags: ['MATLAB', 'Simulink', 'CAN Bus', 'Simulación offline', 'WinTax', 'Dinámica vehicular', 'Soporte en carrera'],
       },
       {
         dates: 'Sep. 2021 – Sep. 2024', role: 'Vehicle Controls Engineer', company: 'BCNeMotorsport (Formula Student) · UPC Barcelona',
