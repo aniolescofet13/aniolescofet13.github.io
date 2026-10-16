@@ -40,7 +40,26 @@ collections:
     # listed and unlisted projects; a hidden one has no page.
     preview_path: "projects/{{slug}}/"
     summary: "{{title}}  ·  {{visibility}}  ·  aniolescofet13.github.io/projects/{{slug}}/"
-    sortable_fields: [title, category, order, visibility]
+    # The list, grouped by category the way the site is, in the site's order.
+    # "Group by" in the list toolbar switches to visibility; "Filter" shows
+    # only one kind (listed, unlisted, hidden, or one category).
+    sortable_fields:
+      fields: [order, title, category, visibility]
+      default: { field: order, direction: ascending }
+    view_groups:
+      default: category
+      groups:
+        - { name: category, label: Category, field: category }
+        - { name: visibility, label: Visibility, field: visibility }
+    view_filters:
+      filters:
+        - { name: listed, label: "Listed (on the portfolio)", field: visibility, pattern: "^listed$" }
+        - { name: unlisted, label: "Unlisted (own page only)", field: visibility, pattern: "^unlisted$" }
+        - { name: hidden, label: "Hidden", field: visibility, pattern: "^hidden$" }
+        - { name: personal, label: "Personal", field: category, pattern: "^personal$" }
+        - { name: fs, label: "Formula Student", field: category, pattern: "^fs$" }
+        - { name: pro, label: "Professional", field: category, pattern: "^pro$" }
+        - { name: uni, label: "University", field: category, pattern: "^uni$" }
     fields:
       # --- what is shown, and where the code lives ---
       - name: visibility
@@ -102,4 +121,4 @@ collections:
 
       # Which English version a translation was made from. The build compares
       # it with the English text and lists the translations that need updating.
-      - { name: source, label: Translated from, widget: hidden, required: false, i18n: true }
+      - { name: source, label: Translated from, widget: hidden, i18n: true }
