@@ -1,0 +1,434 @@
+---
+title: "Property Yield Analyser"
+subtitle: "Anàlisi d'inversió immobiliària · Next.js · MapLibre · Supabase"
+tags:
+  - "Next.js"
+  - "React · TypeScript"
+  - "MapLibre GL"
+  - "H3"
+  - "Supabase · Postgres"
+  - "Recollida de dades"
+  - "Dades obertes"
+  - "Modelització financera"
+  - "Modelització fiscal"
+  - "Web Crypto"
+  - "Testing"
+source: "f6e56b7593"
+---
+
+**L'eina.** Property Yield Analyser (Rendibilitat Immobiliària, en el català en què està escrita la seva interfície) respon dues preguntes sobre comprar un pis per llogar-lo: quin rendiment donarà aquest, i quins pisos d'aquest barri són els que rendeixen més. Una calculadora calcula el flux de caixa, la rendibilitat sobre el capital aportat, la rendibilitat bruta i el patrimoni generat d'un pis concret, en sis modes i amb els impostos de compra de la comunitat autònoma on sigui. Un cercador llegeix cinc portals immobiliaris sobre una zona dibuixada al mapa, fusiona els anuncis que són el mateix pis, estima el que guanyaria cadascun segons l'objectiu triat i els ordena per rendibilitat. És una eina personal i sense ànim comercial.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P1 - Results.png",
+    "alt": "Una zona dibuixada al voltant de Sant Antoni, Barcelona: 100 pisos a partir de 195 anuncis, ordenats per rendibilitat sobre el capital aportat",
+    "shot": true
+  }
+]} />
+
+**El problema que resol.** Valorar un pis com a inversió sol demanar tres pestanyes de portals, un full de càlcul i una suposició. La suposició és el lloguer: un anunci de venda diu quant costa un pis, no per quant es llogaria, i una resposta raonable depèn del que demanen pisos semblants de la zona, que és una altra cerca en altres pàgines. Els impostos de compra canvien d'una comunitat a una altra, les normes de lloguer canvien d'un municipi a un altre, i el mateix pis surt en diversos portals a preus lleugerament diferents. L'eina es va inspirar en eines comercials d'anàlisi d'inversions i es va proposar fer-ho tot en un sol lloc per a Catalunya, amb cada xifra traçable fins al seu origen. Una cerca comença amb tres preguntes: on, per a què i els detalls.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P2 - Where.png",
+    "alt": "On: Barcelona trobada pel codi postal, i la zona de cerca dibuixada com un polígon al mapa",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P2 - Goal.png",
+    "alt": "Per a què: llogar-lo sencer, per habitacions, a turistes, reformar i vendre, rent to rent, o buscar un pis de lloguer",
+    "shot": true
+  }
+]} />
+
+**La calculadora.** Sis modes: lloguer de llarga durada, lloguer per habitacions, lloguer turístic de curta durada, rent to rent, comprar per reformar i vendre, i comprar per viure-hi, comparat amb llogar. Els impostos de compra són els reals de cadascuna de les 19 comunitats i ciutats autònomes, l'ITP per a l'habitatge de segona mà i l'IVA més l'AJD per a l'obra nova, cada valor desat amb la seva font i la data en què es va comprovar. Quan un tipus no s'ha pogut verificar, queda marcat com a tal i es pot editar, en lloc d'endevinar-lo. També hi són els 88 tipus reduïts d'ITP per a l'habitatge habitual, amb les seves condicions, i l'IBI ve amb el seu interval legal i el tipus oficial de diverses grans ciutats. La quota de la hipoteca es divideix en interessos, que són un cost, i capital, que és patrimoni, i la projecció a deu anys té tres escenaris de revaloració. Tot l'estat viu a la URL, de manera que un càlcul es desa o es comparteix com un enllaç, i s'imprimeix en PDF. Les fórmules són funcions pures sense codi d'interfície, i uns tests de referència (golden tests) les fixen als resultats d'una calculadora de referència: si un d'aquests falla, el que està malament és el canvi, no el test.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Calculator.png",
+    "alt": "La calculadora oberta des d'un anunci: inversió inicial, flux de caixa amb interessos i capital per separat, i rendibilitat sobre el capital aportat",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Tax source.png",
+    "alt": "La font del tipus de l'ITP, amb la llei, els trams i la data en què es va comprovar",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Projection.png",
+    "alt": "Patrimoni generat per any i la projecció a deu anys en tres escenaris de revaloració",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Flipping.png",
+    "alt": "Reformar i vendre: inversió total, benefici net després d'impostos i la rendibilitat anualitzada",
+    "shot": true
+  }
+]} />
+
+**Una cerca, cinc portals.** La zona és un municipi amb un radi, o un polígon dibuixat al mapa. Als portals es busca per lloc, no per polígon, així que la cerca primer planifica: llegeix la primera pàgina de cada districte, baixa només als districtes amb pisos a prop de la zona, i als seus barris si encara són grans, i després conserva o descarta cada anunci per les seves coordenades. Aquestes primeres pàgines es guarden una setmana, de manera que la cerca següent al mateix municipi se salta la planificació. Es llegeixen cinc fonts en paral·lel: Fotocasa, Habitaclia i pisos.com, més Aliseda i Solvia, que venen habitatges de bancs. Aliseda, a més, indica el que els grans portals sovint ometen: si un pis està ocupat, llogat o amb un lloguer social. Cada font té el seu propi adaptador, i cadascuna es va revisar abans d'escriure'l: primer una API o alertes oficials, després el seu robots.txt, les seves condicions i si és darrere d'un servei antibots. Les peticions surten una cada quatre a sis segons per web, i una web que respon amb un bloqueig es deixa tranquil·la durant la resta de la cerca. Idealista, el portal més gran, està protegit per DataDome, així que no se'n fa scraping en absolut i queda a l'espera de la seva API oficial. El progrés es mostra en directe, amb una estimació del temps que falta.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P4 - Search running.png",
+    "alt": "Una cerca en curs: els anuncis trobats fins ara, els lloguers i les habitacions llegits per a l'estimació del lloguer, i el temps que falta",
+    "shot": true
+  }
+]} />
+
+**Un pis, molts anuncis.** El mateix pis sovint és a tres portals alhora. Fotocasa i Habitaclia ara funcionen sobre una mateixa plataforma i serveixen les mateixes fotografies, així que dos anuncis que comparteixen dos o més identificadors d'imatge són el mateix pis gairebé sense dubte, i també ho són dos amb la mateixa agència i la mateixa referència de l'agència. A partir d'aquí, les parelles a menys de 300 m es puntuen per habitacions, banys, superfície, planta, preu i semblança de les descripcions, i per sobre d'un llindar es fusionen amb union-find. Entre el llindar inferior i el superior es mostren com a possibles duplicats perquè els resolgui l'usuari, i les cerques posteriors respecten la decisió. Les puntuacions es van ajustar amb anuncis reals: el mateix preu exacte, superfície, habitacions i banys ja vol dir el mateix pis, tret que tots dos indiquin una planta i les plantes siguin diferents. Dos anuncis del mateix banc no es fusionen mai, perquè un banc publica un anunci per pis, i abans unitats idèntiques d'una mateixa promoció, situades només pel carrer, acabaven fusionades en una. A la cerca de Sant Antoni d'aquestes imatges, 195 anuncis es van convertir en 100 pisos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P5 - Listing.png",
+    "alt": "Un pis, dos anuncis: Habitaclia i Fotocasa al mateix preu i amb la mateixa rebaixa, amb la nota i les etiquetes de l'usuari",
+    "shot": true
+  }
+]} />
+
+**Estimar el lloguer quan hi ha pocs comparables.** Cada cerca de venda també llegeix els lloguers de pisos sencers al voltant de la zona, amb un quilòmetre de marge, i hi afegeix els que les cerques anteriors han vist en els últims 120 dies. Els lloguers de temporada queden fora: en una prova inicial, 13 de 30 lloguers eren de temporada. Els comparables es prenen per esglaons, primer a menys de 250 m i ±10 % de superfície, després 500 m i ±20 %, 1 km i ±30 %, 2 km i ±40 %, fins que n'hi ha tres. L'estimació és la mediana del seu lloguer per metre quadrat multiplicada per la superfície del pis, i la xifra prudent n'és el 85 %, perquè els lloguers demanats tendeixen a ser alts. Quan no se'n troben tres enlloc, el recurs és el lloguer mitjà demanat per metre quadrat del municipi segons l'índex públic de preus d'un portal, que només s'aplica fins a 150 m², perquè una mitjana de totes les mides sobrevalora els habitatges grans. Algunes rendibilitats continuen sense ser fiables, i les dades reals ho van deixar clar: el primer rànquing d'un poble de costa l'encapçalaven un anunci que deia tenir 976 m², amb una rendibilitat del 281 %, i unes cases valorades contra tres vil·les de luxe a 2 km. Per això, una estimació amb massa pocs comparables, una superfície impossible, un preu molt per sota del de la zona, una subhasta, o una estimació de més d'1,5 vegades l'índex municipal es marca com a poc fiable, amb el motiu, i queda ordenada després de la resta. Un pis ocupat, amb lloguer social o venut en nua propietat mostra la rendibilitat que tindria si estigués buit, i queda ordenat després dels buits.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P6 - Rent estimate.png",
+    "alt": "La rendibilitat d'un pis: lloguer prudent, mediana de mercat, l'índex municipal al costat, i el mateix pis llogat per habitacions",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P6 - Comparables.png",
+    "alt": "Comparables: pisos semblants en venda amb el seu preu per metre quadrat, i els lloguers a partir dels quals es va fer l'estimació",
+    "shot": true
+  }
+]} />
+
+**Una rendibilitat per a cada objectiu.** La mateixa cerca es pot llegir de cinc maneres, i passar d'una a una altra no requereix una cerca nova. Llogar-lo sencer fa servir l'estimació anterior. Llogar per habitacions fa servir els anuncis d'habitacions de la zona, que són escassos en aquests portals, així que el preu també es pot introduir a mà. El lloguer turístic fa servir les dades obertes d'Inside Airbnb en lloc del mateix Airbnb, el robots.txt del qual prohibeix les seves pàgines de cerca: habitatges sencers amb les mateixes habitacions, actius i amb preu, entre 300 m i 2 km de distància, al 85 % de la mediana del seu preu per nit i amb la mediana de la seva ocupació, limitada al 70 %. Reformar per vendre valora el pis a la mediana per metre quadrat dels anuncis de la mateixa cerca el text dels quals diu que estan reformats, una dada que els portals no ofereixen com a camp, menys el 6,2 % de diferència mitjana entre el preu demanat i el de venda. Rent to rent llegeix les habitacions al voltant d'un lloguer i calcula el benefici de rellogar-les totes. Cada objectiu passa les seves xifres a la calculadora amb un clic.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Tourist.png",
+    "alt": "L'objectiu turístic: les normes de llicència de Barcelona i com es van fer servir els comparables d'Inside Airbnb",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Tourist ROI.png",
+    "alt": "La rendibilitat turística d'un pis: preu per nit, ocupació i els ingressos que implica",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Renovate and sell.png",
+    "alt": "L'objectiu de reformar i vendre: el preu de venda a partir dels pisos reformats de la mateixa cerca",
+    "shot": true
+  }
+]} />
+
+**La normativa, comprovada a la font.** A Catalunya les normes de lloguer canvien d'un municipi a un altre, així que l'eina les indica allà on importen, a partir de textos oficials i amb la data en què es van llegir. Als 271 municipis declarats zones de mercat residencial tensionat per les resolucions TER/800/2024 i TER/2408/2024, el lloguer d'un contracte nou està limitat. El límit d'un pis concret no es pot calcular, perquè depèn del seu últim contracte o de l'índex de referència per a la seva referència cadastral, que cap API oberta ofereix, així que el resum de la cerca i cada pis expliquen com trobar-lo i la calculadora l'accepta com a dada. Una revisió a 302 municipis encara estava en consulta el 9 d'octubre de 2026, i l'eina la marca com a no verificada en lloc de donar per bona cap de les dues llistes. L'objectiu turístic inclou els 262 municipis del Decret llei 3/2023, on un pis turístic necessita una llicència urbanística prèvia, i rent to rent inclou les condicions de sotsarrendament de l'article 8.2 de la Llei d'arrendaments urbans.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P8 - Rent cap.png",
+    "alt": "El límit del lloguer en un mercat tensionat: quan s'aplica, com trobar la xifra d'un pis, i la revisió encara pendent d'aprovació",
+    "shot": true
+  }
+]} />
+
+**El mapa i el barri.** El mapa té cinc capes. A més dels mateixos anuncis, tres són hexàgons H3 amb la mediana del preu per metre quadrat, la rendibilitat bruta o la rendibilitat dels pisos que contenen, amb una resolució de 75 m a 1,4 km de costat que s'adapta a la mida de la zona, acolorits per quantils, i les dues capes de rendibilitat construïdes només amb lloguers fiables. La cinquena és la renda neta per persona de cada secció censal, a partir dels serveis de mapes oberts de l'INE, l'institut d'estadística d'Espanya. Després, cada pis té una fitxa en set seccions: resum, rendibilitat, comparables, evolució del mercat, barri, llocs propers i una anàlisi. L'evolució del mercat són cinc anys de preus demanats de venda i de lloguer per metre quadrat del municipi. El barri compara la secció censal del pis amb el seu municipi, des de la renda i la desigualtat fins a l'edat, l'origen i la proporció d'habitatges turístics, a partir de l'atles de distribució de renda i del cens anual de l'INE, consultats directament des del navegador. Els llocs propers surten d'OpenStreetMap, amb els minuts a peu. L'anàlisi es basa en regles: punts forts i febles a partir de la rendibilitat, el flux de caixa, el preu respecte a la zona i les xifres del barri.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - ROI hexagons.png",
+    "alt": "Rendibilitat sobre el capital aportat per hexàgon H3, mediana dels pisos amb un lloguer fiable",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Price hexagons.png",
+    "alt": "Preu per metre quadrat per hexàgon H3",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Income.png",
+    "alt": "Renda neta per persona per secció censal, INE 2023",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Market.png",
+    "alt": "Evolució del mercat: els preus als quals s'ha vist aquest pis, i cinc anys de preus de venda i de lloguer al municipi",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Neighbourhood.png",
+    "alt": "Barri: la secció censal del pis comparada amb el conjunt de Barcelona",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Nearby.png",
+    "alt": "Llocs propers d'OpenStreetMap amb els minuts a peu, amb els noms difuminats",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Analysis.png",
+    "alt": "Anàlisi: punts forts i febles obtinguts per regles",
+    "shot": true
+  }
+]} />
+
+**Grans ciutats.** Una cerca de 300 m a l'Eixample de Barcelona va trigar més de 14 minuts i encara estava llegint comparables, més de 2 400 habitacions en 5 km i 1 100 lloguers en 1 km. Els anuncis de venda, que són la raó de ser de la cerca, es continuen llegint sencers. Els comparables ja no: cada portal en llegeix com a màxim 15 pàgines, començant per les zones amb més pisos a prop, i s'atura a 150 dins de la zona, i les habitacions es busquen primer en 1 km i només s'amplia fins a 5 km quan en surten menys de 30. La mateixa cerca va passar a trigar 108 s. Un ritme respectuós té un cost que es manté: la cerca de Sant Antoni d'aquestes imatges, amb la profunditat normal, va trigar uns sis minuts, gairebé tots esperant entre pàgines. Obrir una cerca anterior des de l'historial no demana res als portals, perquè es reconstrueix des de la base de dades, en menys d'un segon.
+
+**Al voltant de la cerca.** Totes les cerques es guarden, i tornar-ne a obrir una no costa res. Una alerta repeteix una cerca cada dia o cada setmana en segon pla mentre l'aplicació està oberta i avisa, amb una notificació del navegador, dels pisos que són nous, o almenys un 1 % més barats, i que continuen complint els seus filtres amb una rendibilitat fiable. La primera execució només fixa el punt de partida. Un altre tipus d'alerta vigila els pisos desats i avisa a l'instant quan un baixa de preu, a partir dels preus que han vist les cerques posteriors. Els pisos desats viuen en un tauler per estat (interessat, visitat, oferta feta i descartat), amb notes, etiquetes i arrossegar i deixar anar entre columnes, i els càlculs desats es comparen un al costat de l'altre amb el millor de cada fila en verd. La llista filtrada s'exporta a Excel, i el cercador de municipis accepta un codi postal i respon a l'instant a partir d'una llista local de GeoNames de 8 124 municipis.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Saved board.png",
+    "alt": "Pisos desats en un tauler per estat, amb notes i etiquetes, i els càlculs desats a sota",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Compare.png",
+    "alt": "Tres càlculs desats un al costat de l'altre, el millor de cada fila en verd",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Alerts.png",
+    "alt": "Alertes: una cerca repetida cada dia, i el formulari per a alertes de baixada de preu dels pisos desats",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - History.png",
+    "alt": "Historial de cerques: tornar a obrir una cerca la reconstrueix des de la base de dades",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Postcode finder.png",
+    "alt": "El cercador de municipis, responent un codi postal a partir d'una llista local de GeoNames",
+    "shot": true
+  }
+]} />
+
+**Com està construïda.** Next.js amb l'App Router i cache components, React, TypeScript, Tailwind i shadcn/ui. Tot el que ha de sobreviure a una recàrrega o a un enllaç compartit viu a la URL, mitjançant nuqs. El mapa és MapLibre GL sobre tessel·les d'OpenFreeMap, amb terra-draw per al polígon i h3-js per als hexàgons. Supabase guarda els anuncis i el seu historial de preus, les cerques, els pisos desats i les alertes, en Postgres amb seguretat a nivell de fila, darrere d'un inici de sessió amb Google limitat a un compte autoritzat. La lògica de càlcul són funcions pures separades dels components, i cada adaptador de portal es prova contra pàgines desades. Funciona en un ordinador personal en lloc d'un servidor, en part perquè els portals solen bloquejar les adreces de centres de dades, així que les alertes en segon pla només s'executen mentre està oberta.
+
+**El que no és.** Una eina personal, no un producte: un sol usuari, sense publicitat, sense seguiment i sense assessorament financer. Els anuncis es llegeixen només per a anàlisi personal, a un ritme lent, dins del robots.txt de cada web, sense saltar-se cap protecció antibots, i no es publica ni es redistribueix res. En aquestes imatges i al vídeo, les fotos dels anuncis, les adreces, les agències, les descripcions i els noms dels llocs propers es difuminen al navegador abans de la captura, i els pisos desats, les notes, l'historial i les alertes pertanyen a un compte de demostració local, no a un ús real. El repositori és privat.
+
+**Tot plegat, d'una tirada.** Un recorregut enregistrat per l'eina tal com es fa servir: un codi postal, una zona dibuixada al voltant de Sant Antoni, un objectiu i una cerca, amb l'espera accelerada, els resultats llegits a través de les capes del mapa, una alerta, un pis obert secció per secció, desat amb una nota, portat a la calculadora i desat allà, i després el tauler, la comparació, l'historial i les alertes. Enregistrat a 1440p60 des de l'aplicació en funcionament, renderitzat al doble de densitat de píxels tal com ho mostraria una pantalla retina, capturat a càmera lenta perquè qualsevol cosa que es mogui tingui un fotograma nou cada seixantena de segon, i amb el mateix difuminat que les imatges.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PropertyYield/walkthrough.mp4",
+    "poster": "/PropertyYield/walkthrough-poster.jpg",
+    "title": "Property Yield Analyser, recorregut"
+  }
+]} />
+
+<Note>Dades: <a href="https://www.geonames.org/" rel="noreferrer noopener" target="_blank">GeoNames</a> i <a href="https://insideairbnb.com/" rel="noreferrer noopener" target="_blank">Inside Airbnb</a>, tots dos amb llicència <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC BY 4.0</a>. Estadístiques de renda, cens i habitatges turístics de l'<a href="https://www.ine.es/" rel="noreferrer noopener" target="_blank">INE</a>. Llocs i dades del mapa © <a href="https://www.openstreetmap.org/copyright" rel="noreferrer noopener" target="_blank">col·laboradors d'OpenStreetMap</a> (ODbL). Tessel·les del mapa d'<a href="https://openfreemap.org/" rel="noreferrer noopener" target="_blank">OpenFreeMap</a>, © <a href="https://www.openmaptiles.org/" rel="noreferrer noopener" target="_blank">OpenMapTiles</a>.</Note>
+
+**Una segona part: el patrimoni familiar.** A més de trobar pisos per comprar, l'eina porta un llibre privat del patrimoni d'una família: qui és propietari de cada immoble i en quina proporció, què genera cadascun, què queda per pagar dels préstecs, i què significa tot plegat en impostos, aquest any, en una venda prevista i en una herència d'aquí a unes quantes dècades. Està pensada per preparar les converses de la família amb el seu assessor fiscal, no per substituir-les, i només s'obre per a un compte autoritzat.
+
+**Xifrat abans de sortir del navegador.** El llibre es xifra al navegador amb una frase de pas, amb una clau derivada amb PBKDF2 i AES-GCM, de manera que la base de dades només conté text xifrat, i el mateix passa amb el fitxer de còpia de seguretat en què es pot descarregar el llibre. Res al servidor el pot llegir, i una frase de pas oblidada no es pot recuperar. Cada desament es guarda com una versió, i el llibre es bloqueja sol després de 15 minuts sense ús.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F01 - Book.png",
+    "alt": "El llibre familiar: cinc persones, cadascuna amb la seva edat, pensió o sou i els immobles que té",
+    "shot": true
+  }
+]} />
+
+**Persones i immobles.** Cada persona porta el que necessiten els impostos: any de naixement, sou o pensió, estalvis, un pla de pensions, persones a càrrec i les deduccions que s'hi apliquen. Un sou es desglossa en les cotitzacions a la Seguretat Social del treballador i el que l'empresa paga a sobre. Cada immoble té els seus propietaris, les seves quotes i si en tenen el ple domini o un usdefruit, el valor cadastral i la part que correspon al sòl, el que va costar, el que val, les despeses anuals i l'arrendament. L'arrendament determina la reducció de l'IRPF sobre el lloguer, que amb la llei d'habitatge del 2023 depèn de quan es va signar el contracte i, en un de nou, de si el lloguer va baixar en un mercat tensionat. Per als valors, es consulta el Cadastre per adreça o per referència cadastral, i el valor taxat mitjà per metre quadrat del Ministeri d'Habitatge, trimestre a trimestre, des del 1995 per a cada província i des del 2005 per als municipis més grans, dona una estimació del que val un habitatge i, calculant cap enrere fins a l'any en què es va comprar, del que va costar quan ningú no se'n recorda.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F02 - Payslip.png",
+    "alt": "Un sou desglossat: les cotitzacions del treballador, el sou abans de l'IRPF i el que l'empresa paga a sobre",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F03 - Properties.png",
+    "alt": "Els immobles de la família: un habitatge, pisos llogats, un local, el pis del fill gran i una finca rústica, amb els seus propietaris",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F04 - Property values.png",
+    "alt": "Un pis llogat: propietaris, valors cadastral i de mercat, i el valor taxat mitjà del Ministeri d'Habitatge per a Barcelona aplicat a la seva superfície",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F05 - Rent reduction.png",
+    "alt": "Un arrendament nou en un mercat tensionat amb el lloguer rebaixat de 900 a 850 euros al mes: una reducció del 90 % a l'IRPF",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F07 - Loan.png",
+    "alt": "Una hipoteca: quota mensual, capital pendent, i els interessos i el capital d'aquest any",
+    "shot": true
+  }
+]} />
+
+**Una venda prevista.** Un immoble pot tenir una venda prevista, amb el seu preu, data i despeses. L'eina calcula el guany propietari per propietari: el preu menys les despeses de venda i la plusvàlua municipal, contra el que va costar menys l'amortització de cada any en què va estar llogat, i a partir d'aquí l'IRPF addicional i la plusvàlua municipal. Indica el dret de tanteig i retracte de l'inquilí quan el pis està llogat, i l'exempció per als propietaris de més de 65 anys que destinin l'import a una renda vitalícia. Una venda anterior a la data de l'herència arriba a l'herència com els diners que queden, no com el pis.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F06 - Sale.png",
+    "alt": "Una venda prevista: per a cada propietari, els valors de transmissió i d'adquisició, el guany, l'IRPF addicional i el que queda",
+    "shot": true
+  }
+]} />
+
+**IRPF i impost sobre el patrimoni.** L'IRPF de l'any de cada persona es calcula complet: les escales estatal i catalana, la base de l'estalvi, els mínims personals, els rendiments del lloguer nets de despeses i amortització amb la seva reducció, i el pla de pensions. En un matrimoni compara la declaració individual i la conjunta. Cada xifra s'obre per mostrar els passos que hi ha al darrere. Després ve l'impost sobre el patrimoni, amb l'escala i el mínim exempt de Catalunya, l'exempció de l'habitatge habitual, els deutes, el límit que el lliga a l'IRPF i l'impost temporal de solidaritat de les grans fortunes, i un habitatge buit rep un avís allà on l'ajuntament aplica un recàrrec a l'IBI. Un decret llei encara pendent de convalidació canvia algunes d'aquestes xifres, així que és un interruptor, i cada pestanya es pot llegir amb ell o sense.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F08 - Income tax.png",
+    "alt": "L'IRPF de cada persona: el que queda a l'any, l'impost i els ingressos bruts, i la declaració individual i la conjunta de la parella comparades",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F09 - Income tax detail.png",
+    "alt": "Com es calcula l'IRPF d'una persona, pas a pas",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F10 - Wealth tax.png",
+    "alt": "Impost sobre el patrimoni: els béns i els deutes de cada persona, l'exempció de l'habitatge habitual, el mínim exempt i la quota a pagar",
+    "shot": true
+  }
+]} />
+
+**L'herència, d'aquí a uns anys.** El que importa no és l'herència d'avui sinó la d'aquí a vint-i-cinc anys, així que l'escenari pren qui mor i quan, i una revaloració anual suposada dels immobles, i ho porta tot fins a aquella data: els valors, el que encara quedarà per pagar dels préstecs, els estalvis i les vendes previstes abans. El cònjuge supervivent pot conservar l'usdefruit de tot mentre els fills reben la nua propietat, com preveuen la majoria de testaments catalans. Després, l'impost sobre successions català de cada hereu segueix els seus passos: la reducció per parentiu, la reducció del 95 % per l'habitatge habitual, l'escala i la bonificació que depèn de quant rep cadascun. Per aleshores, els fills probablement tindran més de 500 000 € de patrimoni propi, cosa que multiplica el seu impost per 1,1, així que això també és un interruptor. Cada immoble urbà paga també la plusvàlua municipal, i aquesta la fixa cada ajuntament: les ordenances dels principals municipis catalans hi són carregades amb els seus tipus i bonificacions, que varien en de qui havia de ser l'habitatge, quant temps l'han de conservar els hereus i si la bonificació depèn del valor cadastral o de la renda de l'hereu. Es pot comparar donar un immoble en vida amb deixar-lo en herència.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F11 - Inheritance.png",
+    "alt": "L'escenari d'herència: qui mor, quan, la revaloració anual, l'usdefruit del cònjuge i l'interruptor per als hereus amb patrimoni propi",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F12 - Estate.png",
+    "alt": "El que conté l'herència: la quota de cada immoble, el seu valor declarat i el valor a efectes fiscals, i la seva plusvàlua municipal",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F13 - Municipal tax.png",
+    "alt": "La plusvàlua municipal de cada municipi: tipus, bonificació per a l'habitatge habitual i per a la resta, i les condicions de la seva ordenança",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F14 - Inheritance tax.png",
+    "alt": "L'impost sobre successions d'un hereu, des de la base imposable, passant per les reduccions i l'escala, fins a la bonificació i la quota a pagar",
+    "shot": true
+  }
+]} />
+
+**A nom propi o a través d'una societat.** Els mateixos immobles poden quedar-se en mans de la família o passar a una societat, i la comparació arriba fins a la data de l'herència: què costa aportar-los, què li queda a la família cada any després de l'impost sobre societats o de l'IRPF, l'impost sobre successions i la plusvàlua municipal al final, i el guany latent que queda dins de la societat. Es comparen dos tipus de societat: una patrimonial passiva i una amb un treballador a jornada completa que pot qualificar-se com a empresa familiar, les participacions de la qual tenen aleshores una reducció del 95 % a l'herència. També es comprova la condició de gran tenidor, que canvia les normes de lloguer. Per a aquesta família inventada, mantenir els pisos a nom propi surt clarament guanyador.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F15 - Company.png",
+    "alt": "Quins immobles passarien a una societat, com funcionaria i què arriba a la família cada any",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F16 - Company vs inheritance.png",
+    "alt": "Nom propi, societat patrimonial o empresa familiar fins a l'herència: cost d'entrada, ingressos anuals, impost sobre successions i plusvàlua municipal, i fiscalitat latent",
+    "shot": true
+  }
+]} />
+
+**Hipoteques i jubilació.** Quant prestaria un banc a qualsevol membre de la família per a un habitatge d'un preu donat, a partir del 35 % dels ingressos nets i del 80 % del valor, criteris que són pràctica bancària i no llei i per això es poden editar, els diners necessaris després de l'ITP i les despeses, i quant es podria obtenir amb la garantia d'un pis ja pagat. La jubilació mostra quan es pot jubilar cada persona i si un pensionista té dret al complement a mínims, o el perd a causa dels lloguers.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F17 - Mortgage.png",
+    "alt": "Comprar amb hipoteca: el préstec màxim, la quota mensual i els diners necessaris per a un pis de 285 000 euros",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F18 - Retirement.png",
+    "alt": "Jubilació: cada pensió comparada amb la mínima, els altres ingressos que fan perdre el complement, i les edats de jubilació dels fills",
+    "shot": true
+  }
+]} />
+
+**El terreny.** Una finca rústica que pot ser requalificada com a urbanitzable és l'actiu més difícil de valorar. El seu valor un cop requalificada surt del mètode residual estàtic: l'edificabilitat, menys la part cedida a l'ajuntament, repartida entre habitatge lliure i protegit i venuda als preus previstos, menys el marge del promotor, la construcció i les obres d'urbanització. Després es comparen les opcions de la família segons el que els deixaria cadascuna, i quan: vendre-la ara com a sòl rústic, esperar la requalificació i vendre, urbanitzar-la i vendre les parcel·les, permutar-la per una part dels pisos que s'hi construeixin, aportar-la abans a una societat, o heretar-la abans o després de la requalificació. Cada opció detalla els seus impostos, el seu calendari i les preguntes per a l'assessor, i quan la data de l'herència és posterior a la requalificació, l'herència compta la finca com a sòl urbà amb el seu valor requalificat.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F19 - Land.png",
+    "alt": "Les hipòtesis de la requalificació i el valor residual: edificabilitat, vendes, marge del promotor, construcció i urbanització",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F20 - Land scenarios.png",
+    "alt": "El que deixa a la família cada opció, des d'esperar la requalificació i vendre fins a heretar la finca abans",
+    "shot": true
+  }
+]} />
+
+**Cada norma, amb la seva font.** Tot això es basa en un catàleg de les normes que aplica, cadascuna explicada en llenguatge planer amb les seves xifres, el seu article i la seva font, tal com estan el 2026. Les xifres que són pràctica de mercat i no llei es marquen com a no verificades i es poden editar, i la icona d'ajuda al costat d'una xifra calculada obre la norma que hi ha al darrere.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F21 - Rules.png",
+    "alt": "El catàleg de normes: IRPF, hipoteques i la resta, cadascuna amb el seu article, i les xifres pendents de verificar marcades",
+    "shot": true
+  }
+]} />
+
+**El que no és aquesta part.** No és assessorament fiscal ni jurídic: fa estimacions, i diu què cal preguntar. La família d'aquestes imatges i del vídeo és inventada, un pare, una mare i tres fills adults amb immobles en municipis del voltant de Barcelona, carregada en un compte de demostració local en un servidor de proves, i els camps d'adreça i de referència cadastral es difuminen al navegador abans de la captura.
+
+**El llibre familiar, d'una tirada.** Un recorregut enregistrat: el llibre desbloquejat amb la seva frase de pas, una nòmina, una venda prevista, l'IRPF i l'impost sobre el patrimoni, l'herència amb l'interruptor dels hereus amb patrimoni desactivat i tornat a activar, la comparació amb la societat, una hipoteca recalculada per a un pis més barat, la jubilació, el terreny i les seves opcions, el catàleg de normes, i el llibre desat i bloquejat. Enregistrat de la mateixa manera que el primer vídeo, a 1440p60.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PropertyYield/family-walkthrough.mp4",
+    "poster": "/PropertyYield/family-walkthrough-poster.jpg",
+    "title": "Property Yield Analyser, el patrimoni familiar"
+  }
+]} />

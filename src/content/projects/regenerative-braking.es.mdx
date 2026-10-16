@@ -1,0 +1,67 @@
+---
+title: "Frenado regenerativo"
+subtitle: "Recuperación de energía · CAT15x/16x"
+tags:
+  - "Recuperación de energía"
+  - "Brake blending"
+  - "Antibloqueo"
+  - "Gestión del SoC"
+  - "Sensores hidráulicos"
+  - "ROS"
+source: "da3a3f1f8f"
+---
+
+El sistema de frenado regenerativo está diseñado en torno a una restricción innegociable: siempre se debe mantener la curva ideal de distribución de la fuerza de frenado. Todos los modos y configuraciones funcionan dentro de ese margen, lo que garantiza la estabilidad del vehículo y un reparto de frenada previsible independientemente de cómo se combinen las fuerzas eléctricas y mecánicas.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P1 - IdealBrakeDistribution.png",
+    "alt": "Curva ideal de distribución de la fuerza de frenado Fr vs. Ff"
+  }
+]} />
+
+En escenarios orientados al rendimiento, como el AutoX, el frenado mecánico y el eléctrico trabajan en paralelo desde el primer momento en que se pisa el freno. Unos sensores de presión hidráulica en ambos circuitos de freno miden la demanda de frenado del piloto en tiempo real, lo que permite al sistema calcular el par de frenado mecánico en cada instante. Después, el par de frenado eléctrico se ajusta para complementarlo con precisión, de modo que el piloto conserva toda la sensibilidad del pedal mientras se maximiza la deceleración. La distribución de fuerzas combinada se mantiene sobre la curva ideal durante toda la frenada.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P2 - ParallelBraking.png",
+    "alt": "Frenado en paralelo: fuerza trasera hidráulica, eléctrica y total"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P2 - BrakeDistribution_Simulation.png",
+    "alt": "Simulación de la distribución de frenado: distribución sobre la curva ideal y desglose de fuerzas"
+  }
+]} />
+
+Cuando la prioridad es recuperar energía, el sistema da al piloto un primer recorrido de pedal gestionado por completo por los motores eléctricos. Solo cuando la fuerza de frenado eléctrica es insuficiente entran los frenos mecánicos, y ambos sistemas vuelven a trabajar en paralelo. Este escalonamiento maximiza la energía que vuelve a la batería en circuitos donde la recuperación importa más que la deceleración máxima, sin que el piloto tenga que cambiar su técnica de frenada.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - BrakingStrategies.png",
+    "alt": "Estrategias de frenado regenerativo: Regen-First vs. Parallel Mode"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - RegenTorque_Limits.png",
+    "alt": "Límites de par regenerativo máximo en función de la velocidad del vehículo"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - StateMachine.png",
+    "alt": "Máquina de estados del frenado regenerativo: implementación en Simulink"
+  }
+]} />
+
+El sistema incluye un mecanismo de prevención del bloqueo de ruedas que compara las RPM de cada rueda con la velocidad del vehículo que proporciona el INS. Si alguna rueda decelera más rápido de lo que es físicamente coherente con la velocidad del vehículo, se reduce el par eléctrico en esa rueda. Un conjunto de límites de seguridad también vigila el estado de carga (State of Charge) de la batería y las temperaturas de los motores y de los inversores. Si se supera algún umbral, el par regenerativo se reduce progresivamente con una transición suave hacia un frenado puramente mecánico, para que el piloto nunca se lleve una sorpresa.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P4 - WheelTorque_Simulation.png",
+    "alt": "Simulación del par de frenado por rueda: FL/FR/RL/RR"
+  }
+]} />

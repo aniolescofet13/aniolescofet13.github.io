@@ -1,0 +1,12 @@
+---
+// The same project pages in Catalan and Spanish: /ca/projects/<slug>/ and /es/projects/<slug>/.
+import { getCollection } from 'astro:content';
+import ProjectPage from '../../../components/pages/ProjectPage.astro';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('projects')).filter((p) => p.data.visibility !== 'hidden');
+  return ['ca', 'es'].flatMap((lang) => all.map((p) => ({ params: { lang, slug: p.id }, props: { project: p } })));
+}
+const { project } = Astro.props;
+---
+<ProjectPage project={project} />

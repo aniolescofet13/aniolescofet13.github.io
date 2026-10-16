@@ -1,0 +1,98 @@
+---
+title: "Webs per a petits negocis"
+subtitle: "Nou webs de demostració per a tres sectors · Astro · TypeScript · Disseny web"
+tags:
+  - "Astro"
+  - "TypeScript"
+  - "Disseny web"
+  - "Disseny d'interacció"
+  - "Accessibilitat"
+  - "i18n"
+  - "Il·lustració procedural"
+  - "Python"
+source: "14256fbbb9"
+---
+
+**La idea.** Un restaurant petit, una casa d'hostes, un taller o una floristeria passen bona part del dia responent per telèfon les mateixes preguntes: és obert?, teniu habitació aquell cap de setmana?, quant costarà?, com va el meu cotxe?, pot arribar avui? Aquests nou webs són demostracions per a un estudi web adreçat a aquests negocis, tres per a cada sector, i cadascun està construït al voltant de la pregunta que el propietari respon més sovint. La resposta és el primer que hi ha a la pàgina, i és interactiva: el visitant tria, el web calcula i el resultat és a la pantalla abans que ningú hagi d'agafar el telèfon.
+
+**Què tenen en comú.** Tots els negocis són inventats, amb el seu lloc, la seva gent i la seva història, i cada web ho diu. Cadascun té un món visual propi, triat entre quatre prototips construïts, perquè no n'hi hagi dos que s'assemblin. Són webs estàtics fets amb Astro, sense peticions a tercers, sense galetes i amb les fonts allotjades al mateix lloc. Els preus sempre són visibles, les reserves, les comandes i les sol·licituds són simulades i ho diuen, i res no es presenta com una ressenya, un premi o un fet real si no ho és. Les il·lustracions que semblen pintades estan fetes amb codi: SVG escrit a mà i passat per un filtre procedural de gouache i paper en Python, ja que no s'ha fet servir cap model d'imatge. Les fotografies són de banc d'imatges, amb la llicència registrada.
+
+**Restaurants.** Un bar de barri, una fonda de muntanya que viu de les reserves del cap de setmana i un menú degustació no necessiten el mateix web. Els tres webs de restauració cobreixen tres maneres de rebre un client.
+
+**Can Sifó, un bar de vermut a Sants, Barcelona.** Un bar familiar des del 1962, amb el mateix taulell de marbre, una bota de vermut i un sifó a cada taula. El telèfon no parava de sonar els dilluns, el dia que tanca, un grup de deu es presentava el dissabte sense avisar i una veïna celíaca preguntava plat per plat què podia menjar. El web respon abans que ningú surti de casa. Un rètol il·luminat diu si el bar és obert i a quina hora tanca, a partir de l'horari i l'hora de Barcelona. Un mirall daurat mostra el plat del dia. La carta filtra per vegetarià, sense gluten i els 14 al·lèrgens, amaga el que no es pot menjar i diu quants plats ha amagat. Els grups escriuen quants són i quan venen, i el missatge queda a punt per enviar per WhatsApp. En català i castellà.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/can-sifo.mp4", "poster": "/WebStudio/can-sifo-poster.jpg", "title": "Can Sifó, un recorregut" },
+  { "type": "image", "src": "WebStudio/can-sifo-1.png", "alt": "Pàgina d'inici de Can Sifó: el rètol il·luminat diu obert, al costat del plat del dia en un mirall daurat", "shot": true },
+  { "type": "image", "src": "WebStudio/can-sifo-2.png", "alt": "La carta filtrada per sense gluten, amb el recompte dels plats amagats", "shot": true }
+]} />
+
+**Fonda Solpost, una fonda de muntanya amb sistema de reserves propi.** Una fonda de poble a la carretera de la vall, oberta des del 1974, amb brasa de carbó i plats de cullera. Els dissabtes depenien d'una llibreta al costat de la caixa i d'un telèfon que sonava enmig del servei, i els clients que no aconseguien parlar-hi reservaven en una plataforma que cobrava per cada comensal. Aquest és el complet: un web públic en quatre idiomes i un tauler per al personal. El visitant veu les hores lliures d'aquesta nit, en tria una i rep un codi de reserva i un correu de confirmació. El motor de reserves l'assigna a la taula lliure més petita on càpiga, i uneix fins a tres taules de la mateixa sala quan cal, mai les rodones. Al tauler, la reserva nova apareix al plànol de la sala, els recordatoris s'envien amb un clic, els clients que arriben sense reserva i les reserves per telèfon s'afegeixen de la mateixa manera, i una llista d'espera guarda els clients que no han trobat taula.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/fonda-solpost.mp4", "poster": "/WebStudio/fonda-solpost-poster.jpg", "title": "Fonda Solpost, una reserva des del web fins al plànol de la sala" },
+  { "type": "image", "src": "WebStudio/fonda-solpost-1.png", "alt": "Pàgina d'inici de la Fonda Solpost amb les hores lliures d'aquesta nit en rajoles blanques" },
+  { "type": "image", "src": "WebStudio/fonda-solpost-2.png", "alt": "El formulari de reserva amb la data, l'hora i el nombre de persones ja emplenats" }
+]} />
+
+**Fonoll, un menú degustació en una masia de l'Empordà.** Un xef que va convertir el celler familiar en un menjador amb volta de maó i una sola finestra al sud. Els clients sempre preguntaven si era millor venir a dinar o a sopar, i la resposta eren dues llums diferents. La pàgina d'inici dibuixa la sala en secció: el dinar deixa entrar el sol amb l'angle real d'aquell dia i aquell lloc a les 13:30, i el sopar porta la sala al vespre i encén els llums. El menú avança pas a pas amb l'hora en què arriba cada plat i el total al costat, maridatge inclòs. El formulari de reserva recull els 14 al·lèrgens i una nota, perquè la cuina ho sàpiga abans del servei, i un val regal es dibuixa a mesura que s'emplena. En català i castellà.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/fonoll.mp4", "poster": "/WebStudio/fonoll-poster.jpg", "title": "Fonoll, un recorregut" },
+  { "type": "image", "src": "WebStudio/fonoll-1.png", "alt": "Pàgina d'inici de Fonoll: el menjador dibuixat en secció, amb el selector de dinar i sopar" },
+  { "type": "image", "src": "WebStudio/fonoll-2.png", "alt": "El menú degustació pas a pas, amb el total recalculat per a quatre persones" }
+]} />
+
+**Allotjament.** Qui busca on dormir el compara amb les grans plataformes. Un web propi només guanya si mostra de seguida el que la plataforma mostra malament, i si reservar directament surt a compte. Cadascun d'aquests tres respon una pregunta diferent: queden nits lliures i quant costarà tota l'estada, quina habitació vull, i a quina distància és el remuntador i en quin idioma m'ho explicaran.
+
+**Cal Peirot, una casa d'hostes a la Cerdanya.** Una casa de pedra del 1884 on l'àvia, quan van començar a llogar habitacions, tenia un pot en un prestatge per a cada nit: ple i tapat si estava ocupada, buit si estava lliure. El web és aquell prestatge. Cada nit dels dos mesos següents és un pot, per a cada habitació o per a tota la casa, i canviar d'habitació els omple i els buida en una onada. Al costat, una etiqueta de paper d'estrassa suma les nits per temporada, la neteja i la taxa turística en un sol total, es gira per mostrar què hi ha inclòs i avisa, abans d'enviar res, quan un festiu demana tres nits. El formulari de sol·licitud arriba ja emplenat amb l'estada. En català i castellà, en diverses pàgines per a la casa, la vall i com arribar-hi.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/cal-peirot.mp4", "poster": "/WebStudio/cal-peirot-poster.jpg", "title": "Cal Peirot, un recorregut" },
+  { "type": "image", "src": "WebStudio/cal-peirot-1.png", "alt": "Pàgina d'inici de Cal Peirot: un prestatge de pots, un per nit, al costat de l'etiqueta del preu" },
+  { "type": "image", "src": "WebStudio/cal-peirot-2.png", "alt": "Tres nits d'un pont festiu triades al prestatge, amb l'etiqueta girada per mostrar què inclou el preu" }
+]} />
+
+**Casa Serinyana, un hotel boutique a tocar de l'Onyar, a Girona.** Onze habitacions en una casa de comerciants del barri vell, cadascuna amb una finestra pròpia, i una amb un sostre pintat que es va trobar sota un fals sostre. A les plataformes semblava un hotel qualsevol. Aquí la façana és el selector d'habitacions: cada finestra és un dels quatre tipus d'habitació amb el seu preu, i triar-ne una obre els porticons, encén la finestra i encén el seu reflex al riu. El panell del costat calcula el preu de les nits triades, amb els caps de setmana més cars, i mostra el que s'estalvia en l'esmorzar reservant directament, una xifra que torna a sortir al costat dels quatre motius per reservar aquí.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/casa-serinyana.mp4", "poster": "/WebStudio/casa-serinyana-poster.jpg", "title": "Casa Serinyana, un recorregut" },
+  { "type": "image", "src": "WebStudio/casa-serinyana-1.png", "alt": "Pàgina d'inici de Casa Serinyana: les cases sobre el riu amb una etiqueta de preu a cada finestra" },
+  { "type": "image", "src": "WebStudio/casa-serinyana-2.png", "alt": "L'habitació Noble triada a la façana, amb la finestra encesa i reflectida a l'aigua" }
+]} />
+
+**Coll d'Isard, apartaments d'esquí a Soldeu, Andorra.** Vuit apartaments a 120 m del telecabina, i cada dia les mateixes dues preguntes en tres idiomes: a quina distància és la pista, i quant ens costa la setmana. La pàgina d'inici és un cartell d'esquí pintat a la gouache que respon la primera. A sota, la franja de reserva recull les dates, les persones i l'aparcament i calcula el preu de la setmana exacta segons la temporada, amb el descompte per set nits. Tres tiquets diuen quin apartament encaixa i si està lliure, i quan un està ocupat el web passa al següent. En català, castellà i francès.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/coll-d-isard.mp4", "poster": "/WebStudio/coll-d-isard-poster.jpg", "title": "Coll d'Isard, un recorregut" },
+  { "type": "image", "src": "WebStudio/coll-d-isard-1.png", "alt": "Pàgina d'inici de Coll d'Isard: un cartell d'esquí pintat, a 120 m del telecabina, sobre la franja de reserva", "shot": true },
+  { "type": "image", "src": "WebStudio/coll-d-isard-2.png", "alt": "Una setmana per a sis persones amb el preu per temporada i el descompte per set nits" }
+]} />
+
+**Botigues i serveis.** Una botiga, un taller o un despatx no venen una experiència. Responen una pregunta concreta i repetida, cada dia, per telèfon. El web els és útil si respon aquesta pregunta abans que el client hagi de trucar: quant costa aquest ram i si pot arribar avui, com va el meu cotxe i quant em costarà, quin és el pròxim termini fiscal i què he de portar.
+
+**Floristeria Ginesta, una floristeria a Gràcia, Barcelona.** Una florista que compra al mercat de flors a les sis i fa sis rams cada dilluns, i després es passa el migdia responent els mateixos missatges. El web és una parada de Sant Jordi tot l'any. Els sis rams estan pintats sobre un taulell de fusta, cadascun amb una targeta escrita a mà amb els seus tres preus, i tocar un preu l'encercla amb bolígraf vermell. Una etiqueta de paper diu si una comanda encara arriba avui i quant temps queda. El full de comanda del costat recull si és per recollir o per enviar, amb el cost per a cada barri, el dia i el missatge de la targeta, i redacta el missatge de WhatsApp a mesura que s'emplena. Els rams de condol van a part, en blanc i verd, sense cinta.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/floristeria-ginesta.mp4", "poster": "/WebStudio/floristeria-ginesta-poster.jpg", "title": "Floristeria Ginesta, un recorregut" },
+  { "type": "image", "src": "WebStudio/floristeria-ginesta-1.png", "alt": "Pàgina d'inici de la Floristeria Ginesta: rams pintats sobre un taulell, cadascun amb una targeta de preus escrita a mà" },
+  { "type": "image", "src": "WebStudio/floristeria-ginesta-2.png", "alt": "Un preu encerclat amb bolígraf vermell i el full de comanda amb enviament a Vallcarca" }
+]} />
+
+**Tallers Gurri, un taller en un polígon industrial de Vic.** Tres mecànics que un dia van comptar 31 trucades de clients que preguntaven com anava el seu cotxe. Aquí tot és una sola ordre de treball amb còpia en paper carbó. En escriure el número del resguard, l'ordre s'omple i cada pas fet queda segellat (rebut, diagnosi, esperant una peça, en reparació, a punt) amb la data i la nota escrita a mà del mecànic. La còpia groga és el pressupost: un servei i un tipus de vehicle donen la forquilla de preu i el que inclou. La còpia rosa és l'agenda: encercla una hora lliure de la setmana vinent, afegeix-hi un cotxe de cortesia, i la cita queda resumida al mateix full. El web complet d'aquest sector, en català i castellà.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/tallers-gurri.mp4", "poster": "/WebStudio/tallers-gurri-poster.jpg", "title": "Tallers Gurri, un recorregut" },
+  { "type": "image", "src": "WebStudio/tallers-gurri-1.png", "alt": "Pàgina d'inici de Tallers Gurri: una ordre de treball amb còpia en carbó, buida, esperant un número de resguard" },
+  { "type": "image", "src": "WebStudio/tallers-gurri-2.png", "alt": "La còpia groga del pressupost i la còpia rosa de la cita, l'una al costat de l'altra" }
+]} />
+
+**Gestoria Pallarès, una gestoria a Sabadell.** Quatre persones que expliquen la declaració de l'IVA com l'IVA que has cobrat menys l'IVA que has pagat, i clients que no tenen por de pagar sinó de fer tard. El web és l'agenda del despatx, oberta per la setmana del pròxim termini amb l'últim dia encerclat en vermell i els dies que queden en xifres grans. Triar autònom, petita empresa o particular passa la pàgina fins al termini d'aquella persona, i la pàgina del davant enumera què cal portar i la quota mensual. El calendari ratlla a mà els terminis passats, cada model tributari s'explica amb paraules planeres, i la primera consulta demana el motiu perquè respongui la persona adequada. Les dates porten un avís clar que són orientatives i no constitueixen assessorament.
+
+<Slider items={[
+  { "type": "video", "src": "/WebStudio/gestoria-pallares.mp4", "poster": "/WebStudio/gestoria-pallares-poster.jpg", "title": "Gestoria Pallarès, un recorregut" },
+  { "type": "image", "src": "WebStudio/gestoria-pallares-1.png", "alt": "Pàgina d'inici de la Gestoria Pallarès: una agenda enquadernada en tela, oberta per la setmana del pròxim termini fiscal, encerclat en vermell", "shot": true },
+  { "type": "image", "src": "WebStudio/gestoria-pallares-2.png", "alt": "La pàgina d'autònoms de l'agenda: dies que queden, què cal portar i la quota mensual", "shot": true }
+]} />
+
+<Note>Tots els negocis, persones, adreces, preus i telèfons d'aquests webs són inventats. Les fotografies són imatges de banc sota la llicència de Pexels. Els recorreguts estan gravats dels webs en funcionament.</Note>

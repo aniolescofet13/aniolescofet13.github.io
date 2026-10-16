@@ -2,19 +2,22 @@
 // The old viewer embedded the PDF directly, so all six reports — 130 MB —
 // were requested on page load, inside cards most visitors never open.
 // Now the frame is created only when someone asks to read it.
+import { useT } from '../i18n/ui';
+import { langOf } from '../i18n/current';
+const t = useT(langOf(Astro.currentLocale)).pdf;
 interface Props { src: string; title?: string }
-const { src, title = 'Document' } = Astro.props;
+const { src, title = t.doc } = Astro.props;
 const viewer = `${src}#toolbar=0&navpanes=0&scrollbar=0`;
 ---
 <div class="pdf-viewer">
   <div class="pdf-viewer-header">
     <span class="pdf-viewer-title">{title}</span>
     <div class="pdf-viewer-nav">
-      <a class="pdf-download-btn" href={src} download>↓ Download PDF</a>
+      <a class="pdf-download-btn" href={src} download>{t.download}</a>
     </div>
   </div>
   <div class="pdf-facade" data-pdf={viewer} data-title={title}>
-    <button class="pdf-open-btn" type="button">Read the report here</button>
-    <span class="pdf-facade-hint">Opens in the page · or download it above</span>
+    <button class="pdf-open-btn" type="button">{t.read}</button>
+    <span class="pdf-facade-hint">{t.hint}</span>
   </div>
 </div>

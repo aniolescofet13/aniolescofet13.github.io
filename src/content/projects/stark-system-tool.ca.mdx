@@ -1,0 +1,32 @@
+---
+title: "STARK System Tool"
+subtitle: "STARK Future S.L. · Simulació 1D del vehicle"
+tags:
+  - "MATLAB"
+  - "Simulink"
+  - "Enginyeria de sistemes"
+  - "Powertrain elèctric"
+  - "Modelització tèrmica"
+source: "cd29060237"
+---
+
+Vaig construir l'eina de simulació principal per a la gamma de motos de STARK: un model 1D complet de bateria, inversor, motor, transmissió, xassís i entorn. Els enginyers varien models i característiques per avaluar consum, pèrdues, acceleració, velocitat màxima i comportament tèrmic, és a dir, pràcticament tot el que cal per dimensionar una moto abans que existeixi.
+
+La cadena funciona de punta a punta en una sola dimensió. La bateria alimenta l'inversor, l'inversor el motor, el motor la transmissió i la transmissió la roda, amb l'entorn (pendent, temperatura ambient, vent i demanda del pilot) imposat sobre les parts que el noten, i la velocitat i la càrrega tancant el llaç de tornada cap amunt de la cadena. Cada etapa reporta les seves pròpies pèrdues, i cadascuna d'aquestes pèrdues va a parar a una xarxa tèrmica, de manera que la temperatura no és un estudi que es fa a posteriori sinó un estat que retroalimenta directament l'eficiència i els límits en règim continu. Aquesta és la part que decideix si una moto que és ràpida durant una volta continua sent ràpida durant vint.
+
+El que en surt són grups de resultats, no un valor únic: la potència a cada node i com es reparteixen les pèrdues entre ells. L'energia al llarg d'un cicle, incloent-hi la que torna en la recuperació. I la temperatura al bobinatge, a la unió, a la cel·la i al llarg del circuit de refrigerant, juntament amb el temps que es triga a arribar a un límit. Les preguntes de dimensionament es redueixen a aquests canals (acceleració, velocitat màxima, capacitat de pujar pendents, autonomia i capacitat contínua davant de capacitat de pic), i cadascuna es respon en funció del conjunt de components escollit.
+
+Els dos dibuixos de sota són l'arquitectura i els grups de canals. Només en mostren la topologia: cap paràmetre, cap característica i cap resultat.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "STARK Future/P1 - System architecture.png",
+    "alt": "Arquitectura: de la bateria a la carretera, amb cada terme de pèrdues dirigit a una xarxa tèrmica"
+  },
+  {
+    "type": "image",
+    "src": "STARK Future/P2 - Computed quantities.png",
+    "alt": "Grups de canals que dona el model: potència, energia i tèrmics"
+  }
+]} />

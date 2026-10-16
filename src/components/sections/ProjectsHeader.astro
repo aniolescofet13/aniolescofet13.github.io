@@ -1,3 +1,6 @@
 ---
+import { useT } from '../../i18n/ui';
+import { langOf } from '../../i18n/current';
+const t = useT(langOf(Astro.currentLocale)).projects;
 ---
-<div class="section-header reveal"><span class="section-num">03</span><h2 class="section-title">Projects</h2><div class="section-line"></div></div>
+<div class="section-header reveal"><span class="section-num">03</span><h2 class="section-title">{t.title}</h2><div class="section-line"></div></div>

@@ -1,0 +1,56 @@
+---
+title: "Control de tracción"
+subtitle: "Gestión del deslizamiento de rueda · CAT15x/16x"
+tags:
+  - "Control del inversor"
+  - "Relación de deslizamiento"
+  - "Pacejka"
+  - "CAN Bus"
+  - "ROS"
+source: "1a326ba8c0"
+---
+
+El sistema de control de tracción se implementa como un controlador de velocidad que se ejecuta directamente dentro del inversor, en lugar de hacerlo a nivel de la Processing Unit. Es una decisión de arquitectura deliberada: el enlace de comunicación CAN-ROS entre la PU y los inversores funciona a 50 Hz, demasiado lento para reaccionar de forma eficaz a los transitorios de deslizamiento de las ruedas. Al llevar el lazo de control dentro del inversor, que funciona a una frecuencia bastante más alta, el sistema responde a los episodios de deslizamiento antes de que puedan desarrollarse, sin quedar limitado por la latencia de comunicación.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P1 - Continuous_vs_Discrete.png",
+    "alt": "Control continuo vs. respuesta de par discreta a 50 Hz"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P1 - Speed_Setpoint.png",
+    "alt": "Velocidad angular de consigna para el deslizamiento ideal en función de la velocidad del vehículo"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P1 - SlipRatio_Control.png",
+    "alt": "Respuesta del control de velocidad y de relación de deslizamiento"
+  }
+]} />
+
+Además de limitar el par, el sistema también aplica un control basado en la velocidad con un objetivo de relación de deslizamiento óptima para cada rueda. Como las superficies de competición son conocidas y constantes, y se caracterizan durante los tests de pretemporada, el punto de funcionamiento óptimo de la curva de fuerza longitudinal se determina de antemano. El equipo modeló la Pacejka Magic Formula para sus neumáticos concretos, lo que da una predicción de la relación de deslizamiento de pico mucho más precisa que un modelo genérico. Después, el objetivo de relación de deslizamiento óptima se ajusta en función del ángulo de deriva de cada rueda, acoplando el comportamiento longitudinal y lateral del neumático para una estrategia de gestión del deslizamiento más completa.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P2 - Pacejka_Full.png",
+    "alt": "Curva completa de fuerza longitudinal de Pacejka"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P2 - Pacejka_Optimal.png",
+    "alt": "Pacejka Mu_x vs. relación de deslizamiento: punto de funcionamiento óptimo"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P2 - SlipRatio_vs_SlipAngle.png",
+    "alt": "Acoplamiento entre la relación de deslizamiento óptima y el ángulo de deriva"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P2 - DesSR_perWheel.png",
+    "alt": "Límite de velocidad angular y relación de deslizamiento deseada por rueda"
+  }
+]} />

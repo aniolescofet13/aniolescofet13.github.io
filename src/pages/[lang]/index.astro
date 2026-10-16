@@ -1,0 +1,8 @@
+---
+// /ca/ and /es/. English lives at the root, in src/pages/index.astro.
+import Home from '../../components/pages/Home.astro';
+export function getStaticPaths() {
+  return [{ params: { lang: 'ca' } }, { params: { lang: 'es' } }];
+}
+---
+<Home />

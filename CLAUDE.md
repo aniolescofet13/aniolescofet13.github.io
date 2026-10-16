@@ -44,6 +44,29 @@ repo: https://github.com/aniolescofet13/lap-time   # optional
 The schema is in `src/content.config.ts`. A field it rejects fails the build,
 which is the point: a bad value never reaches the live site.
 
+## Languages: English, Catalan, Spanish
+
+The site is in three languages: English at `/`, Catalan at `/ca/`, Spanish at
+`/es/`, with a switch in the nav. Project pages follow the same pattern
+(`/ca/projects/<slug>/`).
+
+- **Interface text** (menu, hero, about, experience, skills, contact, buttons)
+  lives in `src/i18n/ui.ts`, one block per language with the same keys.
+- **A project's translations** sit next to its English file:
+  `<slug>.mdx` (English, the original), `<slug>.ca.mdx`, `<slug>.es.mdx`.
+  A translation has only `title`, `subtitle`, `tags`, `badge`, `source` and the
+  body. Visibility, category, order and repo come from the English file.
+- **When you change a project's English text, update both translations in the
+  same change**, then record it: `npm run i18n -- --stamp <slug>.ca` and
+  `npm run i18n -- --stamp <slug>.es`. `npm run i18n` lists any translation that
+  is missing or older than its English; the build also warns about them. A
+  missing translation shows the English with a short notice.
+- Translate everything a visitor reads, including Slider `alt` and `title` and
+  Pdf titles. Keep every `src`, URL and component as it is. Proper names stay
+  (products, cars, circuits, companies, Politecnico di Milano course names).
+  Same rules as the English: no em-dashes, no semicolons, decimal comma in
+  Catalan and Spanish prose, nothing added or dropped.
+
 ## Writing the body
 
 Markdown, plus three components. **They need no `import` line**; they are

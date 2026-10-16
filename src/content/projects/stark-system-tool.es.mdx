@@ -1,0 +1,32 @@
+---
+title: "STARK System Tool"
+subtitle: "STARK Future S.L. · Simulación 1D del vehículo"
+tags:
+  - "MATLAB"
+  - "Simulink"
+  - "Ingeniería de sistemas"
+  - "Powertrain eléctrico"
+  - "Modelado térmico"
+source: "cd29060237"
+---
+
+Construí la herramienta de simulación principal para la gama de motos de STARK: un modelo 1D completo de batería, inversor, motor, transmisión, chasis y entorno. Los ingenieros varían modelos y características para evaluar consumo, pérdidas, aceleración, velocidad máxima y comportamiento térmico, es decir, prácticamente todo lo necesario para dimensionar una moto antes de que exista.
+
+La cadena funciona de principio a fin en una sola dimensión. La batería alimenta al inversor, el inversor al motor, el motor a la transmisión y la transmisión a la rueda, con el entorno (pendiente, temperatura ambiente, viento y demanda del piloto) impuesto sobre las partes que lo notan, y la velocidad y la carga cerrando el lazo de vuelta hacia arriba en la cadena. Cada etapa reporta sus propias pérdidas, y cada una de esas pérdidas acaba en una red térmica, de modo que la temperatura no es un estudio que se hace a posteriori sino un estado que retroalimenta directamente la eficiencia y los límites en régimen continuo. Esa es la parte que decide si una moto que es rápida durante una vuelta sigue siendo rápida durante veinte.
+
+Lo que sale son grupos de resultados, no un valor único: la potencia en cada nodo y cómo se reparten las pérdidas entre ellos. La energía a lo largo de un ciclo, incluida la que vuelve en la recuperación. Y la temperatura en el bobinado, en la unión, en la celda y a lo largo del circuito de refrigerante, junto con el tiempo que se tarda en llegar a un límite. Las preguntas de dimensionamiento se reducen a esos canales (aceleración, velocidad máxima, capacidad para subir pendientes, autonomía y capacidad continua frente a capacidad de pico), y cada una se responde en función del conjunto de componentes elegido.
+
+Los dos dibujos de abajo son la arquitectura y los grupos de canales. Solo muestran la topología: ningún parámetro, ninguna característica y ningún resultado.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "STARK Future/P1 - System architecture.png",
+    "alt": "Arquitectura: de la batería a la carretera, con cada término de pérdidas dirigido a una red térmica"
+  },
+  {
+    "type": "image",
+    "src": "STARK Future/P2 - Computed quantities.png",
+    "alt": "Grupos de canales que da el modelo: potencia, energía y térmicos"
+  }
+]} />

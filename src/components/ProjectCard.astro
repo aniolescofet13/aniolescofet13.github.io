@@ -4,6 +4,9 @@ import Slider from './Slider.astro';
 import Pdf from './Pdf.astro';
 import Note from './Note.astro';
 import { isPublicRepo } from '../lib/repos';
+import { localize } from '../lib/projects';
+import { useT } from '../i18n/ui';
+import { langOf } from '../i18n/current';
 
 // Handed to every project body, so the content files need no import lines:
 // nothing for the CMS or another session to break, and a new project can use
@@ -17,8 +20,11 @@ interface Props {
   open?: boolean;     // a project's own page shows it expanded
 }
 const { project, label, anchor, open = false } = Astro.props;
-const { title, subtitle, tags, badge, repo } = project.data;
-const { Content } = await render(project);
+const lang = langOf(Astro.currentLocale);
+const t = useT(lang).projects;
+// The text in the page's language when a translation exists, the English otherwise.
+const { title, subtitle, tags, badge, repo, entry, translated } = await localize(project, lang);
+const { Content } = await render(entry);
 // The icon appears by itself once the repository is public on GitHub.
 const showRepo = await isPublicRepo(repo);
 ---
@@ -33,7 +39,7 @@ const showRepo = await isPublicRepo(repo);
       )}
       {showRepo && (
         <a class="repo-link" href={repo} target="_blank" rel="noreferrer noopener"
-           aria-label={`Source code for ${title} on GitHub`} title="Source code on GitHub">
+           aria-label={t.code(title)} title={t.codeShort}>
           <svg viewBox="0 0 16 16" width="24" height="24" aria-hidden="true" fill="currentColor">
             <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
               0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
@@ -47,7 +53,8 @@ const showRepo = await isPublicRepo(repo);
       )}
       <span class="pcard-cue" aria-hidden="true"></span>
     </summary>
-    <div class="project-desc">
+    <div class="project-desc" lang={translated ? undefined : 'en'}>
+      {!translated && <p class="project-note">{t.fallback}</p>}
       <Content components={mdxComponents} />
     </div>
   </details>

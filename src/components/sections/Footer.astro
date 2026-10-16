@@ -1,3 +1,6 @@
 ---
+import { useT } from '../../i18n/ui';
+import { langOf } from '../../i18n/current';
+const t = useT(langOf(Astro.currentLocale));
 ---
-<footer><p>© 2026 Aniol Escofet. Built with precision.</p></footer>
+<footer><p>{t.footer}</p></footer>

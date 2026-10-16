@@ -1,0 +1,287 @@
+---
+title: "Purple Stint"
+subtitle: "Anàlisi de cronometratge i telemetria de F1 · Next.js · WebGL"
+tags:
+  - "Next.js"
+  - "TypeScript"
+  - "WebGL"
+  - "react-three-fiber"
+  - "ECharts"
+  - "Telemetria"
+  - "Pipeline de dades"
+  - "Exportació estàtica"
+  - "Sistemes de disseny"
+  - "Proves"
+source: "fb5963a27f"
+---
+
+**L'eina.** Purple Stint agafa el cronometratge i la telemetria de la Fórmula 1, totes les sessions de les temporades que cobreix, i els publica com un lloc estàtic: cada pàgina es pre-renderitza en temps de compilació, sense cap API al darrere i sense crides de xarxa en temps d'execució. Cada sessió té nou vistes, des d'una taula de resultats fins a la comparació de telemetria i una reconstrucció 3D de la volta. L'anàlisi en si està escrita com a mòduls de TypeScript pur, sense cap framework a dins, de manera que es prova directament i no a través d'un navegador: tests unitaris contra les dades reals en disc, i tests de Playwright contra l'exportació compilada, que és el que serviria realment un hosting.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P1 - Session overview.png",
+    "alt": "Purple Stint: resum de la sessió amb resultats i condicions",
+    "shot": true
+  }
+]} />
+
+**Situar el cotxe per posició, no per distància.** La manera òbvia d'animar una volta és fer avançar cada cotxe segons la distància recorreguda registrada. Fer-ho així donava cotxes que avançaven a batzegades i, de vegades, saltaven. La causa va resultar ser mesurable: punts de distància consecutius impliquen velocitats d'entre 9 i 5 533 km/h, perquè el canal és acumulat i els seus errors s'acumulen amb ell. Reconstruir l'animació a partir del canal de posició situa cada cotxe a uns 4 m d'on era realment, que és menys que l'amplada de la pista. Després la volta es remostreja amb un Hermite cúbic limitat (clamped), perquè el ritme sigui correcte a cada nus i continu entre nusos: només sobreviuen uns 45 punts al delmat, i unir-los amb rectes mantenia un cotxe a una sola velocitat mitjana durant dos segons seguits, desviat fins a 43 km/h del seu ritme real.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P2 - Lap analysis.png",
+    "alt": "Anàlisi de volta: comparació de telemetria entre diversos pilots i delta",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P2 - Telemetry channels.png",
+    "alt": "Canals de telemetria: velocitat, accelerador, fre, marxa i RPM respecte a la distància de volta",
+    "shot": true
+  }
+]} />
+
+**Llegir una cursa, no una taula de resultats.** La vista de progressió dibuixa el race trace, la diferència de cada pilot respecte a una volta de referència seleccionable, volta a volta, amb les parades a boxs, els safety cars i els virtual safety cars marcats al seu lloc, perquè un undercut es vegi com el que és: una diferència que es tanca en dues voltes i no un número en una columna. La vista d'estratègia és un diagrama de Gantt de stints de pneumàtics construït com una sèrie personalitzada d'ECharts, amb el compost, la durada del stint i l'edat del pneumàtic per a cada pilot. La vista d'undercut va més enllà i detecta automàticament les batalles a boxs, aparellant els pilots la diferència dels quals fa un salt en passar per una parada i representant cada cas en un gràfic.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P3 - Race progression.png",
+    "alt": "Progressió de cursa: race trace amb marques de parades a boxs i safety car",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P4 - Strategy.png",
+    "alt": "Estratègia: Gantt de stints de pneumàtics per pilot",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P5 - Undercut.png",
+    "alt": "Detecció d'undercuts: batalles a boxs trobades a partir del salt de la diferència en una parada",
+    "shot": true
+  }
+]} />
+
+**El temps al pit lane no és temps aturat.** Una parada a boxs, tal com se sol informar, és el delta del pit lane, d'entrada a sortida, que inclou l'aproximació, el límit de velocitat i la sortida, i depèn sobretot del circuit. El que vol saber l'espectador és el temps que el cotxe ha estat aturat amb les rodes fora. Això no és a les dades, però s'hi pot recuperar: la traça de velocitat de la volta de sortida baixa a zero mentre el cotxe és als gats, i la durada d'aquest zero és la parada. Aplicat a tot l'arxiu, resol la majoria de parades, i les més ràpides se situen al voltant d'1,80 s. Aquest 1,80 és la comprovació que el mètode és sòlid i no només plausible: és el rècord mundial, de manera que el límit inferior de la distribució cau exactament on el posa la física.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P5 - Pit stops.png",
+    "alt": "Parades a boxs: durada de les parades, delta del pit lane enfront del temps aturat",
+    "shot": true
+  }
+]} />
+
+**Tot a l'escena s'escala a partir de les dades.** El traçat del circuit s'ajusta dins una caixa fixa, de manera que una unitat de món són 27 m a Jeddah i 10 m a Monaco, i cada constant ajustada a ull només era correcta per a un circuit. Per això l'escena deriva les mides en lloc de fixar-les: la calçada ocupa una proporció fixa del fotograma, i l'amplada del cotxe es deriva de la de la calçada, de manera que hi caben uns set cotxes i mig d'amplada a la pista, com a la realitat. Aquesta relació no es pot desajustar quan algú toca l'altra mida, cosa que havia passat dues vegades, un cop amb un cotxe tres vegades més ample que el seu propi carril i un altre amb un cotxe d'un terç del que hauria de ser, i cap dels dos errors es veu fins que no comptes. Mesurat després sobre els píxels renderitzats: 404 px de calçada, 53 px de cotxe, 7,6 en paral·lel. Cinc càmeres van amb el cotxe. La càmera onboard es col·loca a partir del model i no a ull, sobre el seu propi arc antibolcada, i és l'única vista amb un camp de visió propi: des d'allà les rodes davanteres queden 25° per sota de l'objectiu, i amb els 34° de l'escena, una inclinació prou pronunciada per veure-les apuntaria a l'asfalt. Per això funciona a 62°, i per això una onboard de televisió és un gran angular. El cotxe és un model CC BY 4.0 delmat de 267 632 a 14 019 triangles i compilat en un binari de 300 KiB, repintat per a cada equip a partir d'un buffer de color per instància. Tota l'escena, calçada, pianos, sis cotxes i sis cintes de telemetria, són sis draw calls.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D onboard.png",
+    "alt": "Pista 3D: càmera onboard a 313 km/h amb HUD de telemetria",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D top.png",
+    "alt": "Pista 3D: càmera zenital que mostra l'amplada del cotxe respecte a la de la calçada",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D free.png",
+    "alt": "Pista 3D: càmera lliure amb cintes de velocitat sobre el circuit",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D chase.png",
+    "alt": "Pista 3D: càmera de persecució",
+    "shot": true
+  }
+]} />
+
+**La classificació general, calculada i no descarregada.** Els dos campionats es calculen a partir dels resultats en disc i no es prenen d'una API de classificacions, cosa que vol dir que es poden comprovar: a totes les sessions puntuables d'una temporada, els punts atorgats sumen exactament 101 per cursa i 36 per sprint, i el nombre de victòries coincideix amb el calendari. La pàgina de temporada també inclou l'historial ronda a ronda que hi ha darrere la taula: punts per ronda, posicions d'arribada i de qualificació, el bump chart del campionat i tots els duels entre companys d'equip. La vista de volta ideal reconstrueix el millor temps teòric de cada pilot a partir dels seus propis sectors més ràpids.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P8 - Season standings.png",
+    "alt": "Classificació de la temporada: taules del campionat i repartiment de punts per equip",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P6 - Ideal lap.png",
+    "alt": "Volta ideal: millor volta teòrica reconstruïda a partir dels millors sectors",
+    "shot": true
+  }
+]} />
+
+**Les dades s'aturen on s'atura la temporada.** Una exportació de telemetria només conté els caps de setmana que ja s'han disputat, i porta una sola data per esdeveniment, el diumenge, recuperada del primer missatge de direcció de cursa. Un calendari construït només amb això s'acaba a l'última cursa, cosa que, en una temporada en curs, sembla una temporada que acaba al setembre. Per això la llista de proves ve d'una segona font i les dues es fusionen: el calendari diu quines són les rondes i quan comença cada sessió, i l'exportació diu què va passar a les que ja s'han disputat. Una ronda només es dona per feta quan les dades en tenen la cursa, i només aleshores mostra un guanyador, una pole o un enllaç a la seva telemetria. Cada targeta dibuixa el seu circuit com un únic traç remostrejat a partir del mateix traçat amb què es construeix l'escena 3D. Aquesta segona font és CC BY-NC-SA, no comercial i amb clàusula ShareAlike, i és l'única dependència d'aquest tipus del projecte, així que està aïllada a propòsit: un script l'escriu, un mòdul la llegeix, i si se n'esborren els dos fitxers la pàgina torna a les rondes en disc sense tocar res més. Un test comprova aquesta alternativa, incloent-hi que cap sessió no reivindiqui llavors una hora d'inici que no pot tenir.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P9 - Season calendar.png",
+    "alt": "Calendari de la temporada: rondes, compte enrere i traçats dels circuits",
+    "shot": true
+  }
+]} />
+
+**El tall de la qualificació, i fins a quin punt es pot conèixer.** Una vista nova per a les sessions de qualificació respon la pregunta que tot aficionat es fa el dissabte: quin temps cal per passar? Cada fase s'estima a partir dels temps disponibles just abans, escalats pel guany que sol fer la graella fins aleshores. Dels lliures, només es fan servir les simulacions de qualificació, una volta amb tous nous, ja que la resta dels lliures són tandes llargues i feina de setup. Després, el k-èsim millor temps de la Q1 per a la Q2, i el millor temps de la Q2 per a la pole. Quants passen es llegeix de les dades, no se suposa: 15 de 20 el 2025, 16 de 22 el 2026. Comptar només les simulacions redueix a la meitat l'error medià respecte a fer servir qualsevol volta, mesurat amb leave-one-out sobre els caps de setmana convencionals perquè cap sessió no s'avaluï a si mateixa.
+
+La troballa honesta és el que l'estimació *no pot* fer. El guany del dia entre els lliures i la Q1 va de −1,06 % a +0,37 % i res del que se sap abans de la sessió no el prediu: l'evolució durant els lliures hi té una correlació de 0,23, la temperatura de pista de 0,03, i totes les regressions provades eren pitjors que la mediana plana. Actualitzar l'estimació durant la Q1 amb les voltes fetes fins aleshores no millora l'estimació prèvia a la sessió fins que tota la graella no ha fet un primer intent. Davant d'un tall de Q1 que es decideix per 0,06 s en un cap de setmana típic, la previsió és una zona, no un número, i la pàgina ho diu en segons. El que sí que aguanta és a quin costat de la zona queda cada pilot: en tots els caps de setmana en disc, el 95 % dels pilots estimats més ràpids que tota la zona van passar la Q1, i el 20 % dels estimats més lents. De la Q1 a la Q2, el 95 % i el 3 %. Per això la vista comença amb tres grups (segur, a la corda fluixa, fora), amb aquests percentatges impresos al costat i recalculats a cada compilació, i el temps estimat queda en segon pla. Madrid 2026, un circuit que la graella encara estava aprenent, és el cas extrem: el tall va quedar 0,95 s més enllà de l'estimació, i tot i així els grups van encertar 12 dels 13 pilots segurs i 5 dels 6 marcats com a fora.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P12 - Cut-off Miami.png",
+    "alt": "Tall: Miami 2026, el tall de la Q1 estimat a partir dels lliures amb 0,013 s d'error, amb els grups segur, a la corda fluixa i fora i el percentatge mesurat al costat de cadascun",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P12 - Cut-off Australia.png",
+    "alt": "Tall: Austràlia 2026, les tres fases a menys de 0,09 s de l'estimació, i 15 de 16 i 9 de 9 pilots posats al grup correcte",
+    "shot": true
+  }
+]} />
+
+**Seguir una sessió mentre es disputa.** Una segona porta d'entrada a les dades: una pantalla de cronometratge en directe, un mapa i un panell d'anàlisi que canvia segons la sessió. Llegeix el feed de cronometratge propi de la Fórmula 1 a través d'un petit adaptador que s'executa en una sola màquina, o reprodueix una sessió exportada en temps real perquè es pugui sincronitzar amb una retransmissió. Aquest feed no té cap llicència, així que la pàgina es compila i després s'*esborra* de l'exportació publicada amb el mateix script que informa de la mida del desplegament, i un test fa fallar la compilació si la ruta hi sobreviu mai. El que es publica és el camí de reproducció i l'anàlisi, tots dos construïts a partir de les dades Apache-2.0. Les dues fonts convergeixen en un únic format de frame i un únic reducer, de manera que l'eina en directe i la reproducció comparteixen cada línia excepte l'adaptador, i això és el que permet provar el camí en directe: els tests el fan funcionar plegant sessions reals senceres des del disc i comprovant l'estat contra la classificació de la mateixa sessió.
+
+**Cada sessió fa la seva pròpia pregunta.** El divendres llegeix les tandes llargues: stints entre passades per boxs amb almenys cinc voltes netes, amb el ritme medià, el rang interquartílic com a consistència i el pendent de la tanda com a degradació. Una volta és neta si queda dins del 12 % de la millor del stint, una regla afegida després que una volta de refredament colés una volta de 41 s dins d'una tanda de divendres. El dissabte porta el tall descrit abans, i al costat, cada cotxe en volta respecte al temps que li importa: dins del tall persegueixes la P1, fora, el cotxe que marca el tall, sector a sector. El diumenge comença amb les batalles (cotxes consecutius a menys d'un segon i mig, o que s'acosten prou de pressa per ser-ho aviat, amb el delta acumulat a cada sector que tots dos han passat i les voltes que falten perquè el perseguidor hi arribi) i després l'ordre net, on s'afegeix el temps d'una parada a qui encara deu el canvi obligatori. El que costa una parada es mesura a partir de les parades que ja hi ha hagut en aquella cursa i no se suposa: 20,2 s en 23 parades a Hongria 2025, davant dels 19 s de pit lane que el lloc indica en altres pàgines. El rellotge de la sessió es deriva de la mateixa manera, a partir del moment en què es va obrir el pit lane més la durada reglamentària, i es descarta quan no és fiable: una qualificació amb bandera vermella atura el rellotge i res de l'exportació no diu durant quant de temps, així que Monaco 2025 ofereix rellotge per a la Q3 i cap per a la Q1 ni la Q2.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online practice.png",
+    "alt": "Online: lliures, tandes llargues amb ritme, dispersió i degradació, al costat de les simulacions de qualificació",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online qualifying.png",
+    "alt": "Online: la Q1 de Miami 2026 reproduïda just després de la bandera, el tall estimat a partir dels lliures en 1:29,907 i l'1:29,920 que va caldre, cada cotxe al seu costat del tall",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online race.png",
+    "alt": "Online: cursa, l'ordre al costat del circuit i les batalles amb el que el perseguidor retalla a cada sector",
+    "shot": true
+  }
+]} />
+
+**El mapa era buit, i la mesura ho deia.** El mapa del circuit semblava trencat, i la primera feina era esbrinar per què abans que posar-hi estil. Instrumentat en un navegador real, mantenia 60 fps sense tasques llargues, i no dibuixava cap cotxe durant vint segons seguits: la telemetria exportada és una volta per pilot, que sobre vint cotxes és el 41 % del rellotge d'una qualificació i el 28 % del d'una cursa, menys d'un cotxe en pantalla en qualsevol moment. Per això el mapa funciona a partir del cronometratge, que és complet, i la telemetria es reserva per a l'única cosa que el cronometratge no pot donar: la forma d'una volta. Un cotxe que porta un terç d'una volta en *temps* no ha fet un terç del recorregut en *distància*, i aquesta relació es mesura un cop sobre una volta real i s'hi situa cada cotxe. Comprovada contra la telemetria que no fa servir, la posició cau a 6 m de la realitat en la mediana i a 12 m en el percentil noranta en una volta de qualificació, i a 7 m i 17 m en una volta de cursa, en un circuit de 4,35 km. Un cotxe amb telemetria activa es continua dibuixant a partir d'ella, ple. La resta són buits, perquè una estimació ha de semblar-ho.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online map.png",
+    "alt": "Online: el mapa, amb cotxes buits situats a partir del cronometratge, plens a partir de la seva pròpia telemetria, i els revolts numerats del circuit",
+    "shot": true
+  }
+]} />
+
+**L'entorn de proves estava en verd i el feed no.** L'adaptador s'havia construït contra una sessió sintètica i una reproducció de dades exportades, i totes dues passaven. Apuntar-lo per primer cop a l'arxiu propi de la Fórmula 1 (uns lliures de divendres, descarregats per clau de sessió) va destapar quatre errors, dos dels quals haurien estat igual d'equivocats en una sessió en directe. Els fluxos per sessió de l'arxiu porten el que *canvia* mentre la sessió està en marxa. Qui condueix, quina sessió és i quin pneumàtic porta cada cotxe s'indiquen un sol cop, en fitxers que la reproducció no obria mai, així que enviava temps de volta del cotxe 81 sense dir mai que és Piastri, i no podia distingir uns lliures d'una cursa. El compte enrere fins a la bandera s'escriu hores:minuts:segons i passava per un parser que llegeix un sol dos punts com a minuts i en rebutja dos, de manera que el temps restant no s'establia mai. I cap frame no portava temps: la reproducció descartava els temps de mostra amb què acabava d'ordenar per fusió, el camí en directe no en tenia mai, i cada frame arribava marcat amb zero, així que res mesurat en segons de sessió no es podia moure. L'entorn de proves havia amagat aquests dos últims per motius diferents: no enviava cap rellotge, així que mai no es posava el parser a prova, i marcava els seus propis frames amb temps, cosa que no fa cap de les dues fonts reals. Ara envia un rellotge, l'adaptador marca ell mateix cada frame, i un test vigila cada cosa. Mesurat després contra aquells lliures: la sessió s'identifica sola, vint-i-dos cotxes porten compost, el rellotge corre, i setze pilots entren a la referència dels lliures, que és el nombre que necessita l'estimació de la Q1.
+
+Les imatges de sota són de la sessió sintètica, no de la real, i això és per la norma de llicència, no una drecera. El feed no en té cap, així que les seves dades no es publiquen de cap manera (ni a la compilació ni en una captura de pantalla), i el que es pot mostrar a un lector de la meitat en directe és l'adaptador, la sessió que identifica i el rellotge que fa córrer.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P14 - Live adapter.png",
+    "alt": "Online: l'adaptador connectat al loopback, la sessió identificada a partir del feed i el rellotge fins a la bandera en marxa",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P14 - Baseline sources.png",
+    "alt": "Online: el panell de qualificació sense lliures en disc, que indica d'on pot sortir la referència en el seu lloc",
+    "shot": true
+  }
+]} />
+
+**Després es va disputar una cursa real, i la meitat en directe fallava de maneres que cap test no hauria pogut trobar.** Fins aleshores tot s'havia comprovat contra una sessió en disc o una de sintètica. Seguir un Gran Premi real a través de l'adaptador va destapar un grup d'errors amb una mateixa forma: el feed diu una cosa un cop i no la repeteix mai. En quaranta-cinc segons de funcionament va enviar *dues* posicions i *tres-centes* diferències, perquè una posició només és notícia quan canvia. Així, una pantalla oberta després de la instantània de la subscripció no sabia on rodava ningú, i posava al capdavant un cotxe que anava divuitè. El líder es mostrava mig minut per darrere de si mateix, perquè «sense diferència» es diu no enviant res, i el que quedava era la diferència de quan aquell cotxe encara perseguia. Ara l'adaptador guarda totes les línies de cronometratge que ha vist i les reenvia totes a cada nou client. El mateix raonament va arreglar la finestra de parades, que deia a un lector que s'hi connectava a la volta trenta que ningú no havia parat: el feed indica els stints de cada cotxe un per un i per posició, així que es fusionen per índex en lloc de substituir-se. Connectar-se a una cursa a la volta 48 mostra ara trenta-cinc parades entre vint cotxes.
+
+**Una subscripció que porta cronometratge i res més.** El nivell bàsic no té posicions dels cotxes, ni telemetria, ni circuit, cosa que deixava el mapa permanentment buit, i no es pot arreglar esforçant-s'hi més, perquè les dades no hi són. El que sí que envia el feed són els microsectors: cada sector dividit en trams fixos de pista, amb una indicació de quins ha travessat un cotxe. Això és una informació de posició a la pista que no necessita cap temps de volta, i el circuit on posar-la ja és en disc d'una sessió disputada, així que el mapa es llegeix d'allà i els cotxes se situen pel tram més avançat que han encès. Comptar *quants* n'hi ha d'encesos en lloc de *quins* posava tota la graella a la línia de sortida, ja que el feed esmenta un sector cada vegada.
+
+**Sincronitzar amb una retransmissió vol dir anar enrere, i una cua no pot fer-ho.** El control de retard retenia frames, de manera que augmentar-lo congelava la pantalla durant tot el retard i reduir-lo la feia posar-se al dia. Mai no mostrava un moment anterior, que és tot l'objectiu. Ara guarda els últims minuts i reconstrueix la vista en el moment que es demani, endavant o enrere: 1 517 frames mostrats, 100 després de tornar quaranta segons enrere, 1 705 en tornar. I la instrucció del costat (anar ajustant fins que un cotxe creui la línia a totes dues pantalles alhora) era impossible de seguir, perquè res de la pàgina no deia quan un cotxe creuava la línia. Ara hi ha un llum per a això.
+
+**I un quadre per a l'altre tipus de pregunta.** La resta de la pantalla pregunta per la sessió: qui és on, qui s'acosta, on caurà el tall. Aquest pregunta què fa un pilot amb el cotxe: tria'n tants com vulguis i llegeix-ne la telemetria contra la volta més ràpida de la sessió, que sempre es dibuixa, l'hagis triat o no, perquè és la referència amb què es llegeixen els altres. Cada pilot es mostra en la seva pròpia volta més ràpida i no en una volta concreta escollida, que és la volta que porta realment l'exportació. És el mateix gràfic de les pàgines de volta, així que els canals, el cursor sincronitzat i els colors són els mateixos. Només en diferit, i no és una omissió: en directe no hi ha telemetria per dibuixar.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P15 - Online with telemetry.png",
+    "alt": "Online: la Q2 de Miami 2026 a un minut del final, cada cotxe en volta respecte al temps que li importa, la telemetria de tres pilots i l'estimació del tall a 0,050 s d'on va caure",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P15 - Telemetry box.png",
+    "alt": "Online: telemetria de quatre pilots en una volta de qualificació, cadascun en la seva més ràpida, contra la millor de la sessió",
+    "shot": true
+  }
+]} />
+
+**Un rellotge de qualificació, reconstruït quan la sessió es va aturar.** L'exportació no porta rellotge de sessió, així que la bandera de cada part és el seu semàfor verd més la durada reglamentària, i per a prop d'una quarta part de les parts de qualificació en disc això sortia malament, perquè l'exportació també guarda una fila per a l'espera de cada cotxe al garatge entre parts, sense temps i etiquetada amb la part en què va començar. La prova que funciona és l'única cosa que un rellotge en marxa prohibeix: una volta llançada que comenci després de la bandera. Amb aquest criteri les parts se separen netament: 124 amb l'última volta llançada abans de la bandera, 6 en el minut següent, cap entre un i quatre minuts, i 23 molt més enllà, que són les aturades reals. Aquestes es reconstrueixen en lloc de deixar-les en blanc: l'última volta llançada d'una part comença una mediana de 36 s abans de la bandera, cosa que permet recol·locar la bandera, i l'excés és el temps que el rellotge va estar aturat, inserit al tram més llarg sense ningú a pista. Les 153 parts tenen ara rellotge, i les 23 reconstruïdes porten una titlla, perquè tenen una precisió de mig minut i no de segon.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P16 - Qualifying clock.png",
+    "alt": "Quant tarda a començar l'última volta llançada de cada part de la qualificació respecte a la seva bandera prevista: 130 parts abans o just després, 23 molt més enllà, les aturades",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P16 - Monaco Q2 rebuilt.png",
+    "alt": "Online: la Q2 de Monaco 2025 en diferit, una part que es va aturar, amb el rellotge reconstruït marcat com a estimació",
+    "shot": true
+  }
+]} />
+
+**Les batzegades eren culpa nostra, i un perfil ho va dir en una sola execució.** La reproducció en diferit a 30× baixava a 53 fotogrames per segon amb 18 tasques llargues en deu segons. Un perfil de CPU va situar una desena part del temps a l'efecte d'un wrapper de gràfic: tres gràfics de telemetria reconstruïts des de zero deu cops per segon, perquè tenien com a clau una llista que es refeia a cada tick i rebien un objecte d'opcions construït inline. Amb la clau a les millors voltes i construït un cop per canvi, són 59 fotogrames i una sola tasca llarga. La mateixa passada va treure del mapa els cotxes aparcats. Un cotxe tornat al garatge es continuava dibuixant on hauria acabat la seva volta, des de tres fonts alhora (telemetria que havia deixat de moure's, microsectors que havien deixat d'arribar i una estimació de volta que retenia un cotxe endarrerit a la línia), i ara cadascuna el deixa anar: telemetria quieta durant deu segons, microsectors en silenci durant quatre vegades el seu interval habitual, una volta amb més d'un 4 % de retard. I la pantalla diu menys: els cotxes en volta són els que fan una volta d'atac, quatre com a màxim, i tots els altres que són a pista s'anomenen en una línia a sota.
+
+**Esborrar una ruta de l'exportació no n'esborra el codi.** La pàgina en directe s'elimina de la compilació publicada, però el seu JavaScript continuava a la carpeta estàtica com un chunk al qual no feia referència cap pàgina publicada (la vista en directe, l'adreça de l'adaptador, el reproductor de ràdio), descarregable per qualsevol que llistés el desplegament. L'script que poda l'exportació ara llegeix cada chunk que genera la compilació, elimina els que contenen les paraules pròpies del codi només local i fa fallar la compilació si una pàgina publicada en referencia algun. Això importava pel que va venir després: la ràdio d'equip d'una sessió ja disputada es pot escoltar en aquesta màquina, a la pàgina Online i al costat de la telemetria d'una volta, en streaming des dels servidors propis de la Fórmula 1 i sense guardar-se mai. L'arxiu es llegeix a través d'un rewrite que només existeix al servidor de desenvolupament (una exportació estàtica no en té), i la pàgina de volta carrega el reproductor a través d'un import que la compilació de producció elimina, amb la mateixa comprovació al darrere. La ràdio és contingut de retransmissió, així que aquí apareix com una frase i no com una captura de pantalla.
+
+**Què va dir la ràdio, i qui ho va dir.** En prémer play, una captura es desplega en la targeta que el senyal internacional posa a pantalla: el nom i RADIO apilats en el color de l'equip i en blanc, el número del cotxe en una línia amb una empremta de veu que s'hi aixeca, dibuixada a partir del nivell del mateix àudio, i les paraules en majúscules, que apareixen a mesura que es diuen. Les paraules són de Whisper, executat en aquesta màquina. Dels quatre models mesurats amb les mateixes captures de la cursa d'Abu Dhabi 2025, `small.en` va ser l'únic que va encertar tant «you made a kid's dream come true» com «I love you, Mom, I love you, Dad», i donar-li primer el vocabulari de la ràdio va convertir «Zach from McLaren» en Zak sense canviar res del que ja tenia bé. Una exportació estàtica rebutja qualsevol endpoint que llegeixi una petició, fins i tot en desenvolupament, així que el transcriptor és un procés independent que el servidor de desenvolupament arrenca al seu costat.
+
+La retransmissió posa les paraules del pilot en el color del seu equip i les del mur de boxs en blanc, i res d'una captura no diu qui parla. Un diaritzador divideix cada captura en torns i assigna a cada veu un vector, i al llarg de la sessió els torns del cotxe s'agrupen per veu i es distingeixen per un nom: el mur crida el pilot pel nom de pila, i un pilot gairebé mai no diu el seu. La veu que el diu és la de l'enginyer. De les que no ho fan mai, la que se sent més és la del pilot. En dues curses va pintar catorze torns com a del pilot: dotze són clarament seus, dos són massa confusos per saber-ho, i cap no és clarament de l'enginyer. Per als tres pilots en què no es va poder ancorar cap veu no va pintar res, i aquesta és la gràcia: un color que de vegades és una suposició convertiria cada color en una suposició.
+
+**El color com a dada, no com a decoració.** Cada color és un token d'un únic full d'estils i cap component no pot contenir-ne un de literal, cosa que garanteix un test. Cadascuna de les onze seccions té el seu propi to d'accent, i els tons es trien per cerca i no per gust: un escombratge del cub sRGB a la recerca del color més allunyat, en CIEDE2000, dels 53 que ja s'utilitzen, és a dir, els altres accents, la semàntica de cronometratge i de compostos, i els 21 colors d'equip que porten les dades. El més recent va sortir amb un contrast de 6,03:1 i un ΔE00 de 17,35 respecte al veí més proper, davant d'un mínim d'especificació de 15. Els colors d'equip es reserven per a la identitat i no es reutilitzen mai com a color d'interfície, perquè el color d'una sèrie en un gràfic és una dada. Tot plegat es manté dins del límit de fitxers i de mida de pàgina de Cloudflare Pages, i la compilació falla si se supera qualsevol dels dos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P10 - Circuits globe.png",
+    "alt": "Circuits: globus WebGL del calendari de la temporada",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P11 - Mobile.png",
+    "alt": "La mateixa vista d'estratègia de pneumàtics amb amplada de mòbil",
+    "shot": true
+  }
+]} />
+
+**El que no és.** El lloc no és oficial ni comercial, no té cap relació amb les empreses de la Fórmula 1, i ho indica a cada pàgina. La font del calendari és CC BY-NC-SA i l'única dependència no permissiva del projecte, i per això està aïllada i declarada clarament en lloc d'amagada. Hi ha un test de navegador inestable, una asserció sobre draw calls que falla aproximadament una de cada tres execucions i passa en tornar-lo a executar, conegut i encara no arreglat. La meitat de cronometratge en directe del projecte no és al repositori públic i no hi serà mai, perquè llegeix el feed propi de la F1 amb una subscripció personal.
+
+**Tot plegat, d'una tirada.** Setanta-sis segons del lloc tal com es fa servir, amb el Gran Premi d'Itàlia 2026: obert des de la pàgina d'inici, la telemetria de tres pilots superposada a l'última volta, el race trace i l'estratègia llegits amb el cursor, les batalles a boxs, la volta conduïda en 3D amb les càmeres de persecució, onboard i zenital. Després, la qualificació d'Austràlia triada al carril lateral i el seu tall, cada fase contra la franja en què es va estimar. Després, Online reproduint el final de la Q1 de Miami a trenta vegades el temps real, arrossegat fins als últims minuts, fins que cau la bandera i el tall queda a 0,013 s de l'estimació. I per tancar, la temporada: classificació, calendari i el globus girat a mà. Enregistrat des de la compilació de producció a 2560×1440 i a 60 fotogrames per segon reals: la pàgina anava de deu a setze vegades més lenta que el temps real mentre el screencast del mateix Chrome la capturava, i cada fotograma de sortida es va triar d'entre els fotogrames que lliurava, de manera que cadascun és un fotograma que el lloc va dibuixar de veritat. Les escenes més llargues es reprodueixen més ràpid. La pàgina Online és només local i no té pestanya al lloc publicat, i per això el vídeo hi salta amb un tall. La seva ràdio d'equip queda completament fora.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PurpleStint/walkthrough.mp4",
+    "poster": "/PurpleStint/walkthrough-poster.jpg",
+    "title": "Purple Stint: visita guiada"
+  }
+]} />

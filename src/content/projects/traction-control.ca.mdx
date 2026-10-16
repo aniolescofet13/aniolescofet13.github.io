@@ -1,0 +1,56 @@
+---
+title: "Control de tracció"
+subtitle: "Gestió del lliscament de roda · CAT15x/16x"
+tags:
+  - "Control de l'inversor"
+  - "Relació de lliscament"
+  - "Pacejka"
+  - "CAN Bus"
+  - "ROS"
+source: "1a326ba8c0"
+---
+
+El sistema de control de tracció s'implementa com un controlador de velocitat que s'executa directament dins de l'inversor, en lloc de fer-ho a nivell de la Processing Unit. És una decisió d'arquitectura deliberada: l'enllaç de comunicació CAN-ROS entre la PU i els inversors funciona a 50 Hz, massa lent per reaccionar de manera eficaç als transitoris de lliscament de les rodes. En portar el llaç de control dins de l'inversor, que funciona a una freqüència força més alta, el sistema respon als episodis de lliscament abans que es puguin desenvolupar, sense quedar limitat per la latència de comunicació.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P1 - Continuous_vs_Discrete.png",
+    "alt": "Control continu vs. resposta de parell discreta a 50 Hz"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P1 - Speed_Setpoint.png",
+    "alt": "Velocitat angular de consigna per al lliscament ideal en funció de la velocitat del vehicle"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P1 - SlipRatio_Control.png",
+    "alt": "Resposta del control de velocitat i de relació de lliscament"
+  }
+]} />
+
+A més de limitar el parell, el sistema també aplica un control basat en la velocitat amb un objectiu de relació de lliscament òptima per a cada roda. Com que les superfícies de competició són conegudes i constants, i es caracteritzen durant els tests de pretemporada, el punt de funcionament òptim de la corba de força longitudinal es determina per endavant. L'equip va modelar la Pacejka Magic Formula per als seus pneumàtics concrets, cosa que dona una predicció de la relació de lliscament de pic molt més precisa que un model genèric. Després, l'objectiu de relació de lliscament òptima s'ajusta en funció de l'angle de deriva de cada roda, acoblant el comportament longitudinal i lateral del pneumàtic per a una estratègia de gestió del lliscament més completa.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P2 - Pacejka_Full.png",
+    "alt": "Corba completa de força longitudinal de Pacejka"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P2 - Pacejka_Optimal.png",
+    "alt": "Pacejka Mu_x vs. relació de lliscament: punt de funcionament òptim"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P2 - SlipRatio_vs_SlipAngle.png",
+    "alt": "Acoblament entre la relació de lliscament òptima i l'angle de deriva"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TC/P2 - DesSR_perWheel.png",
+    "alt": "Límit de velocitat angular i relació de lliscament desitjada per roda"
+  }
+]} />

@@ -1,16 +1,16 @@
 ---
 import { Image } from 'astro:assets';
 import { resolveImage } from '../../lib/assets';
+import { useT } from '../../i18n/ui';
+import { langOf } from '../../i18n/current';
+const t = useT(langOf(Astro.currentLocale)).about;
 ---
 <section class="parallax-bg" id="about">
-<div class="section-header reveal"><span class="section-num">01</span><h2 class="section-title">About Me</h2><div class="section-line"></div></div>
+<div class="section-header reveal"><span class="section-num">01</span><h2 class="section-title">{t.title}</h2><div class="section-line"></div></div>
 <div class="about-text-wrap reveal">
 <div class="about-id-photo"><Image src={resolveImage("About Me/ID.png")} alt="Aniol Escofet" loading="lazy" /></div>
 <div class="about-text">
-<p>Growing up in Catalonia, I was the kind of kid who genuinely could not sit still. Every tree was something to climb, every rooftop a challenge worth taking. Sports were a constant — anything physical, anything with a bit of edge. That energy never really went away. It just found better places to go.</p>
-<p>But alongside all of that, there was always a pull towards physics, maths and understanding how things work. Not as a school obligation, but as genuine curiosity. When I figured out that engineering was where those two worlds collide, and that motorsport was where engineering gets pushed to its absolute limit, the direction became clear.</p>
-<p>Today I am doing <strong>two Master's degrees at the same time</strong>, one at UPC Barcelona, one at Politecnico di Milano, while working at STARK Future on electric motorcycle simulation and powertrain development. Outside of that I train in some form every day: gym, running, padel, climbing, hiking. I travel whenever I can. And I keep personal engineering projects running on the side because building things out of pure curiosity is one of the best ways I know to stay sharp.</p>
-<p>What I am after is a motorsport or prototype project that genuinely puts me to the test. Something fast-paced, technically demanding, where the engineering work shows up directly in the results. The goal is not a title on a business card. It is the kind of project where you feel the weight of every decision you make.</p>
-<div class="interests-row"><span class="interest-tag">Motorsport</span><span class="interest-tag">Travel</span><span class="interest-tag">Climbing</span><span class="interest-tag">Running</span><span class="interest-tag">Padel</span><span class="interest-tag">Hiking</span><span class="interest-tag">Gym</span><span class="interest-tag">Personal Projects</span><span class="interest-tag">Photography</span></div>
+{t.paragraphs.map((p) => <p set:html={p} />)}
+<div class="interests-row">{t.interests.map((i) => <span class="interest-tag">{i}</span>)}</div>
 </div>
 </div></section>

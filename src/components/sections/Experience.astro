@@ -2,28 +2,29 @@
 import { Image } from 'astro:assets';
 import { resolveImage } from '../../lib/assets';
 import Slider from '../Slider.astro';
+import { useT } from '../../i18n/ui';
+import { langOf } from '../../i18n/current';
+const t = useT(langOf(Astro.currentLocale)).experience;
+
+// What does not change with the language: logos and photos.
+const media = [
+  { logo: 'STARK Future/logo.png', name: 'STARK Future', id: 'slider-exp-stark', photos: ['STARK Future/1.jpg', 'STARK Future/2.webp', 'STARK Future/3.jpeg'] },
+  { logo: 'CUPRA Racing/logo.png', name: 'CUPRA Racing', id: 'slider-exp-cupra', photos: ['CUPRA Racing/CEE/1.webp', 'CUPRA Racing/TCR/2.jpeg', 'CUPRA Racing/CEE/5.jpg'] },
+  { logo: 'BCNeMotorsport/logo.png', name: 'BCNeMotorsport', id: 'slider-exp-bcne', photos: ['BCNeMotorsport/1.jpg', 'BCNeMotorsport/2.jpg', 'BCNeMotorsport/3.jpg', 'BCNeMotorsport/4.jpg', 'BCNeMotorsport/5.jpg', 'BCNeMotorsport/6.jpg'] },
+];
 ---
 <section id="experience">
-<div class="section-header reveal"><span class="section-num">02</span><h2 class="section-title">Experience</h2><div class="section-line"></div></div>
-<div class="exp-item reveal"><div class="exp-date">Jan 2025 — Present<Image src={resolveImage("STARK Future/logo.png")} class="exp-logo" alt="STARK Future" loading="lazy" /></div><div class="exp-role">
-<h3>Junior Power Electronics R&amp;D</h3><div class="exp-company">STARK Future S.L. · Sant Boi de Llobregat</div>
-<div class="exp-desc">Built and validated a full-vehicle 1D simulation tool (the "System Tool") covering battery, inverter, motor, gearbox, chassis and environment. This became the core engineering tool used to dimension and evaluate motorcycles across MX, Supermoto and street platforms. Performed system-level trade-off analysis on battery capacity, torque, gearing, and power output to maximize performance. Also contributed to traction control algorithm development for racing applications.</div>
-<div class="exp-tags"><span class="exp-tag">MATLAB</span><span class="exp-tag">Simulink</span><span class="exp-tag">1D Simulation</span><span class="exp-tag">Traction Control</span><span class="exp-tag">Powertrain</span></div>
-</div>
-<Slider id="slider-exp-stark" items={[{"type": "image", "src": "STARK Future/1.jpg", "alt": "STARK Future"}, {"type": "image", "src": "STARK Future/2.webp", "alt": "STARK Future"}, {"type": "image", "src": "STARK Future/3.jpeg", "alt": "STARK Future"}]} />
-</div>
-<div class="exp-item reveal"><div class="exp-date">Sep 2023 — Dec 2024<Image src={resolveImage("CUPRA Racing/logo.png")} class="exp-logo" alt="CUPRA Racing" loading="lazy" /></div><div class="exp-role">
-<h3>Software &amp; Electronic Engineer Intern</h3><div class="exp-company">CUPRA Racing · Martorell</div>
-<div class="exp-desc">Developed control systems and vehicle dynamics algorithms using MATLAB/Simulink. Led simulation and validation campaigns across MiL, SiL, HiL and DiL environments. Worked extensively on the CUPRA Exponential Experience, programming and setting up software for CUPRA Leon TCR race cars. Created the control software for a prototype combining a CUPRA Born RWD platform with a Tavascan front motor to create an AWD concept. Supported race operations, optimized CAN/GPS/IMU communication systems, and led vehicle-level testing for performance and durability.</div>
-<div class="exp-tags"><span class="exp-tag">MATLAB</span><span class="exp-tag">Simulink</span><span class="exp-tag">CAN Bus</span><span class="exp-tag">MiL/SiL/HiL/DiL</span><span class="exp-tag">WinTax</span><span class="exp-tag">Vehicle Dynamics</span><span class="exp-tag">Race Support</span></div>
-</div>
-<Slider id="slider-exp-cupra" items={[{"type": "image", "src": "CUPRA Racing/CEE/1.webp", "alt": "CUPRA Racing"}, {"type": "image", "src": "CUPRA Racing/TCR/2.jpeg", "alt": "CUPRA Racing"}, {"type": "image", "src": "CUPRA Racing/CEE/5.jpg", "alt": "CUPRA Racing"}]} />
-</div>
-<div class="exp-item reveal"><div class="exp-date">Sep 2021 — Sep 2024<Image src={resolveImage("BCNeMotorsport/logo.png")} class="exp-logo" alt="BCNeMotorsport" loading="lazy" /></div><div class="exp-role">
-<h3>Vehicle Controls Engineer</h3><div class="exp-company">BCNeMotorsport (Formula Student) · UPC Barcelona</div>
-<div class="exp-desc">Designed and implemented control systems for a 4WD electric Formula Student single-seater (CAT15x, CAT16x). Developed Torque Vectoring, Traction Control, and Regenerative Braking algorithms. Built dynamic and kinematic vehicle models for simulation using VI-Grade and IPG. Led test planning, execution and data analysis, serving as a bridge between driver feedback and engineering optimization. Managed test sessions, validated systems on track, and analyzed telemetry to improve performance. Won 1st place EV Class at Formula Student Spain 2023.</div>
-<div class="exp-tags"><span class="exp-tag">Torque Vectoring</span><span class="exp-tag">Traction Control</span><span class="exp-tag">Regen Braking</span><span class="exp-tag">VI-Grade</span><span class="exp-tag">IPG</span><span class="exp-tag">ROS</span><span class="exp-tag">C++</span><span class="exp-tag">Python</span></div>
-</div>
-<Slider id="slider-exp-bcne" items={[{"type": "image", "src": "BCNeMotorsport/1.jpg", "alt": "BCNeMotorsport"}, {"type": "image", "src": "BCNeMotorsport/2.jpg", "alt": "BCNeMotorsport"}, {"type": "image", "src": "BCNeMotorsport/3.jpg", "alt": "BCNeMotorsport"}, {"type": "image", "src": "BCNeMotorsport/4.jpg", "alt": "BCNeMotorsport"}, {"type": "image", "src": "BCNeMotorsport/5.jpg", "alt": "BCNeMotorsport"}, {"type": "image", "src": "BCNeMotorsport/6.jpg", "alt": "BCNeMotorsport"}]} />
-</div>
+<div class="section-header reveal"><span class="section-num">02</span><h2 class="section-title">{t.title}</h2><div class="section-line"></div></div>
+{t.jobs.map((job, i) => {
+  const m = media[i];
+  return (
+    <div class="exp-item reveal"><div class="exp-date">{job.dates}<Image src={resolveImage(m.logo)} class="exp-logo" alt={m.name} loading="lazy" /></div><div class="exp-role">
+    <h3>{job.role}</h3><div class="exp-company">{job.company}</div>
+    <div class="exp-desc">{job.desc}</div>
+    <div class="exp-tags">{job.tags.map((tag) => <span class="exp-tag">{tag}</span>)}</div>
+    </div>
+    <Slider id={m.id} items={m.photos.map((src) => ({ type: 'image', src, alt: m.name }))} />
+    </div>
+  );
+})}
 </section>

@@ -1,0 +1,67 @@
+---
+title: "Frenada regenerativa"
+subtitle: "Recuperació d'energia · CAT15x/16x"
+tags:
+  - "Recuperació d'energia"
+  - "Brake blending"
+  - "Antibloqueig"
+  - "Gestió del SoC"
+  - "Sensors hidràulics"
+  - "ROS"
+source: "da3a3f1f8f"
+---
+
+El sistema de frenada regenerativa està dissenyat al voltant d'una restricció innegociable: sempre s'ha de mantenir la corba ideal de distribució de la força de frenada. Tots els modes i configuracions funcionen dins d'aquest marge, i això garanteix l'estabilitat del vehicle i un repartiment de frenada previsible independentment de com es combinin les forces elèctriques i mecàniques.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P1 - IdealBrakeDistribution.png",
+    "alt": "Corba ideal de distribució de la força de frenada Fr vs. Ff"
+  }
+]} />
+
+En escenaris orientats al rendiment, com l'AutoX, la frenada mecànica i l'elèctrica treballen en paral·lel des del primer moment en què es trepitja el fre. Uns sensors de pressió hidràulica als dos circuits de fre mesuren la demanda de frenada del pilot en temps real, cosa que permet al sistema calcular el parell de frenada mecànic de cada instant. Llavors el parell de frenada elèctric s'ajusta per complementar-lo amb precisió, de manera que el pilot conserva tota la sensibilitat del pedal mentre es maximitza la desacceleració. La distribució de forces combinada es manté sobre la corba ideal durant tota la frenada.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P2 - ParallelBraking.png",
+    "alt": "Frenada en paral·lel: força posterior hidràulica, elèctrica i total"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P2 - BrakeDistribution_Simulation.png",
+    "alt": "Simulació de la distribució de frenada: distribució sobre la corba ideal i desglossament de forces"
+  }
+]} />
+
+Quan la prioritat és recuperar energia, el sistema dona al pilot un primer recorregut de pedal gestionat completament pels motors elèctrics. Només quan la força de frenada elèctrica és insuficient entren els frens mecànics, i els dos sistemes tornen a treballar en paral·lel. Aquest escalonament maximitza l'energia que torna a la bateria en circuits on la recuperació importa més que la desacceleració màxima, sense que el pilot hagi de canviar la seva tècnica de frenada.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - BrakingStrategies.png",
+    "alt": "Estratègies de frenada regenerativa: Regen-First vs. Parallel Mode"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - RegenTorque_Limits.png",
+    "alt": "Límits de parell regeneratiu màxim en funció de la velocitat del vehicle"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P3 - StateMachine.png",
+    "alt": "Màquina d'estats de la frenada regenerativa: implementació a Simulink"
+  }
+]} />
+
+El sistema inclou un mecanisme de prevenció del bloqueig de rodes que compara les RPM de cada roda amb la velocitat del vehicle que dona l'INS. Si alguna roda desaccelera més ràpid del que és físicament coherent amb la velocitat del vehicle, es redueix el parell elèctric en aquella roda. Un conjunt de límits de seguretat també vigila l'estat de càrrega (State of Charge) de la bateria i les temperatures dels motors i dels inversors. Si se supera algun llindar, el parell regeneratiu es redueix progressivament amb una transició suau cap a una frenada purament mecànica, perquè el pilot no es trobi mai amb cap sorpresa.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/RB/P4 - WheelTorque_Simulation.png",
+    "alt": "Simulació del parell de frenada per roda: FL/FR/RL/RR"
+  }
+]} />

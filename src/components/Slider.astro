@@ -40,6 +40,9 @@ const slides = await Promise.all(
 );
 
 const ytId = (u: string) => u.split('/embed/')[1]?.split(/[?&#]/)[0] ?? '';
+import { useT } from '../i18n/ui';
+import { langOf } from '../i18n/current';
+const ts = useT(langOf(Astro.currentLocale)).slider;
 ---
 <div class="img-slider">
   <div class="img-slider-track" id={sliderId}>
@@ -68,7 +71,7 @@ const ytId = (u: string) => u.split('/embed/')[1]?.split(/[?&#]/)[0] ?? '';
     )}
   </div>
   <div class="slider-controls">
-    <button class="slider-btn" type="button" aria-label="Previous" onclick={`scrollSlider('${sliderId}',-1)`}>←</button>
-    <button class="slider-btn" type="button" aria-label="Next" onclick={`scrollSlider('${sliderId}',1)`}>→</button>
+    <button class="slider-btn" type="button" aria-label={ts.prev} onclick={`scrollSlider('${sliderId}',-1)`}>←</button>
+    <button class="slider-btn" type="button" aria-label={ts.next} onclick={`scrollSlider('${sliderId}',1)`}>→</button>
   </div>
 </div>

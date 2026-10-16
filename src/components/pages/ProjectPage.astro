@@ -1,0 +1,20 @@
+---
+// One project on its own page, the link to send for a single project. No menu
+// and no link back, so whoever gets the link sees this project only.
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../ProjectCard.astro';
+import { labelFor, localize } from '../../lib/projects';
+import { langOf } from '../../i18n/current';
+
+interface Props { project: CollectionEntry<'projects'> }
+const { project } = Astro.props;
+const { label, anchor } = await labelFor(project);
+const { title, subtitle } = await localize(project, langOf(Astro.currentLocale));
+const unlisted = project.data.visibility === 'unlisted';
+---
+<Base title={`${title} · Aniol Escofet`} description={subtitle} noindex={unlisted} standalone>
+<section class="project-page">
+  <ProjectCard project={project} label={label} anchor={anchor} open />
+</section>
+</Base>

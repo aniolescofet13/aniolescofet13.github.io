@@ -1,0 +1,287 @@
+---
+title: "Purple Stint"
+subtitle: "Análisis de cronometraje y telemetría de F1 · Next.js · WebGL"
+tags:
+  - "Next.js"
+  - "TypeScript"
+  - "WebGL"
+  - "react-three-fiber"
+  - "ECharts"
+  - "Telemetría"
+  - "Pipeline de datos"
+  - "Exportación estática"
+  - "Sistemas de diseño"
+  - "Testing"
+source: "fb5963a27f"
+---
+
+**La herramienta.** Purple Stint toma el cronometraje y la telemetría de la Fórmula 1, todas las sesiones de las temporadas que cubre, y los publica como un sitio estático: cada página se prerenderiza en tiempo de compilación, sin ninguna API detrás y sin llamadas de red en ejecución. Cada sesión tiene nueve vistas, desde una tabla de resultados, pasando por la comparación de telemetría, hasta una reconstrucción 3D de la vuelta. El análisis en sí está escrito como módulos de TypeScript puro, sin ningún framework dentro, así que se testea directamente y no a través de un navegador: tests unitarios contra los datos reales en disco y tests de Playwright contra la exportación compilada, que es lo que un hosting serviría de verdad.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P1 - Session overview.png",
+    "alt": "Purple Stint: resumen de la sesión con resultados y condiciones",
+    "shot": true
+  }
+]} />
+
+**Situar un coche a partir de la posición, no de la distancia.** La forma obvia de animar una vuelta es mover cada coche a lo largo de la distancia recorrida que se ha registrado. Al hacerlo, los coches daban tirones y, a veces, saltaban. La causa resultó ser medible: puntos de distancia consecutivos implican velocidades de entre 9 y 5 533 km/h, porque el canal es acumulado y sus errores se acumulan con él. Reconstruir la animación a partir del canal de posición sitúa cada coche a unos 4 m de donde estaba realmente, menos que el ancho de la pista. Después, la vuelta se remuestrea con un Hermite cúbico acotado (clamped), de modo que el ritmo es correcto en cada nodo y continuo entre ellos: tras el diezmado solo sobreviven unas 45 muestras, y unirlas con rectas mantenía a un coche a una única velocidad media durante dos segundos seguidos, con una desviación de hasta 43 km/h respecto a su ritmo real.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P2 - Lap analysis.png",
+    "alt": "Análisis de vuelta: comparación de telemetría entre varios pilotos y delta",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P2 - Telemetry channels.png",
+    "alt": "Canales de telemetría: velocidad, acelerador, freno, marcha y RPM frente a la distancia de vuelta",
+    "shot": true
+  }
+]} />
+
+**Leer una carrera, no una tabla de resultados.** La vista de progresión dibuja el race trace, la diferencia de cada piloto respecto a una vuelta de referencia seleccionable, vuelta a vuelta, con las paradas en boxes, los safety cars y los virtual safety cars marcados en su sitio, de modo que un undercut aparece como lo que es: una diferencia que se cierra en dos vueltas y no un número en una columna. La vista de estrategia es un Gantt de stints de neumáticos construido como una serie personalizada de ECharts, con el compuesto, la longitud del stint y la edad del neumático de cada piloto. La vista de undercut va más allá y detecta automáticamente las batallas en boxes, emparejando a los pilotos cuya diferencia cambia bruscamente alrededor de una parada y representando cada una en un gráfico.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P3 - Race progression.png",
+    "alt": "Progresión de carrera: race trace con las paradas en boxes y los safety cars marcados",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P4 - Strategy.png",
+    "alt": "Estrategia: Gantt de stints de neumáticos por piloto",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P5 - Undercut.png",
+    "alt": "Detección de undercuts: batallas en boxes encontradas a partir del cambio de diferencia alrededor de una parada",
+    "shot": true
+  }
+]} />
+
+**El tiempo en el pit lane no es tiempo parado.** Una parada en boxes, tal y como se suele publicar, es el delta del pit lane, de la entrada a la salida, que incluye la aproximación, el límite de velocidad y la salida, y depende sobre todo del circuito. Lo que quiere ver el espectador es el tiempo que el coche estuvo inmóvil con las ruedas fuera. Ese dato no está, pero se puede recuperar a partir de los que sí están: la traza de velocidad de la vuelta de salida cae a cero mientras el coche está sobre los gatos, y la duración de ese cero es la parada. Aplicado a todo el archivo, resuelve la mayoría de las paradas, y las más rápidas quedan en torno a 1,80 s. Ese 1,80 es la comprobación de que el método es correcto y no solo verosímil: es el récord mundial, así que el suelo de la distribución cae exactamente donde lo pone la física.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P5 - Pit stops.png",
+    "alt": "Paradas en boxes: duración de las paradas, delta del pit lane frente a tiempo inmóvil",
+    "shot": true
+  }
+]} />
+
+**Todo en la escena se escala a partir de los datos.** El trazado del circuito se encaja en una caja fija, así que una unidad del mundo equivale a 27 m en Jeddah y a 10 m en Mónaco, y cada constante ajustada a ojo era correcta exactamente para un circuito. Por eso la escena deriva sus tamaños en lugar de fijarlos: la carretera ocupa una fracción fija del encuadre y el ancho del coche se deriva del de la carretera, de modo que caben unos siete coches y medio a lo ancho de la pista, como en la realidad. Esa relación no puede desviarse cuando alguien ajusta uno de los dos, cosa que ya había pasado dos veces: una, con un coche tres veces más ancho que su propio carril, y otra, con un coche de un tercio de lo que debería medir, y ninguno de los dos errores se ve hasta que cuentas. Medido después sobre los píxeles renderizados: 404 px de carretera, 53 px de coche, 7,6 en paralelo. Cinco cámaras viajan con el coche. La onboard se coloca a partir del modelo y no a ojo, sobre su propio arco antivuelco, y es la única vista con su propio campo de visión: desde ahí, las ruedas delanteras quedan 25° por debajo del objetivo y, con los 34° de la escena, una inclinación suficiente para captarlas apuntaría al asfalto. Así que usa 62°, que es precisamente por lo que una onboard de televisión lleva un gran angular. El coche es un modelo CC BY 4.0 diezmado de 267 632 a 14 019 triángulos y empaquetado en un binario de 300 KiB, repintado para cada equipo a partir de un buffer de color por instancia. Toda la escena, carretera, pianos, seis coches y seis cintas de telemetría, son seis draw calls.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D onboard.png",
+    "alt": "Pista 3D: cámara onboard a 313 km/h con HUD de telemetría",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D top.png",
+    "alt": "Pista 3D: cámara cenital que muestra el ancho del coche frente al ancho de la carretera",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D free.png",
+    "alt": "Pista 3D: cámara libre con cintas de velocidad sobre el circuito",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P7 - Track 3D chase.png",
+    "alt": "Pista 3D: cámara de persecución",
+    "shot": true
+  }
+]} />
+
+**Clasificaciones del campeonato calculadas, no descargadas.** Ambos campeonatos se calculan a partir de los resultados en disco y no se toman de una API de clasificaciones, lo que significa que se pueden comprobar: en todas las sesiones que puntúan de una temporada, los puntos repartidos suman exactamente 101 por carrera y 36 por sprint, y el número de victorias coincide con el calendario. La página de la temporada incluye también el historial ronda a ronda que hay detrás de la tabla: puntos por ronda, posiciones en carrera y en clasificación, el bump chart del campeonato y todos los cara a cara entre compañeros de equipo. La vista de vuelta ideal reconstruye el mejor tiempo teórico de cada piloto a partir de sus propios mejores sectores.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P8 - Season standings.png",
+    "alt": "Clasificación de la temporada: tablas del campeonato y reparto de puntos por equipo",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P6 - Ideal lap.png",
+    "alt": "Vuelta ideal: mejor tiempo teórico reconstruido a partir de los mejores sectores",
+    "shot": true
+  }
+]} />
+
+**Los datos se acaban donde se acaba la temporada.** Una exportación de telemetría solo contiene los fines de semana ya disputados, y lleva una sola fecha por evento, el domingo, recuperada del primer mensaje de dirección de carrera. Un calendario construido solo con ella termina en la última carrera, lo que en una temporada en curso parece una temporada que acaba en septiembre. Así que la lista de pruebas sale de una segunda fuente y las dos se fusionan: el calendario dice qué rondas hay y cuándo empieza cada sesión, y la exportación dice qué pasó en las que ya se han corrido. Una ronda solo se da por terminada cuando los datos tienen una carrera para ella, y solo entonces lleva un ganador, una pole o un enlace a su telemetría. Cada tarjeta dibuja su circuito como un único trazado remuestreado a partir del mismo contorno con el que se construye la escena 3D. Esa segunda fuente es CC BY-NC-SA, no comercial y con cláusula ShareAlike, y es la única dependencia de ese tipo en el proyecto, así que está aislada a propósito: un script la escribe, un módulo la lee, y borrar sus dos archivos hace que la página vuelva a las rondas en disco sin tocar nada más. Un test comprueba esa vuelta atrás, incluido que ninguna sesión diga entonces tener una hora de inicio que no puede tener.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P9 - Season calendar.png",
+    "alt": "Calendario de la temporada: rondas, cuenta atrás y trazados de los circuitos",
+    "shot": true
+  }
+]} />
+
+**El corte de clasificación, y hasta qué punto se puede saber.** Una nueva vista para las sesiones de clasificación responde a la pregunta que se hace cualquier aficionado el sábado: ¿qué tiempo hace falta para pasar? Cada fase se estima a partir de los tiempos disponibles justo antes, escalados con la mejora que la parrilla suele conseguir hasta ese momento: de los libres, solo las simulaciones de clasificación, una vuelta con blandos nuevos, ya que el resto de los libres son tandas largas y trabajo de setup. Después, el k-ésimo mejor tiempo de la Q1 para la Q2 y el mejor tiempo de la Q2 para la pole. Cuántos pasan se lee de los datos, no se supone: 15 de 20 en 2025, 16 de 22 en 2026. Contar solo las simulaciones reduce a la mitad el error mediano frente a usar cualquier vuelta, medido con leave-one-out sobre los fines de semana convencionales para que ninguna sesión se evalúe a sí misma.
+
+El hallazgo honesto es lo que la estimación *no puede* hacer. La mejora del día entre los libres y la Q1 va de −1,06 % a +0,37 % y nada de lo que se sabe antes de la sesión la predice: la evolución en los libres tiene una correlación de 0,23, la temperatura de la pista de 0,03, y todas las regresiones probadas salían peores que la mediana plana. Actualizar durante la Q1 con las vueltas marcadas hasta el momento no mejora la estimación previa a la sesión hasta que toda la parrilla ha hecho un primer intento. Frente a un corte de Q1 que en un fin de semana típico se decide por 0,06 s, la predicción es una zona, no un número, y la página lo dice en segundos. Lo que sí se sostiene es en qué lado de la zona está cada piloto: en todos los fines de semana en disco, el 95 % de los pilotos estimados más rápidos que toda la zona pasó la Q1, y también el 20 % de los estimados más lentos. De la Q1 a la Q2, el 95 % y el 3 %. Así que la vista empieza con tres grupos (a salvo, en el filo, fuera), con esas tasas impresas al lado y recalculadas en cada compilación, y el tiempo estimado pasa a un segundo plano. Madrid 2026, un circuito que la parrilla todavía estaba aprendiendo, es el caso extremo: el corte quedó 0,95 s más allá de la estimación, y aun así los grupos acertaron 12 de los 13 pilotos a salvo y 5 de los 6 marcados como fuera.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P12 - Cut-off Miami.png",
+    "alt": "Corte: Miami 2026, el corte de la Q1 estimado desde los libres con 0,013 s de diferencia, con los grupos a salvo, en el filo y fuera, y la tasa medida junto a cada uno",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P12 - Cut-off Australia.png",
+    "alt": "Corte: Australia 2026, las tres fases a menos de 0,09 s de la estimación, y 15 de 16 y 9 de 9 pilotos en el grupo correcto",
+    "shot": true
+  }
+]} />
+
+**Ver una sesión mientras se disputa.** Una segunda forma de entrar en los datos: una pantalla de live timing, un mapa y un panel de análisis que cambia según la sesión. Lee el propio feed de cronometraje de la Fórmula 1 a través de un pequeño adaptador que se ejecuta en una sola máquina, o reproduce una sesión exportada en tiempo real para poder sincronizarla con una retransmisión. Ese feed no tiene licencia, así que la página se compila y después se *borra* de la exportación publicada con el mismo script que informa del tamaño del despliegue, y un test hace fallar la compilación si la ruta sobrevive alguna vez. Lo que se publica es la vía de reproducción y el análisis, ambos construidos con los datos Apache-2.0. Las dos fuentes confluyen en un único formato de frame y un único reducer, de modo que la herramienta en directo y la reproducción comparten cada línea excepto el adaptador, y eso es lo que permite testear la parte en directo: los tests la alimentan plegando sesiones reales completas desde disco y comprueban el estado contra la clasificación de la propia sesión.
+
+**Cada sesión plantea su propia pregunta.** El viernes lee las tandas largas: stints entre paradas en boxes con al menos cinco vueltas limpias, con el ritmo mediano, el rango intercuartílico como consistencia y la pendiente de la tanda como degradación. Limpia significa a menos del 12 % de la mejor vuelta del stint, una regla añadida después de que una vuelta de enfriamiento metiera una vuelta de 41 s dentro de una tanda del viernes. El sábado lleva el corte descrito arriba y, a su lado, cada coche en vuelta frente al tiempo que le importa: dentro del corte persigues la P1, fuera de él al coche que marca el corte, sector a sector. El domingo empieza con las batallas (coches consecutivos a menos de un segundo y medio, o que se acercan lo bastante rápido como para estarlo pronto, con el delta acumulado en cada sector que ambos han pasado y las vueltas que faltan para que llegue el perseguidor) y después el orden neto, en el que se suma el tiempo de una parada a quien todavía deba el cambio obligatorio. Lo que cuesta una parada se mide a partir de las paradas que esa carrera ya ha tenido, en lugar de suponerse: 20,2 s en 23 paradas en Hungría 2025, frente a los 19 s de pit lane que la web indica en otros sitios. El reloj de la sesión se deriva de la misma manera, a partir del momento en que se abrió el pit lane más la duración reglamentaria, y se descarta donde no es fiable: una clasificación con bandera roja detiene el reloj y nada en la exportación dice durante cuánto tiempo, así que Mónaco 2025 ofrece reloj para la Q3 y no para la Q1 ni la Q2.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online practice.png",
+    "alt": "Online: libres, tandas largas con ritmo, dispersión y degradación, junto a las simulaciones de clasificación",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online qualifying.png",
+    "alt": "Online: Q1 de Miami 2026 reproducida, justo después de la bandera, con el corte estimado desde los libres en 1:29.907 frente al 1:29.920 que hizo falta, y cada coche en su lado",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online race.png",
+    "alt": "Online: carrera, el orden junto al circuito y las batallas con lo que gana el perseguidor en cada sector",
+    "shot": true
+  }
+]} />
+
+**El mapa estaba vacío, y la medición lo decía.** El mapa del circuito parecía roto, y lo primero era averiguar por qué, no darle estilo. Instrumentado en un navegador real, se mantenía a 60 fps sin long tasks y no dibujaba ningún coche durante veinte segundos seguidos: la telemetría exportada es una vuelta por piloto, que con veinte coches cubre el 41 % del reloj de una clasificación y el 28 % del de una carrera, menos de un coche en pantalla en cualquier momento. Así que el mapa se alimenta del cronometraje, que está completo, y la telemetría se reserva para lo único que el cronometraje no puede dar: la forma de una vuelta. Un coche que lleva un tercio de la vuelta en *tiempo* no ha recorrido un tercio en *distancia*, y esa relación se mide una vez sobre una vuelta real y se usa para situar a todos los coches. Comparada con la telemetría que no utiliza, la posición cae a 6 m de la real en la mediana y a 12 m en el percentil noventa en una vuelta de clasificación, y a 7 m y 17 m en una vuelta de carrera, en un circuito de 4,35 km. Un coche cuya telemetría está corriendo se sigue dibujando a partir de ella, relleno. El resto van huecos, porque una estimación debe parecerlo.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P13 - Online map.png",
+    "alt": "Online: el mapa, con coches huecos situados a partir del cronometraje, coches rellenos a partir de su propia telemetría y las curvas numeradas del circuito",
+    "shot": true
+  }
+]} />
+
+**El banco de pruebas estaba en verde y el feed no.** El adaptador se había construido contra una sesión sintética y una reproducción de datos exportados, y ambas pasaban. Al apuntarlo por primera vez al propio archivo de la Fórmula 1 (unos libres del viernes, descargados por clave de sesión) aparecieron cuatro fallos, dos de los cuales habrían sido igual de erróneos en una sesión en directo. Los streams por sesión del archivo contienen lo que *cambió* mientras la sesión transcurría. Quién conduce, qué sesión es y qué neumático lleva cada coche se indican una sola vez, en archivos que la reproducción nunca abría, así que enviaba tiempos de vuelta del coche 81 sin decir nunca que es Piastri y no sabía distinguir unos libres de una carrera. La cuenta atrás hasta la bandera se escribe en horas:minutos:segundos y pasaba por un parser que interpreta un solo «:» como minutos y rechaza dos, así que el tiempo restante nunca llegaba a fijarse. Y ningún frame llevaba tiempo: la reproducción descartaba los tiempos de muestra con los que acababa de hacer el merge-sort, la parte en directo nunca los había tenido, y todos los frames llegaban con marca cero, así que nada medido en segundos de sesión podía moverse. El banco de pruebas había ocultado esos dos fallos por motivos distintos: no enviaba ningún reloj, así que al parser nunca se le hacía la pregunta, y marcaba sus propios frames con tiempos, cosa que no hace ninguna de las dos fuentes reales. Ahora envía un reloj, el adaptador marca él mismo cada frame, y un test cubre cada caso. Medido después contra esos libres: la sesión se identifica sola, veintidós coches llevan compuesto, el reloj corre y dieciséis pilotos entran en la referencia de libres, que es el número que necesita la estimación de la Q1.
+
+Las imágenes de abajo son de la sesión sintética, no de la real, y eso es la regla de la licencia, no un atajo. El feed no tiene ninguna, así que sus datos no se publican de ninguna forma (ni en la compilación ni en una captura de pantalla), y lo que se puede enseñar de la mitad en directo es el adaptador, la sesión que identifica y el reloj que hace correr.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P14 - Live adapter.png",
+    "alt": "Online: el adaptador conectado en loopback, la sesión identificada a partir del feed y el reloj hasta la bandera en marcha",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P14 - Baseline sources.png",
+    "alt": "Online: el panel de clasificación sin libres en disco, indicando de dónde puede salir la referencia en su lugar",
+    "shot": true
+  }
+]} />
+
+**Luego se corrió una carrera real, y la mitad en directo fallaba de formas que ningún test podría haber encontrado.** Todo hasta entonces se había comprobado contra una sesión en disco o una sintética. Ver un Gran Premio de verdad a través del adaptador destapó un grupo de fallos con una misma forma: el feed dice una cosa una vez y no la repite nunca. En cuarenta y cinco segundos de sesión envió *dos* posiciones y *trescientas* diferencias, porque una posición solo es noticia cuando cambia, así que una pantalla abierta después del snapshot de la suscripción no sabía dónde iba nadie, y puso arriba del todo a un coche que iba decimoctavo. El líder aparecía medio minuto por detrás de sí mismo, porque «sin diferencia» se dice no enviando nada, y lo que quedaba era la diferencia de cuando ese coche todavía iba persiguiendo. Ahora el adaptador guarda cada línea de cronometraje que ha visto y se la reenvía entera a cada nuevo cliente. El mismo razonamiento arregló la ventana de paradas, que le decía a quien se conectaba en la vuelta treinta que nadie había parado: el feed indica los stints de cada coche, uno a uno y por posición, así que se fusionan por índice en lugar de sustituirse. Conectarse a una carrera en la vuelta 48 ahora muestra treinta y cinco paradas entre veinte coches.
+
+**Una suscripción que trae cronometraje y nada más.** El nivel básico no tiene posiciones de los coches, ni telemetría, ni circuito, lo que dejaba el mapa permanentemente vacío, y eso no se arregla esforzándose más, porque los datos no están. Lo que sí envía el feed son microsectores: cada sector dividido en tramos fijos de pista, con una indicación de por cuáles ha pasado un coche. Eso es una declaración de posición en pista que no necesita ningún tiempo de vuelta, y el circuito sobre el que colocarla ya está en disco de una sesión ya disputada, así que el mapa se lee de ahí y los coches se sitúan por el tramo más avanzado que han encendido. Contar *cuántos* están encendidos en lugar de *cuáles* ponía a toda la parrilla en la línea de salida, ya que el feed menciona un sector cada vez.
+
+**Sincronizar con una retransmisión implica ir hacia atrás, y una cola no puede hacerlo.** El control de retardo retenía frames, así que subirlo congelaba la pantalla durante todo el retardo y bajarlo dejaba que la pantalla se pusiera al día. Nunca mostraba un momento anterior, que es justo para lo que sirve. Ahora guarda los últimos minutos y reconstruye la vista en el momento que se pida, hacia delante o hacia atrás: 1 517 frames mostrados, 100 tras retroceder cuarenta segundos, 1 705 al volver. Y la instrucción que lo acompañaba (ajusta hasta que un coche cruce la línea en las dos pantallas a la vez) era imposible de seguir, porque nada en la página indicaba cuándo un coche cruzaba la línea. Ahora hay una luz para eso.
+
+**Y un recuadro para el otro tipo de pregunta.** El resto de la pantalla pregunta por la sesión: quién está dónde, quién se acerca, cuál será el corte. Este pregunta qué está haciendo un piloto con el coche: elige tantos como quieras y lee su telemetría frente a la vuelta más rápida de la sesión, que siempre se dibuja, la hayas elegido o no, porque es la referencia con la que se leen los demás. Cada piloto se muestra en su propia vuelta más rápida y no en una vuelta concreta, que es la vuelta que lleva realmente la exportación. Es el mismo gráfico de las páginas de vuelta, así que los canales, el cursor sincronizado y los colores son los mismos. Solo en diferido, y no es un olvido: en directo no hay telemetría que dibujar.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P15 - Online with telemetry.png",
+    "alt": "Online: Q2 de Miami 2026 a falta de un minuto, con cada coche en vuelta frente al tiempo que le importa, la telemetría de tres pilotos y la estimación del corte a 0,050 s de donde acabó",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P15 - Telemetry box.png",
+    "alt": "Online: telemetría de cuatro pilotos en una vuelta de clasificación, cada uno en su vuelta más rápida, frente a la mejor de la sesión",
+    "shot": true
+  }
+]} />
+
+**Un reloj de clasificación, recompuesto cuando se detuvo la sesión.** La exportación no lleva reloj de sesión, así que la bandera de cada parte es su luz verde más la duración reglamentaria, y en aproximadamente una cuarta parte de las partes de clasificación en disco eso salía mal, porque la exportación también guarda una fila por cada espera de un coche en el garaje entre partes, sin tiempo y etiquetada con la parte en la que empezó. La prueba que se sostiene es lo único que un reloj en marcha prohíbe: una vuelta lanzada que empieza después de la bandera. Con ella, las partes se separan limpiamente: 124 con la última vuelta lanzada antes de la bandera, 6 en el minuto siguiente, ninguna entre uno y cuatro minutos, y 23 muy después, que son las interrupciones reales. Estas se reconstruyen en lugar de dejarse en blanco: la última vuelta lanzada de una parte empieza una mediana de 36 s antes de la bandera, lo que permite recolocar la bandera, y el exceso es el tiempo que el reloj estuvo parado, colocado en el tramo más largo sin nadie en pista. Las 153 partes tienen ahora reloj, y las 23 reconstruidas llevan una virgulilla (~), porque son precisas al medio minuto, no al segundo.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P16 - Qualifying clock.png",
+    "alt": "Cuánto después de su bandera programada empieza la última vuelta lanzada de cada parte de la clasificación: 130 partes antes o justo después, 23 muy después, las interrupciones",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P16 - Monaco Q2 rebuilt.png",
+    "alt": "Online: Q2 de Mónaco 2025 en diferido, una parte que se detuvo, con su reloj reconstruido marcado como estimación",
+    "shot": true
+  }
+]} />
+
+**El tirón era culpa nuestra, y un perfil lo dijo en una sola ejecución.** La reproducción en diferido a 30× bajaba a 53 frames por segundo con 18 long tasks en diez segundos. Un perfil de CPU situó una décima parte del tiempo en el effect de un wrapper de gráficos: tres gráficos de telemetría reconstruidos desde cero diez veces por segundo, porque dependían de una lista que se rehacía en cada tick y recibían un objeto de opciones construido inline. Con la dependencia en las mejores vueltas y construidos una vez por cambio, son 59 frames y una long task. La misma pasada quitó del mapa los coches aparcados. Un coche que había vuelto al garaje seguía dibujado donde habría terminado su vuelta, por tres fuentes a la vez (telemetría que había dejado de moverse, microsectores que habían dejado de llegar y una estimación de vuelta que retenía en la línea a un coche con retraso), y ahora cada una lo suelta: telemetría quieta durante diez segundos, microsectores en silencio durante cuatro veces su intervalo habitual, una vuelta con más de un 4 % de retraso. Y la pantalla dice menos: los coches en vuelta son los que están en vuelta rápida, cuatro como máximo, y todos los demás que están en pista se nombran en una línea debajo.
+
+**Borrar una ruta de la exportación no borra su código.** La página en directo se elimina de la compilación publicada, pero su JavaScript seguía en la carpeta estática como un chunk al que no hacía referencia ninguna página publicada (la vista en directo, la dirección del adaptador, el reproductor de radio), descargable por cualquiera que listara el despliegue. El script que poda la exportación ahora lee cada chunk que produce la compilación, elimina cualquiera que contenga las palabras propias del código solo local y hace fallar la compilación si una página publicada hace referencia a alguno. Eso importaba por lo que vino después: la radio del equipo de una sesión ya disputada se puede escuchar en esta máquina, en la página Online y junto a la telemetría de una vuelta, en streaming desde los propios servidores de la Fórmula 1 y sin guardarse nunca. El archivo se lee a través de un rewrite que solo existe en el servidor de desarrollo (una exportación estática no tiene ninguno), y la página de vuelta carga el reproductor mediante un import que la compilación de producción elimina, con la misma comprobación detrás. La radio es contenido de retransmisión, así que aquí aparece como una frase y no como una captura.
+
+**Qué dijo la radio, y quién lo dijo.** Al pulsar play, una grabación se despliega en la tarjeta que la señal internacional pone en pantalla: el nombre y RADIO apilados en el color del equipo y en blanco, el número del coche en una línea con una huella de voz que sale de él, dibujada a partir del propio nivel del audio, y las palabras en mayúsculas, apareciendo a medida que se dicen. Las palabras son de Whisper, ejecutado en esta máquina. De cuatro modelos medidos sobre las mismas grabaciones de la carrera de Abu Dhabi 2025, `small.en` fue el único que acertó tanto “you made a kid’s dream come true” como “I love you, Mom, I love you, Dad”, y darle antes el vocabulario de la radio convirtió “Zach from McLaren” en Zak sin cambiar nada de lo que ya tenía bien. Una exportación estática rechaza cualquier endpoint que lea una petición, incluso en desarrollo, así que el transcriptor es un proceso propio que el servidor de desarrollo arranca a su lado.
+
+La retransmisión pone las palabras del piloto en el color de su equipo y las del muro de boxes en blanco, y nada en una grabación dice quién está hablando. Un diarizador divide cada una en turnos y asigna a cada voz un vector, y a lo largo de la sesión los turnos del coche se agrupan por voz y se distinguen por un nombre: el muro llama al piloto por su nombre de pila, y un piloto casi nunca dice el suyo. La voz que lo dice es la del ingeniero. De las que nunca lo dicen, la que más se oye es la del piloto. En dos carreras coloreó catorce turnos como del piloto: doce son claramente suyos, dos están demasiado distorsionados para saberlo y ninguno es claramente del ingeniero. Para los tres pilotos en los que no se pudo anclar ninguna voz no coloreó nada, y esa es la idea: un color que a veces es una suposición convertiría todos los colores en una.
+
+**El color como dato, no como decoración.** Cada color es un token en una única hoja de estilos y ningún componente puede contener un valor literal, algo que un test hace cumplir. Cada una de las once secciones tiene su propio tono de acento, y los tonos se eligen por búsqueda y no por gusto: un barrido del cubo sRGB en busca del color más alejado, en CIEDE2000, de los 53 que ya están en uso, es decir, los otros acentos, la semántica de cronometraje y de compuestos, y los 21 colores de equipo que llevan los datos. El más reciente salió con un contraste de 6,03:1 y un ΔE00 de 17,35 respecto a su vecino más cercano, frente a un mínimo de 15 en la especificación. Los colores de equipo se reservan para la identidad y nunca se reutilizan como color de interfaz, porque el color de una serie en un gráfico es un dato. Todo el conjunto se mantiene dentro del límite de archivos y de tamaño de página de Cloudflare Pages, y la compilación falla si se supera cualquiera de los dos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PurpleStint/P10 - Circuits globe.png",
+    "alt": "Circuitos: globo WebGL con el calendario de la temporada",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PurpleStint/P11 - Mobile.png",
+    "alt": "La misma vista de estrategia de neumáticos con ancho de móvil",
+    "shot": true
+  }
+]} />
+
+**Lo que no es.** La web es no oficial y no comercial, no está asociada a las empresas de la Fórmula 1 y lleva ese aviso en todas las páginas. La fuente del calendario es CC BY-NC-SA y es la única dependencia no permisiva del proyecto, por eso está aislada y se declara abiertamente en lugar de esconderse. Hay un test de navegador inestable, una aserción sobre draw calls que falla aproximadamente una de cada tres ejecuciones y pasa al relanzarla, conocida y todavía sin arreglar. La parte de live timing del proyecto no está en el repositorio público ni lo estará nunca, porque lee el propio feed de la F1 con una suscripción personal.
+
+**Todo, de una pasada.** Setenta y seis segundos de la web tal y como se usa, sobre el Gran Premio de Italia 2026: se abre desde la página de inicio, se superpone la telemetría de tres pilotos en la última vuelta, se leen el race trace y la estrategia con el cursor, las batallas en boxes, la vuelta conducida en 3D desde las cámaras de persecución, onboard y cenital. Después, la clasificación de Australia elegida desde la barra lateral y su corte, cada fase frente a la banda en la que se estimó. Después, Online reproduciendo el final de la Q1 de Miami a treinta veces el tiempo real, arrastrado hasta los últimos minutos, hasta que cae la bandera y el corte queda a 0,013 s de su estimación. Y para cerrar, la temporada: clasificación, calendario y el globo girado a mano. Grabado desde la compilación de producción a 2560×1440 y a 60 frames por segundo reales: la página iba de diez a dieciséis veces más lenta que el tiempo real mientras el propio screencast de Chrome la capturaba, y cada frame de salida se eligió entre los frames que entregó, así que cada uno es un frame que la web dibujó de verdad. Las escenas más largas se reproducen más rápido. La página Online es solo local y no tiene pestaña en la web publicada, por eso el vídeo salta a ella. Su radio del equipo se ha dejado fuera por completo.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PurpleStint/walkthrough.mp4",
+    "poster": "/PurpleStint/walkthrough-poster.jpg",
+    "title": "Purple Stint: recorrido completo"
+  }
+]} />

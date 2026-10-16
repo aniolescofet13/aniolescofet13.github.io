@@ -14,6 +14,17 @@ display_url: https://aniolescofet13.github.io
 media_folder: src/assets/uploads
 public_folder: /src/assets/uploads
 
+# Three languages, edited side by side. English is the original and keeps its
+# file name (lap-time-simulator.mdx); the translations sit next to it as
+# lap-time-simulator.ca.mdx and lap-time-simulator.es.mdx. Only the text is
+# translated: visibility, category, order and the repository live in the
+# English file and apply to every language.
+i18n:
+  structure: multiple_files
+  locales: [en, ca, es]
+  default_locale: en
+  omit_default_locale_from_file_path: true
+
 collections:
   - name: projects
     label: Projects
@@ -21,6 +32,7 @@ collections:
     folder: src/content/projects
     extension: mdx
     format: yaml-frontmatter
+    i18n: true
     create: true
     slug: "{{slug}}"
     # Each project's own page, the link to send for a single project. The list
@@ -55,8 +67,8 @@ collections:
           the site checks every few hours.
 
       # --- the card ---
-      - { name: title, label: Title, widget: string }
-      - { name: subtitle, label: Subtitle, widget: string }
+      - { name: title, label: Title, widget: string, i18n: true }
+      - { name: subtitle, label: Subtitle, widget: string, i18n: true }
       - name: category
         label: Category
         widget: select
@@ -73,8 +85,8 @@ collections:
         hint: >-
           Sort position. The label shown on the card (PP — 01 …) is counted
           from the listed projects only, so hiding one leaves no gap.
-      - { name: tags, label: Tags, widget: list, required: false }
-      - { name: badge, label: Badge, widget: string, required: false, hint: "e.g. Grade: 10/10" }
+      - { name: tags, label: Tags, widget: list, required: false, i18n: true }
+      - { name: badge, label: Badge, widget: string, required: false, i18n: true, hint: "e.g. Grade: 10/10" }
 
       # --- the write-up ---
       # Plain text on purpose: the body is MDX with <Slider>, <Pdf> and <Note>
@@ -82,7 +94,12 @@ collections:
       - name: body
         label: Body (MDX)
         widget: text
+        i18n: true
         hint: >-
           Markdown, plus <Slider items={[…]} />, <Pdf src="…" /> and
           <Note>…</Note>. Images are paths under src/assets, e.g.
           "LapTime/P9 - Web Run.png".
+
+      # Which English version a translation was made from. The build compares
+      # it with the English text and lists the translations that need updating.
+      - { name: source, label: Translated from, widget: hidden, required: false, i18n: true }

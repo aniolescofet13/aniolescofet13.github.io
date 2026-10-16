@@ -6,6 +6,8 @@ import Lightbox from '../components/sections/Lightbox.astro';
 // Classic script, not a module: the markup calls its functions from onclick
 // attributes, so they have to live on window.
 import legacyJs from '../scripts/legacy.js?raw';
+import { LOCALES, DEFAULT_LOCALE, localePath, useT } from '../i18n/ui';
+import { langOf } from '../i18n/current';
 
 interface Props {
   title?: string;
@@ -17,21 +19,27 @@ interface Props {
   // open onto the rest of the portfolio.
   standalone?: boolean;
 }
+const lang = langOf(Astro.currentLocale);
+const meta = useT(lang).meta;
 const {
-  title = 'Aniol Escofet — Industrial Engineer',
-  description = 'Automotive engineer working on vehicle dynamics, control systems and performance simulation.',
+  title = meta.title,
+  description = meta.description,
   noindex = false,
   standalone = false,
 } = Astro.props;
+const bare = Astro.url.pathname.replace(/^\/(ca|es)(?=\/|$)/, '') || '/';
 ---
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
 <meta name="description" content={description}>
 {noindex && <meta name="robots" content="noindex, nofollow">}
+{/* The same page in the other languages, so search engines treat them as one. */}
+{LOCALES.map((l) => <link rel="alternate" hreflang={l} href={new URL(localePath(l, bare), Astro.site).href} />)}
+<link rel="alternate" hreflang="x-default" href={new URL(localePath(DEFAULT_LOCALE, bare), Astro.site).href} />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">

@@ -1,0 +1,434 @@
+---
+title: "Property Yield Analyser"
+subtitle: "Análisis de inversión inmobiliaria · Next.js · MapLibre · Supabase"
+tags:
+  - "Next.js"
+  - "React · TypeScript"
+  - "MapLibre GL"
+  - "H3"
+  - "Supabase · Postgres"
+  - "Recopilación de datos"
+  - "Datos abiertos"
+  - "Modelización financiera"
+  - "Modelización fiscal"
+  - "Web Crypto"
+  - "Testing"
+source: "f6e56b7593"
+---
+
+**La herramienta.** Property Yield Analyser (Rendibilitat Immobiliària, en el catalán en que está escrita su interfaz) responde a dos preguntas sobre comprar un piso para alquilar: qué rentabilidad dará este, y qué pisos de este barrio son los más rentables. Una calculadora obtiene el flujo de caja, la rentabilidad sobre el capital aportado, la rentabilidad bruta y el patrimonio acumulado de un piso concreto, en seis modos y con los impuestos de compra de la comunidad autónoma donde se encuentre. Un buscador lee cinco portales inmobiliarios sobre una zona dibujada en un mapa, fusiona los anuncios que son el mismo piso, estima lo que daría cada uno según el objetivo elegido y los ordena por rentabilidad. Es una herramienta personal y sin ánimo comercial.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P1 - Results.png",
+    "alt": "Una zona dibujada alrededor de Sant Antoni, Barcelona: 100 pisos a partir de 195 anuncios, ordenados por rentabilidad sobre el capital aportado",
+    "shot": true
+  }
+]} />
+
+**El problema que resuelve.** Valorar un piso como inversión suele requerir tres pestañas de portales, una hoja de cálculo y una suposición. La suposición es el alquiler: un anuncio de venta dice cuánto cuesta un piso, no por cuánto se alquilaría, y una respuesta razonable depende de lo que piden pisos parecidos de la zona, que es otra búsqueda en otras páginas. Los impuestos de compra cambian de una comunidad a otra, las normas de alquiler cambian de un municipio a otro, y el mismo piso aparece en varios portales a precios ligeramente distintos. La herramienta se inspiró en herramientas comerciales de análisis de inversión y se propuso hacerlo todo en un solo sitio para Cataluña, con cada cifra trazable hasta su origen. Una búsqueda empieza con tres preguntas: dónde, para qué y los detalles.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P2 - Where.png",
+    "alt": "Dónde: Barcelona encontrada por su código postal, y la zona de búsqueda dibujada como un polígono en el mapa",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P2 - Goal.png",
+    "alt": "Para qué: alquilarlo entero, por habitaciones, a turistas, reformar y vender, rent to rent, o buscar un piso de alquiler",
+    "shot": true
+  }
+]} />
+
+**La calculadora.** Seis modos: alquiler de larga duración, alquiler por habitaciones, alquiler turístico de corta duración, rent to rent, comprar para reformar y vender, y comprar para vivir, comparado con alquilar. Los impuestos de compra son los reales de cada una de las 19 comunidades y ciudades autónomas, el ITP para la vivienda de segunda mano y el IVA más el AJD para la obra nueva, cada valor guardado con su fuente y la fecha en que se comprobó. Cuando un tipo no se ha podido verificar, se marca como tal y queda editable, en lugar de suponerlo. También están los 88 tipos reducidos de ITP para vivienda habitual, mostrados con sus condiciones, y el IBI viene con su horquilla legal y el tipo oficial de varias grandes ciudades. La cuota de la hipoteca se separa en intereses, que son un gasto, y capital, que es patrimonio, y la proyección a diez años contempla tres escenarios de revalorización. Todo el estado vive en la URL, así que un cálculo se guarda o se comparte como un enlace, y se imprime en PDF. Las fórmulas son funciones puras sin código de interfaz, y unos golden tests las fijan a los resultados de una calculadora de referencia: si uno de ellos falla, el cambio está mal, no el test.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Calculator.png",
+    "alt": "La calculadora abierta desde un anuncio: inversión inicial, flujo de caja con intereses y capital por separado, y rentabilidad sobre el capital aportado",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Tax source.png",
+    "alt": "La fuente detrás del tipo de ITP, con la ley, los tramos y la fecha en que se comprobó",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Projection.png",
+    "alt": "Patrimonio acumulado por año y la proyección a diez años en tres escenarios de revalorización",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P3 - Flipping.png",
+    "alt": "Reformar y vender: inversión total, beneficio neto después de impuestos y la rentabilidad anualizada",
+    "shot": true
+  }
+]} />
+
+**Una búsqueda, cinco portales.** La zona es un municipio con un radio, o un polígono dibujado en el mapa. Los portales se consultan por localidad, no por polígono, así que la búsqueda primero planifica: lee la primera página de cada distrito, baja solo a los distritos con pisos cerca de la zona, y a sus barrios si todavía son grandes, y después conserva o descarta cada anuncio según sus coordenadas. Esas primeras páginas se guardan una semana, de modo que la siguiente búsqueda en el mismo municipio se salta la planificación. Se leen cinco fuentes en paralelo: Fotocasa, Habitaclia y pisos.com, además de Aliseda y Solvia, que venden viviendas de bancos. Aliseda indica además lo que los grandes portales a menudo omiten: si un piso está ocupado, alquilado a inquilinos o sujeto a un alquiler social. Cada fuente es su propio adaptador, y cada una se evaluó antes de escribirlo: primero una API o alertas oficiales, después su robots.txt, sus condiciones de uso y si está detrás de un servicio antibots. Las peticiones salen a razón de una cada cuatro a seis segundos por sitio, y un sitio que responde con un bloqueo se deja en paz durante el resto de la búsqueda. Idealista, el portal más grande, está protegido por DataDome, así que no se hace scraping en absoluto y queda a la espera de su API oficial. El progreso se muestra en directo, con una estimación del tiempo restante.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P4 - Search running.png",
+    "alt": "Una búsqueda en curso: los anuncios encontrados hasta el momento, los alquileres y habitaciones leídos para estimar el alquiler, y el tiempo restante",
+    "shot": true
+  }
+]} />
+
+**Un piso, muchos anuncios.** El mismo piso suele estar en tres portales a la vez. Fotocasa y Habitaclia funcionan ahora sobre una misma plataforma y sirven las mismas fotografías, así que dos anuncios que comparten dos o más identificadores de imagen son el mismo piso casi sin duda, y también lo son dos con la misma agencia y la misma referencia de agencia. Más allá de eso, los pares a menos de 300 m se puntúan según habitaciones, baños, superficie, planta, precio y parecido de sus descripciones, y se fusionan con union-find por encima de un umbral. Entre el umbral inferior y el superior se muestran como posibles duplicados para que el usuario decida, y las búsquedas posteriores respetan la decisión. Las puntuaciones se ajustaron con anuncios reales: el mismo precio exacto, superficie, habitaciones y baños ya significa el mismo piso, salvo que ambos indiquen una planta y las plantas no coincidan. Dos anuncios del mismo banco nunca se fusionan, porque un banco publica un anuncio por piso, y las unidades idénticas de una misma promoción, ubicadas solo por su calle, antes acababan colapsando en una sola. En la búsqueda de Sant Antoni de estas imágenes, 195 anuncios se convirtieron en 100 pisos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P5 - Listing.png",
+    "alt": "Un piso, dos anuncios: Habitaclia y Fotocasa al mismo precio y con la misma rebaja, con la nota y las etiquetas del usuario",
+    "shot": true
+  }
+]} />
+
+**Estimar el alquiler cuando hay pocos comparables.** Cada búsqueda de venta lee también los alquileres de pisos enteros alrededor de la zona, con un kilómetro de margen, y añade los que búsquedas anteriores han visto en los últimos 120 días. Los alquileres de temporada se excluyen: en una de las primeras pruebas, 13 de 30 alquileres eran de temporada. Los comparables se toman por pasos, primero a menos de 250 m y con ±10 % de superficie, después 500 m y ±20 %, 1 km y ±30 %, 2 km y ±40 %, hasta reunir tres. La estimación es su mediana de alquiler por metro cuadrado multiplicada por la superficie del piso, y la cifra prudente es el 85 % de ella, porque los alquileres anunciados tienden a ser altos. Cuando no se encuentran tres en ningún sitio, el recurso es el alquiler medio anunciado por metro cuadrado del municipio según el índice público de precios de un portal, usado solo hasta 150 m², ya que una media de todos los tamaños sobrevalora las viviendas grandes. Algunas rentabilidades siguen sin ser fiables, y los datos reales lo dejaron claro: la primera clasificación de un municipio de costa la encabezaban un anuncio que declaraba 976 m², con una rentabilidad del 281 %, y unas casas valoradas frente a tres villas de lujo a 2 km. Por eso una estimación con demasiado pocos comparables, una superficie imposible, un precio muy por debajo del de la zona, una subasta o una estimación de más de 1,5 veces el índice municipal se marca como poco fiable, con el motivo, y se ordena detrás del resto. Un piso ocupado, con alquiler social o vendido en nuda propiedad muestra la rentabilidad que tendría si estuviera vacío, y se ordena detrás de los vacíos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P6 - Rent estimate.png",
+    "alt": "La rentabilidad de un piso: alquiler prudente, mediana de mercado, el índice municipal al lado, y el mismo piso alquilado por habitaciones",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P6 - Comparables.png",
+    "alt": "Comparables: pisos parecidos en venta con su precio por metro cuadrado, y los alquileres a partir de los cuales se hizo la estimación",
+    "shot": true
+  }
+]} />
+
+**Una rentabilidad para cada objetivo.** La misma búsqueda se puede leer de cinco maneras, y pasar de una a otra no requiere una búsqueda nueva. Alquilarlo entero usa la estimación anterior. Alquilarlo por habitaciones usa los anuncios de habitaciones cercanos, que escasean en estos portales, así que el precio también se puede introducir a mano. El alquiler turístico usa los datos abiertos de Inside Airbnb en lugar del propio Airbnb, cuyo robots.txt prohíbe sus páginas de búsqueda: viviendas enteras con los mismos dormitorios, activas y con precio, entre 300 m y 2 km de distancia, al 85 % de su precio mediano por noche y con su ocupación mediana, limitada al 70 %. Reformar para vender valora el piso a la mediana por metro cuadrado de los anuncios de la misma búsqueda cuyo texto dice que están reformados, algo que los portales no indican como campo, menos la diferencia media del 6,2 % entre precio de oferta y precio de venta. Rent to rent lee las habitaciones alrededor de un alquiler y calcula el beneficio de subarrendarlas todas. Cada objetivo pasa sus cifras a la calculadora con un clic.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Tourist.png",
+    "alt": "El objetivo turístico: las normas de licencia para Barcelona y cómo se usaron los comparables de Inside Airbnb",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Tourist ROI.png",
+    "alt": "La rentabilidad turística de un piso: precio por noche, ocupación y los ingresos que implica",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P7 - Renovate and sell.png",
+    "alt": "El objetivo de reformar y vender: el precio de venta a partir de los pisos reformados de la misma búsqueda",
+    "shot": true
+  }
+]} />
+
+**La ley, comprobada en la fuente.** Las normas de alquiler en Cataluña cambian de un municipio a otro, así que la herramienta las indica donde importan, a partir de textos oficiales y con la fecha en que se consultaron. En los 271 municipios declarados zonas de mercado residencial tensionado por las resoluciones TER/800/2024 y TER/2408/2024, el alquiler de un contrato nuevo está limitado. El límite para un piso concreto no se puede calcular, ya que depende de su último contrato o del índice de referencia para su referencia catastral, que ninguna API abierta proporciona, así que el resumen de la búsqueda y cada piso explican cómo encontrarlo y la calculadora lo admite. Una revisión que amplía la lista a 302 municipios seguía en consulta el 9 de octubre de 2026, y la herramienta la señala como no verificada en lugar de dar por buena ninguna de las dos listas. El objetivo turístico incluye los 262 municipios del Decreto ley 3/2023, donde un piso turístico necesita una licencia urbanística previa, y rent to rent incluye las condiciones de subarriendo del artículo 8.2 de la Ley de Arrendamientos Urbanos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P8 - Rent cap.png",
+    "alt": "El límite del alquiler en un mercado tensionado: cuándo se aplica, cómo encontrar la cifra para un piso, y la revisión todavía pendiente de aprobación",
+    "shot": true
+  }
+]} />
+
+**El mapa y el barrio.** El mapa tiene cinco capas. Además de los propios anuncios, tres son hexágonos H3 con la mediana del precio por metro cuadrado, de la rentabilidad bruta o de la rentabilidad de los pisos que contienen, con una resolución de 75 m a 1,4 km de lado que sigue el tamaño de la zona, coloreados por cuantiles, y con las dos capas de rentabilidad construidas solo a partir de alquileres fiables. La quinta es la renta neta por persona de cada sección censal, de los servicios de mapas abiertos del INE, el instituto de estadística de España. Cada piso tiene además una ficha en siete apartados: resumen, rentabilidad, comparables, evolución del mercado, barrio, lugares cercanos y un análisis. La evolución del mercado son cinco años de precios de oferta y alquileres por metro cuadrado del municipio. El barrio compara la sección censal del piso con su municipio, de la renta y la desigualdad a la edad, el origen y el peso de las viviendas turísticas, a partir del atlas de distribución de renta y el censo anual del INE, consultados directamente desde el navegador. Los lugares cercanos vienen de OpenStreetMap, con los minutos a pie. El análisis se basa en reglas: puntos fuertes y débiles derivados de la rentabilidad, el flujo de caja, el precio frente a la zona y las cifras del barrio.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - ROI hexagons.png",
+    "alt": "Rentabilidad sobre el capital aportado por hexágono H3, mediana de los pisos con un alquiler fiable",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Price hexagons.png",
+    "alt": "Precio por metro cuadrado por hexágono H3",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Income.png",
+    "alt": "Renta neta por persona por sección censal, INE 2023",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Market.png",
+    "alt": "Evolución del mercado: los precios a los que se ha visto este piso, y cinco años de precios de venta y alquiler en el municipio",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Neighbourhood.png",
+    "alt": "Barrio: la sección censal del piso frente al conjunto de Barcelona",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Nearby.png",
+    "alt": "Lugares cercanos de OpenStreetMap con los minutos a pie, nombres difuminados",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P9 - Analysis.png",
+    "alt": "Análisis: puntos fuertes y débiles obtenidos mediante reglas",
+    "shot": true
+  }
+]} />
+
+**Grandes ciudades.** Una búsqueda de 300 m en el Eixample de Barcelona tardaba más de 14 minutos y todavía estaba leyendo comparables, más de 2400 habitaciones en 5 km y 1100 alquileres en 1 km. Los anuncios en venta, que son el objeto de la búsqueda, se siguen leyendo enteros. Los comparables ya no: cada portal lee como máximo 15 páginas, empezando por las zonas con más pisos cerca, y se detiene en 150 dentro de la zona, y las habitaciones se buscan primero en 1 km y solo hasta 5 km cuando salen menos de 30. La misma búsqueda pasó entonces a tardar 108 s. Un ritmo respetuoso tiene un coste que se mantiene: la búsqueda de Sant Antoni de estas imágenes, con la profundidad normal, tardó unos seis minutos, casi todos esperando entre páginas. Abrir una búsqueda anterior desde el historial no consulta nada a los portales, porque se reconstruye desde la base de datos, en menos de un segundo.
+
+**Alrededor de la búsqueda.** Todas las búsquedas se guardan, y volver a abrir una no cuesta nada. Una alerta repite una búsqueda cada día o cada semana en segundo plano mientras la aplicación está abierta y avisa, con una notificación del navegador, de los pisos nuevos, o que han bajado al menos un 1 %, que siguen cumpliendo sus filtros con una rentabilidad fiable. Su primera ejecución solo sirve de referencia. Otro tipo de alerta vigila los pisos guardados y avisa cuando uno baja de precio, al instante, a partir de los precios que han visto las búsquedas posteriores. Los pisos guardados viven en un tablero por estado (interesado, visitado, oferta hecha y descartado), con notas, etiquetas y arrastrar y soltar entre columnas, y los cálculos guardados se comparan uno al lado del otro con el mejor de cada fila en verde. La lista filtrada se exporta a Excel, y el buscador de municipios admite un código postal y responde al instante desde una lista local de GeoNames de 8124 municipios.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Saved board.png",
+    "alt": "Pisos guardados en un tablero por estado, con notas y etiquetas, y los cálculos guardados debajo",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Compare.png",
+    "alt": "Tres cálculos guardados uno al lado del otro, el mejor de cada fila en verde",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Alerts.png",
+    "alt": "Alertas: una búsqueda repetida cada día, y el formulario de alertas de bajada de precio para pisos guardados",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - History.png",
+    "alt": "Historial de búsquedas: al volver a abrir una búsqueda, se reconstruye desde la base de datos",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/P11 - Postcode finder.png",
+    "alt": "El buscador de municipios, que responde a un código postal desde una lista local de GeoNames",
+    "shot": true
+  }
+]} />
+
+**Cómo está construida.** Next.js con el App Router y cache components, React, TypeScript, Tailwind y shadcn/ui. Todo lo que debe sobrevivir a una recarga o a un enlace compartido vive en la URL, mediante nuqs. El mapa es MapLibre GL sobre teselas de OpenFreeMap, con terra-draw para el polígono y h3-js para los hexágonos. Supabase guarda los anuncios y su historial de precios, las búsquedas, los pisos guardados y las alertas, en Postgres con row-level security, detrás de un inicio de sesión con Google limitado a una cuenta autorizada. La lógica de cálculo son funciones puras separadas de los componentes, y cada adaptador de portal se prueba contra páginas guardadas. Se ejecuta en un ordenador personal en lugar de en un servidor, en parte porque los portales suelen bloquear las direcciones de centros de datos, así que las alertas en segundo plano solo funcionan mientras está abierta.
+
+**Lo que no es.** Una herramienta personal, no un producto: un solo usuario, sin publicidad, sin seguimiento y sin asesoramiento financiero. Los anuncios se leen solo para análisis personal, a un ritmo lento, dentro del robots.txt de cada sitio, sin sortear ninguna protección antibots, y no se publica ni se redistribuye nada. En estas imágenes y en el vídeo, las fotos de los anuncios, las direcciones, las agencias, las descripciones y los nombres de los lugares cercanos se difuminan en el navegador antes de la captura, y los pisos guardados, las notas, el historial y las alertas pertenecen a una cuenta de demostración local, no a un uso real. El repositorio es privado.
+
+**Todo, de una pasada.** Un recorrido grabado por la herramienta tal como se usa: un código postal, una zona dibujada alrededor de Sant Antoni, un objetivo y una búsqueda, con la espera acelerada, los resultados leídos a través de las capas del mapa, una alerta, un piso abierto apartado por apartado, guardado con una nota, llevado a la calculadora y guardado allí, y después el tablero, la comparación, el historial y las alertas. Grabado a 1440p60 desde la aplicación en funcionamiento, renderizado al doble de densidad de píxeles, como lo mostraría una pantalla retina, capturado a cámara lenta para que todo lo que se mueve tenga un fotograma nuevo cada sesentavo de segundo, y con el mismo difuminado que las imágenes.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PropertyYield/walkthrough.mp4",
+    "poster": "/PropertyYield/walkthrough-poster.jpg",
+    "title": "Property Yield Analyser, recorrido"
+  }
+]} />
+
+<Note>Datos: <a href="https://www.geonames.org/" rel="noreferrer noopener" target="_blank">GeoNames</a> e <a href="https://insideairbnb.com/" rel="noreferrer noopener" target="_blank">Inside Airbnb</a>, ambos con licencia <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC BY 4.0</a>. Estadísticas de renta, censo y viviendas turísticas del <a href="https://www.ine.es/" rel="noreferrer noopener" target="_blank">INE</a>. Lugares y datos del mapa © <a href="https://www.openstreetmap.org/copyright" rel="noreferrer noopener" target="_blank">colaboradores de OpenStreetMap</a> (ODbL). Teselas del mapa de <a href="https://openfreemap.org/" rel="noreferrer noopener" target="_blank">OpenFreeMap</a>, © <a href="https://www.openmaptiles.org/" rel="noreferrer noopener" target="_blank">OpenMapTiles</a>.</Note>
+
+**Una segunda parte: el patrimonio familiar.** Además de encontrar pisos para comprar, la herramienta lleva un libro privado del patrimonio de una familia: quién es propietario de cada inmueble y en qué porcentaje, qué rinde cada uno, cuánto queda por pagar de los préstamos, y qué supone todo ello en impuestos, este año, en una venta prevista y en una herencia dentro de décadas. Está pensada para preparar las conversaciones de la familia con su asesor fiscal, no para sustituirlas, y solo se abre para una cuenta autorizada.
+
+**Cifrado antes de salir del navegador.** El libro se cifra en el navegador con una frase de contraseña, bajo una clave derivada con PBKDF2 y AES-GCM, de modo que la base de datos solo contiene texto cifrado, igual que el archivo de copia de seguridad en que se puede descargar el libro. Nada en el servidor puede leerlo, y una frase de contraseña olvidada no se puede recuperar. Cada guardado se conserva como una versión, y el libro se bloquea solo tras 15 minutos sin uso.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F01 - Book.png",
+    "alt": "El libro familiar: cinco personas, cada una con su edad, su pensión o salario y los inmuebles de los que es propietaria",
+    "shot": true
+  }
+]} />
+
+**Personas e inmuebles.** Cada persona incluye lo que necesitan los impuestos: año de nacimiento, salario o pensión, ahorros, un plan de pensiones, personas a cargo y las deducciones aplicables. Un salario se desglosa en las cotizaciones a la Seguridad Social del trabajador y lo que paga la empresa además. Cada inmueble tiene sus propietarios, sus porcentajes y si tienen el pleno dominio o un usufructo, su valor catastral y la parte correspondiente al suelo, lo que costó, lo que vale, sus gastos anuales y su arrendamiento. El arrendamiento determina la reducción en el IRPF sobre el alquiler, que con la Ley por el derecho a la vivienda de 2023 depende de cuándo se firmó el contrato y, si es nuevo, de si el alquiler bajó en un mercado tensionado. Para los valores, se consulta el Catastro por dirección o referencia catastral, y el valor tasado medio por metro cuadrado del Ministerio de Vivienda, trimestre a trimestre, desde 1995 para cada provincia y desde 2005 para los municipios más grandes, da una estimación de lo que vale una vivienda y, calculado hacia atrás hasta el año de compra, de lo que costó cuando nadie lo recuerda.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F02 - Payslip.png",
+    "alt": "Un salario desglosado: las cotizaciones del trabajador, el sueldo antes del IRPF y lo que paga la empresa además",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F03 - Properties.png",
+    "alt": "Los inmuebles de la familia: una vivienda, pisos alquilados, un local, el piso del hijo mayor y una finca rústica, con sus propietarios",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F04 - Property values.png",
+    "alt": "Un piso alquilado: propietarios, valores catastral y de mercado, y la tasación media del Ministerio de Vivienda para Barcelona aplicada a su superficie",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F05 - Rent reduction.png",
+    "alt": "Un arrendamiento nuevo en un mercado tensionado con el alquiler rebajado de 900 a 850 euros al mes: una reducción del 90 % en el IRPF",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F07 - Loan.png",
+    "alt": "Una hipoteca: cuota mensual, capital pendiente, y los intereses y el capital amortizado de este año",
+    "shot": true
+  }
+]} />
+
+**Una venta prevista.** Un inmueble puede llevar una venta prevista, con su precio, fecha y gastos. La herramienta calcula la ganancia propietario por propietario: el precio menos los gastos de venta y la plusvalía municipal, frente a lo que costó menos la amortización de cada año en que estuvo alquilado, y a partir de ahí el IRPF adicional y la plusvalía municipal sobre el suelo. Señala el derecho de tanteo y retracto del inquilino cuando el piso está alquilado, y la exención para propietarios mayores de 65 años que destinan el importe a una renta vitalicia. Una venta anterior a la fecha de la herencia llega a la herencia como el dinero que queda, no como el piso.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F06 - Sale.png",
+    "alt": "Una venta prevista: para cada propietario, los valores de transmisión y de adquisición, la ganancia, el IRPF adicional y lo que queda",
+    "shot": true
+  }
+]} />
+
+**IRPF e Impuesto sobre el Patrimonio.** El IRPF del año de cada persona se calcula completo: las escalas estatal y catalana, la base del ahorro, los mínimos personales, los rendimientos del alquiler netos de gastos y amortización con su reducción, y el plan de pensiones. Para un matrimonio compara la declaración individual y la conjunta. Cada cifra se despliega en los pasos que hay detrás. Después viene el Impuesto sobre el Patrimonio, con la escala y el mínimo exento de Cataluña, la exención de la vivienda habitual, las deudas, el límite que lo vincula al IRPF y el Impuesto Temporal de Solidaridad de las Grandes Fortunas, y una vivienda vacía recibe un aviso allí donde el ayuntamiento aplica un recargo en su IBI. Un decreto ley todavía pendiente de convalidación cambia algunas de estas cifras, así que es un interruptor, y cada pestaña se puede leer con él o sin él.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F08 - Income tax.png",
+    "alt": "IRPF de cada persona: lo que queda al año, el impuesto y los ingresos brutos, y la comparación entre la declaración individual y la conjunta de la pareja",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F09 - Income tax detail.png",
+    "alt": "Cómo se calcula el IRPF de una persona, paso a paso",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F10 - Wealth tax.png",
+    "alt": "Impuesto sobre el Patrimonio: los bienes y deudas de cada persona, la exención de la vivienda habitual, el mínimo exento y la cuota a pagar",
+    "shot": true
+  }
+]} />
+
+**La herencia, años vista.** Lo que importa no es la herencia hoy sino dentro de veinticinco años, así que el escenario recoge quién fallece y cuándo, y una revalorización anual supuesta de los inmuebles, y lo lleva todo hasta esa fecha: los valores, lo que todavía quedará por pagar de los préstamos, los ahorros y las ventas previstas antes. El cónyuge superviviente puede conservar el usufructo de todo mientras los hijos reciben la nuda propiedad, como prevén la mayoría de testamentos catalanes. Después, el Impuesto sobre Sucesiones catalán de cada heredero sigue sus pasos: la reducción por parentesco, la reducción del 95 % por la vivienda familiar, la escala y la bonificación que depende de cuánto recibe cada uno. Para entonces, los hijos probablemente tendrán ya más de 500 000 € propios, lo que multiplica su impuesto por 1,1, así que eso también es un interruptor. Cada inmueble urbano paga además la plusvalía municipal, y esa la fija cada ayuntamiento: las ordenanzas de los principales municipios catalanes están cargadas con sus tipos y sus bonificaciones, que difieren en de quién debía ser la vivienda, cuánto tiempo deben conservarla los herederos y si la bonificación depende del valor catastral o de la renta del heredero. Donar un inmueble en vida se puede comparar con dejarlo en herencia.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F11 - Inheritance.png",
+    "alt": "El escenario de la herencia: quién fallece, cuándo, la revalorización anual, el usufructo del cónyuge y el interruptor para herederos con patrimonio propio",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F12 - Estate.png",
+    "alt": "Lo que contiene el caudal hereditario: el porcentaje de cada inmueble, su valor declarado y su base imponible, y su plusvalía municipal",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F13 - Municipal tax.png",
+    "alt": "La plusvalía municipal de cada municipio: tipo, bonificación para la vivienda familiar y para el resto, y las condiciones de su ordenanza",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F14 - Inheritance tax.png",
+    "alt": "El Impuesto sobre Sucesiones de un heredero, desde la base imponible, pasando por las reducciones y la escala, hasta la bonificación y la cuota a pagar",
+    "shot": true
+  }
+]} />
+
+**A nombre propio o mediante una sociedad.** Los mismos inmuebles pueden quedarse en la familia o pasar a una sociedad, y la comparación llega hasta la fecha de la herencia: lo que cuesta aportarlos, lo que la familia conserva cada año después del Impuesto sobre Sociedades o del IRPF, el Impuesto sobre Sucesiones y la plusvalía municipal al final, y la plusvalía que queda latente dentro de la sociedad. Se comparan dos tipos de sociedad, una patrimonial pasiva y otra con un empleado a jornada completa que puede calificarse como empresa familiar, cuyas participaciones obtienen entonces una reducción del 95 % en la herencia. También se comprueba la condición de gran tenedor, que cambia las normas de alquiler. Para esta familia inventada, mantener los pisos a nombre propio sale claramente por delante.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F15 - Company.png",
+    "alt": "Qué inmuebles irían a una sociedad, cómo funcionaría y qué llega a la familia cada año",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F16 - Company vs inheritance.png",
+    "alt": "A nombre propio, sociedad patrimonial o empresa familiar hasta la herencia: coste de entrada, ingresos anuales, Impuesto sobre Sucesiones y plusvalía municipal, e impuesto latente",
+    "shot": true
+  }
+]} />
+
+**Hipotecas y jubilación.** Cuánto prestaría un banco a cualquier miembro de la familia para una vivienda de un precio dado, a partir del 35 % de los ingresos netos y el 80 % del valor, criterios que son práctica bancaria y no ley, y que por eso quedan editables, el dinero necesario después del ITP y los gastos, y cuánto se podría obtener con la garantía de un piso ya pagado. La jubilación muestra cuándo puede jubilarse cada persona y si un pensionista tiene derecho al complemento a mínimos, o lo pierde por los alquileres.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F17 - Mortgage.png",
+    "alt": "Comprar con hipoteca: el préstamo máximo, la cuota mensual y el dinero necesario para un piso de 285 000 euros",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F18 - Retirement.png",
+    "alt": "Jubilación: cada pensión frente a la mínima, los otros ingresos que eliminan el complemento, y las edades de jubilación de los hijos",
+    "shot": true
+  }
+]} />
+
+**El suelo.** Una finca rústica que puede recalificarse como urbanizable es el activo más difícil de valorar. Su valor una vez recalificada sale del método residual estático: la edificabilidad, menos la cesión al ayuntamiento, repartida entre vivienda libre y protegida y vendida a los precios esperados, menos el margen del promotor, la construcción y las obras de urbanización. Después se comparan las opciones de la familia según lo que dejaría cada una, y cuándo: venderla ahora como suelo rústico, esperar a la recalificación y vender, urbanizarla y vender las parcelas, permutarla por una parte de los pisos que se construyan, aportarla antes a una sociedad, o heredarla antes o después de la recalificación. Cada opción enumera sus impuestos, sus plazos y las preguntas para el asesor, y cuando la fecha de la herencia es posterior a la recalificación, la herencia computa la finca como suelo urbano a su valor recalificado.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F19 - Land.png",
+    "alt": "Las hipótesis de la recalificación y el valor residual: edificabilidad, ventas, margen del promotor, construcción y urbanización",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "PropertyYield/F20 - Land scenarios.png",
+    "alt": "Lo que deja cada opción a la familia, desde esperar a la recalificación y vender hasta heredar la finca antes de ella",
+    "shot": true
+  }
+]} />
+
+**Cada norma, con su fuente.** Todo esto se apoya en un catálogo de las normas que aplica, cada una en lenguaje llano con sus cifras, su artículo y su fuente, tal como están en 2026. Las cifras que son práctica de mercado y no ley se marcan como no verificadas y quedan editables, y el icono de ayuda junto a una cifra calculada abre la norma que hay detrás.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "PropertyYield/F21 - Rules.png",
+    "alt": "El catálogo de normas: IRPF, hipotecas y el resto, cada una con su artículo, y las cifras pendientes de verificar marcadas",
+    "shot": true
+  }
+]} />
+
+**Lo que no es esta parte.** No es asesoramiento fiscal ni jurídico: estima, y dice qué preguntar. La familia de estas imágenes y del vídeo es inventada, un padre, una madre y tres hijos adultos con inmuebles en municipios de los alrededores de Barcelona, cargada en una cuenta de demostración local en un servidor de pruebas, y los campos de dirección y referencia catastral se difuminan en el navegador antes de la captura.
+
+**El libro familiar, de una pasada.** Un recorrido grabado: el libro desbloqueado con su frase de contraseña, una nómina, una venta prevista, el IRPF y el Impuesto sobre el Patrimonio, la herencia con el interruptor para herederos con patrimonio desactivado y activado de nuevo, la comparación con sociedad, una hipoteca recalculada para un piso más barato, la jubilación, el suelo y sus opciones, el catálogo de normas, y el libro guardado y bloqueado. Grabado del mismo modo que el primer vídeo, a 1440p60.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/PropertyYield/family-walkthrough.mp4",
+    "poster": "/PropertyYield/family-walkthrough-poster.jpg",
+    "title": "Property Yield Analyser, el patrimonio familiar"
+  }
+]} />

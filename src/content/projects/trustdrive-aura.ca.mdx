@@ -1,0 +1,19 @@
+---
+title: "TrustDrive / Aura"
+subtitle: "Advanced Human Machine Interfaces · Politecnico di Milano · 2026"
+tags:
+  - "Disseny d'HMI"
+  - "Conducció autònoma"
+  - "IA explicable"
+  - "React · Python · FastAPI"
+  - "Politecnico di Milano · 2026"
+source: "cfc7e29df5"
+---
+
+TrustDrive / Aura és un prototip de recerca que explora com el disseny d'HMI adaptatiu pot ajudar a calibrar la confiança en vehicles autònoms de nivell 3 SAE. Desenvolupat com a projecte final en grup de l'assignatura Advanced Human Machine Interfaces del Politecnico di Milano, el projecte aborda un problema estructural propi de l'automatització L3: mentre el vehicle gestiona tot el control lateral i longitudinal, el conductor ha d'estar a punt per recuperar el control quan se li demani. Això genera la síndrome Out-of-the-Loop (OOTL), en què la desconnexió cognitiva de la tasca de conducció fa que un traspàs segur surti car en consciència situacional i en temps de reacció. La pregunta de disseny central era com construir la confiança de manera gradual, perquè els conductors se sentin realment segurs confiant en el sistema amb el temps, i no simplement el tolerin.
+
+La resposta és Aura, una interfície de cotxe personalitzada i basada en la veu que modela cada conductor en cinc dimensions de comportament i n'adapta en conseqüència l'estil de comunicació, el moment i la densitat d'informació. La interacció cobreix tot el cicle del trajecte. Una entrevista d'onboarding indirecta estableix un perfil del conductor abans de la primera conducció. Una capa de suggeriments proactius convida a activar l'automatització a l'autopista amb missatges personalitzats sobre els beneficis. Les ordres de veu permeten fer consultes en temps real durant la fase automatitzada. Una seqüència de Takeover Request (TOR) en tres fases reconstrueix la consciència situacional de manera progressiva en lloc de fer-ho amb una alerta sobtada. I una pantalla de feedback després del trajecte afina el perfil al llarg de sessions repetides. Cada decisió del sistema es mostra acompanyada d'una explicació, aplicant principis d'Explainable AI (XAI) per ajudar cada conductor a construir un model mental precís del que el sistema pot fer i del que no.
+
+El prototip funciona com una aplicació web full-stack: un frontend React 19 + TanStack Start fa de pantalla del cotxe, connectat per WebSocket a un backend Python/FastAPI que gestiona el speech-to-text (Whisper), la classificació d'intencions basada en LLM (Groq Llama 3.3 70B) i el text-to-speech (Microsoft Edge TTS). El perfil del conductor es desa com un objecte JSON de cinc dimensions en una escala contínua [0, 10] i es visualitza com un gràfic de radar en forma de pentàgon accessible des de la pantalla d'inici. La presentació completa i el codi font estan enllaçats a continuació.
+
+<Pdf src="/Docs/AHMI.pdf" title="Presentació final d'AHMI" />

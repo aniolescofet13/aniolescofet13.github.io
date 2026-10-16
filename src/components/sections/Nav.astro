@@ -1,21 +1,37 @@
 ---
+import { LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, localePath, useT, type Locale } from '../../i18n/ui';
+import { langOf } from '../../i18n/current';
+
 interface Props {
   // Off on a project sent on its own: the name stays as a header, but nothing
   // leads from there to the rest of the portfolio.
   links?: boolean;
 }
 const { links = true } = Astro.props;
+const lang = langOf(Astro.currentLocale);
+const t = useT(lang).nav;
+const home = localePath(lang, '/');
+
+// This page without its language prefix, so the switch lands on the same page
+// in the other language: /ca/projects/x/ -> /projects/x/ -> /es/projects/x/.
+const bare = Astro.url.pathname.replace(new RegExp(`^/(${LOCALES.filter((l) => l !== DEFAULT_LOCALE).join('|')})(?=/|$)`), '') || '/';
+const sections = ['about', 'experience', 'projects', 'skills', 'contact'] as const;
 ---
 <nav id="navbar"><div class="nav-inner">
 {links
-  ? <a class="nav-logo" href="/">Aniol <span>E.</span></a>
+  ? <a class="nav-logo" href={home}>Aniol <span>E.</span></a>
   : <span class="nav-logo">Aniol <span>E.</span></span>}
 <div class="nav-actions">
-{links && <ul class="nav-links"><li><a href="/#about">About</a></li><li><a href="/#experience">Experience</a></li><li><a href="/#projects">Projects</a></li><li><a href="/#skills">Skills</a></li><li><a href="/#contact">Contact</a></li></ul>}
-<button class="theme-toggle" type="button" aria-label="Switch to dark mode" data-theme-toggle>
+{links && <ul class="nav-links">{sections.map((s) => <li><a href={`${home}#${s}`}>{t[s]}</a></li>)}</ul>}
+<div class="lang-switch" role="group" aria-label={t.language}>
+  {LOCALES.map((l: Locale) => (
+    <a href={localePath(l, bare)} hreflang={l} lang={l} aria-current={l === lang ? 'true' : undefined} title={LOCALE_NAMES[l]}>{l}</a>
+  ))}
+</div>
+<button class="theme-toggle" type="button" aria-label={t.toDark} data-theme-toggle data-label-dark={t.toDark} data-label-light={t.toLight}>
   <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/></svg>
   <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
 </button>
-{links && <button aria-label="Menu" class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')"><span></span><span></span><span></span></button>}
+{links && <button aria-label={t.menu} class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')"><span></span><span></span><span></span></button>}
 </div>
 </div></nav>

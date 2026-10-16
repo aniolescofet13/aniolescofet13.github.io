@@ -76,7 +76,7 @@ document.addEventListener('click', e => {
   if (pdf) {
     const f = document.createElement('iframe');
     f.src = pdf.dataset.pdf;
-    f.title = pdf.dataset.title || 'Document';
+    f.title = pdf.dataset.title || '';
     pdf.replaceWith(f);
     return;
   }
@@ -84,7 +84,7 @@ document.addEventListener('click', e => {
   if (yt) {
     const f = document.createElement('iframe');
     f.src = 'https://www.youtube-nocookie.com/embed/' + yt.dataset.yt + '?autoplay=1';
-    f.title = yt.title || 'YouTube video';
+    f.title = yt.title || 'YouTube';
     f.allow = 'autoplay; encrypted-media; picture-in-picture';
     f.allowFullscreen = true;
     yt.replaceChildren(f);
@@ -171,7 +171,8 @@ document.addEventListener('keydown', e => {
   function stored() { try { return localStorage.getItem('theme'); } catch (e) { return null; } }
   function label() {
     var dark = root.dataset.theme === 'dark';
-    btns.forEach(function (b) { b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode'); });
+    // The labels come from the button, in the page's language.
+    btns.forEach(function (b) { b.setAttribute('aria-label', dark ? b.dataset.labelLight : b.dataset.labelDark); });
   }
   function set(theme, remember) {
     root.classList.add('theme-switching');

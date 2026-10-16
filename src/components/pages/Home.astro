@@ -1,0 +1,52 @@
+---
+// The portfolio's home page, in whatever language its URL says.
+import Base from '../../layouts/Base.astro';
+import Hero from '../sections/Hero.astro';
+import About from '../sections/About.astro';
+import Experience from '../sections/Experience.astro';
+import ProjectsHeader from '../sections/ProjectsHeader.astro';
+import Skills from '../sections/Skills.astro';
+import Contact from '../sections/Contact.astro';
+import ProjectCard from '../ProjectCard.astro';
+import { listedByCategory } from '../../lib/projects';
+import { useT } from '../../i18n/ui';
+import { langOf } from '../../i18n/current';
+
+const lang = langOf(Astro.currentLocale);
+const t = useT(lang).projects;
+const groups = await listedByCategory(lang);
+// Counted, not typed: the old page said "All 17" and "University 7" after
+// cards had come and gone. Hiding a project must update these by itself.
+const total = groups.reduce((n, g) => n + g.items.length, 0);
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+---
+<Base>
+<Hero />
+<About />
+<Experience />
+
+<section id="projects">
+<ProjectsHeader />
+
+<div class="projects-tabs reveal" role="tablist" aria-label={t.tablist}>
+  <button class="ptab active" type="button" role="tab" data-cat="all">{t.all}<span class="n">{total}</span></button>
+  {groups.map((g) => (
+    <button class="ptab" type="button" role="tab" data-cat={g.key}>{g.tab}<span class="n">{g.items.length}</span></button>
+  ))}
+</div>
+
+{groups.map((g) => (
+  <div class="projects-category reveal" data-cat={g.key}>
+    <h3 class="projects-category-title">{g.title}</h3>
+    <div class="projects-grid">
+      {g.items.map((p, i) => (
+        <ProjectCard project={p} label={`${g.prefix} — ${pad(i)}`} anchor={`${g.prefix.toLowerCase()}-${pad(i)}`} />
+      ))}
+    </div>
+  </div>
+))}
+</section>
+
+<Skills />
+<Contact />
+</Base>

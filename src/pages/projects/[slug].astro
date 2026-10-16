@@ -1,26 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
-import { labelFor } from '../../lib/projects';
+import ProjectPage from '../../components/pages/ProjectPage.astro';
 
-// One page per project you can send on its own. Hidden projects get no page
-// at all; unlisted ones get a page but stay off the portfolio and out of search.
-// The page has no menu and no link back, so whoever gets the link sees this
-// project only.
+// Hidden projects get no page at all; unlisted ones get a page but stay off
+// the portfolio and out of search.
 export async function getStaticPaths() {
   const all = await getCollection('projects');
   return all
     .filter((p) => p.data.visibility !== 'hidden')
     .map((p) => ({ params: { slug: p.id }, props: { project: p } }));
 }
-
 const { project } = Astro.props;
-const { label, anchor } = await labelFor(project);
-const unlisted = project.data.visibility === 'unlisted';
 ---
-<Base title={`${project.data.title} — Aniol Escofet`} description={project.data.subtitle} noindex={unlisted} standalone>
-<section class="project-page">
-  <ProjectCard project={project} label={label} anchor={anchor} open />
-</section>
-</Base>
+<ProjectPage project={project} />

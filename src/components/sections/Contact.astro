@@ -1,11 +1,14 @@
 ---
+import { useT } from '../../i18n/ui';
+import { langOf } from '../../i18n/current';
+const t = useT(langOf(Astro.currentLocale)).contact;
 ---
 <section class="contact-section" id="contact">
-<div class="section-header reveal" style="justify-content:center"><span class="section-num">05</span><h2 class="section-title">Contact</h2></div>
-<h3 class="contact-tagline reveal">Let's build something <em>fast</em></h3>
-<p class="contact-sub reveal">Whether it's about an opportunity in motorsport engineering, a collaboration, or just talking about vehicles, I'd love to hear from you.</p>
+<div class="section-header reveal" style="justify-content:center"><span class="section-num">05</span><h2 class="section-title">{t.title}</h2></div>
+<h3 class="contact-tagline reveal">{t.taglineA} <em>{t.taglineEm}</em></h3>
+<p class="contact-sub reveal">{t.sub}</p>
 <div class="contact-links reveal">
-<a class="contact-link primary" href="mailto:aniolescofet01@gmail.com">Email me</a>
+<a class="contact-link primary" href="mailto:aniolescofet01@gmail.com">{t.email}</a>
 <a class="contact-link" href="https://www.linkedin.com/in/aniol-escofet" target="_blank">LinkedIn</a>
-<a class="contact-link" download="" href="/Docs/AniolEscofet_CV.pdf">Download CV</a>
+<a class="contact-link" download="" href="/Docs/AniolEscofet_CV.pdf">{t.cv}</a>
 </div></section>

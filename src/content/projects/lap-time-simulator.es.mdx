@@ -1,0 +1,344 @@
+---
+title: "Lap Time Simulator"
+subtitle: "Plataforma modular de desarrollo de vehículos · Python · React · WebGL"
+tags:
+  - "Python"
+  - "FastAPI"
+  - "React · TypeScript"
+  - "WebGL · three.js"
+  - "Simulación QSS"
+  - "Dinámica vehicular"
+  - "Pacejka MF"
+  - "Validación con telemetría"
+  - "ERS"
+source: "30f3dd0496"
+---
+
+Una plataforma en Python de simulación de tiempo por vuelta y análisis de vehículo, pensada para acompañar todo el ciclo de desarrollo de un coche de competición: desde el concepto inicial, cuando casi no existen datos de hardware, hasta la validación lista para carrera frente a telemetría real en pista. La herramienta se basa en un principio: la fidelidad de la simulación debe corresponderse con la fidelidad de la información disponible. A medida que el equipo conoce mejor el coche, los modelos se mejoran sobre la marcha sin reestructurar el flujo de trabajo.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Garage.png",
+    "alt": "Garaje: seis subsistemas con niveles de fidelidad independientes, junto a la envolvente g-g-V",
+    "shot": true
+  }
+]} />
+
+**El problema que resuelve.** En el desarrollo en competición, las decisiones con mayor impacto en el rendimiento (geometría de suspensión, paquete aerodinámico, arquitectura del tren motriz) se toman al principio del proyecto, justo cuando hay menos datos. Una herramienta que solo funciona cuando ya existen todos los datos de hardware llega demasiado tarde. Del mismo modo, una herramienta demasiado simplificada deja de dar respuestas útiles en cuanto empiezan a llegar datos reales. Este simulador lo resuelve siendo útil de forma continua en cada fase del desarrollo, desde estudios de concepto hechos a mano alzada hasta una simulación precisa a nivel de vuelta y validada con telemetría.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P2 - The problem it solves.png",
+    "alt": "Ciclo de desarrollo: fidelidad de la herramienta frente a la fase del proyecto",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P2 - Comparison.png",
+    "alt": "Comparativa de herramientas: simple frente a compleja frente a modular",
+    "shot": true
+  }
+]} />
+
+**Arquitectura de fidelidad modular.** Cada subsistema tiene su propia escala de fidelidad física, seleccionable en tiempo de ejecución, y las escalas tienen deliberadamente longitudes distintas: cada una se detiene donde la física adicional deja de compensar. L1 es la fase de concepto, con parámetros escalares simples como potencia máxima constante, coeficientes fijos de resistencia aerodinámica y sustentación y fricción constante, suficientes para obtener un tiempo por vuelta creíble a partir de una ficha técnica de una página. L2 es la fase de desarrollo, con modelos basados en la física: curvas de par, reparto de frenada y geometría hidráulica, comportamiento del neumático sensible a la carga, transferencia de carga lateral. Los frenos terminan aquí, en el modelo hidráulico completo. L3 es la fase de validación, en la que llegan los neumáticos con Pacejka Magic Formula ajustada a datos medidos, con temperatura, desgaste y presión por encima, y el chasis incorpora la flexibilidad en cabeceo. L4 es la fase de detalle, y solo tres subsistemas la tienen: el tren motriz para la gestión de energía del ERS, la aerodinámica para el mapa de efecto suelo y altura al suelo, y la suspensión para los centros de balanceo. Los niveles se combinan libremente, de modo que los neumáticos en L3 pueden funcionar junto a la suspensión en L1 cuando los datos no dan para más, lo que deja 4 × 4 × 4 × 3 × 3 × 2 = **1152 combinaciones de modelos** detrás de una única firma de llamada. El solver nunca sabe qué nivel está activo: todos los subsistemas exponen la misma interfaz, y los modelos de mayor fidelidad son sustitutos directos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P3 - 6 subsystems.png",
+    "alt": "Arquitectura de fidelidad modular: 6 subsistemas × niveles",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P8 - OOP architecture diagram.png",
+    "alt": "Modelo de objetos: Vehicle, las escalas de los seis subsistemas tras una única interfaz Subsystem, y los motores solve_lap y run_race",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L1.png",
+    "alt": "Neumáticos en L1: µ constante, dos parámetros",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L2.png",
+    "alt": "Neumáticos en L2: sensibilidad a la carga, cinco parámetros",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L3.png",
+    "alt": "Neumáticos en L3: Pacejka Magic Formula, veintisiete parámetros",
+    "shot": true
+  }
+]} />
+
+**Capa 1: barrido espacial QSS.** El motor espacial se basa en el método cuasiestacionario (Quasi-Steady-State), el estándar de la industria en simulación de competición. El coche se trata como una masa puntual que recorre una trazada conocida y se supone en régimen estacionario en cada punto del espacio. El algoritmo realiza tres barridos encadenados sobre el dominio de la distancia de pista. Primero, los límites de velocidad en curva: en cada punto con curvatura κ, la velocidad lateral máxima se resuelve de forma iterativa, ya que la carga aerodinámica, y por tanto el agarre, dependen de la propia velocidad. Segundo, un barrido de aceleración hacia delante propaga la envolvente de velocidad teniendo en cuenta la potencia del motor, la resistencia aerodinámica, la resistencia a la rodadura y el agarre longitudinal restante una vez descontada la demanda en curva mediante la elipse de fricción. Tercero, un barrido de frenada hacia atrás aplica la misma lógica a la inversa y propaga las velocidades máximas de entrada a cada curva. Ambos barridos dan la vuelta completa, hasta cinco veces, hasta que dejan de cambiar, de modo que la vuelta empieza a la misma velocidad a la que termina. El menor de los dos perfiles es la envolvente de velocidad de tiempo mínimo: en cada punto de la pista el coche está exactamente en un límite (tracción, frenada o paso por curva).
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P4 - Triple sweep scheme.png",
+    "alt": "Triple barrido QSS: velocidad en curva, aceleración hacia delante, frenada hacia atrás",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P4 - Results.png",
+    "alt": "Vuelta resuelta: mapa de la pista, puntos de funcionamiento g-g-V y perfil de velocidad",
+    "shot": true
+  }
+]} />
+
+**Capa 2: integración temporal transitoria y acoplamiento iterativo.** Una vez convergido el perfil de velocidad espacial, una segunda pasada integra la trayectoria en el dominio del tiempo y calcula los estados que evolucionan de forma continua a lo largo de la vuelta. El modelo térmico del neumático sigue la temperatura del compuesto mediante una red térmica de parámetros concentrados y actualiza los coeficientes de fricción y la rigidez de deslizamiento, que realimentan la Capa 1. La dinámica de suspensión y chasis calcula la altura al suelo instantánea en función del bombeo y el balanceo, lo que modifica directamente los mapas aerodinámicos usados en el barrido espacial. El estado de carga del ERS se integra a partir del perfil de demanda de potencia y determina la disponibilidad de despliegue curva a curva. La masa de combustible disminuye de forma continua y desplaza el peso total y la altura del centro de gravedad. Estos resultados se devuelven a la Capa 1, que vuelve a resolver el perfil de velocidad con el estado actualizado del vehículo. Las dos capas iteran hasta converger, normalmente en cinco a quince pasadas con una relajación adaptativa, y producen un perfil de velocidad que tiene en cuenta tanto la física instantánea como la evolución del estado del coche a lo largo de toda la vuelta.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Layer 1 - Layer 2.png",
+    "alt": "Acoplamiento iterativo: Capa 1 QSS y Capa 2 de integración temporal",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Tyre Temperatures.png",
+    "alt": "Temperaturas de los neumáticos frente a la distancia de vuelta, en las cuatro ruedas",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Ride height.png",
+    "alt": "Altura al suelo frente a la distancia de vuelta",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Fuel consumption.png",
+    "alt": "Masa de combustible frente a la distancia de vuelta",
+    "shot": true
+  }
+]} />
+
+**Análisis de sensibilidad y explorador de señales.** En lugar de ejecutar el simulador una vez por configuración, el módulo de sensibilidad barre un parámetro en un rango y representa directamente la respuesta del tiempo por vuelta. Así responde preguntas como: a partir de qué nivel de carga aerodinámica la resistencia añadida pesa más que el agarre adicional en curva, cuál es la penalización por peso en segundos en un circuito técnico frente a uno rápido, o a qué altura del centro de gravedad la transferencia de carga lateral empieza a perjudicar más de lo que ayuda. El explorador de señales ofrece una interfaz gráfica para inspeccionar cada canal calculado en función de la posición en pista o del tiempo (velocidad, aceleración longitudinal y lateral, carga del neumático por eje, carga aerodinámica, reparto de la fuerza de frenada, punto de funcionamiento del motor, aportación del ERS) y superpone canales de distintas configuraciones para mostrar directamente dónde un setup gana a otro. Se incluye el diagrama GG como evaluación estándar de lo bien que se aprovecha el círculo de fricción del neumático.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P6 - Web Sweep.png",
+    "alt": "Barrido de parámetros: respuesta del tiempo por vuelta transmitida punto a punto",
+    "shot": true
+  }
+]} />
+
+**Bucle de validación con datos reales.** Cuando el coche ya rueda en pista, los resultados del simulador se comparan directamente con la telemetría real (velocidad GPS, aceleraciones de la IMU, velocidades de rueda, presión de freno, canales del motor), alineada espacialmente por longitud de arco. Las desviaciones sistemáticas en sectores concretos revelan qué modelo de subsistema necesita refinarse: un punto de frenada sistemáticamente demasiado temprano apunta al modelo de frenos, y una velocidad en curva sistemáticamente demasiado alta apunta al modelo lateral del neumático. Esto cierra el bucle entre simulación y realidad y da a cada mejora del modelo un objetivo de validación claro.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - Web Validation.png",
+    "alt": "Validación frente a la vuelta de telemetría de clasificación en Suzuka",
+    "shot": true
+  }
+]} />
+
+**Comprobado en un coche que conozco.** El preset Formula Student Electric es el coche de mi antiguo equipo, construido con los datos del propio equipo y comprobado, no ajustado, frente a sus cuatro mangas de autocross en Formula Student Germany 2026. La primera pregunta es si el modelo es correcto. El modo sombra (shadow mode) impone la trazada y la velocidad registradas en cada manga, y el modelo deriva todo lo demás: la aceleración lateral y longitudinal, la velocidad del motor y la potencia de batería siguen los registros, con una correlación de la potencia de batería de 0,98-0,99 en todas las mangas, y la energía neta de batería de las dos mangas limpias queda dentro del 1-3 %. Llegar hasta ahí fue lo útil, porque cada corrección fue una medición y no un apaño: un suavizado de pista dimensionado para circuitos de Gran Premio que aplanaba el slalom, un factor de escala del neumático que se había quedado fuera del ajuste, canales de potencia que no incluían el arrastre lateral del neumático que el solver ya contabilizaba, y un consumo fijo de unos pocos kilovatios (el sistema de baja tensión a través del DC-DC, las bombas y las pérdidas fijas de los inversores) sumado a las pérdidas de la cadena de tracción. Los datos del equipo siguen siendo privados: las figuras muestran la comparación, no los parámetros del coche.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Shadow channels.png",
+    "alt": "Modo sombra en el autocross de FSG 2026: aceleración lateral y longitudinal, velocidad del motor, potencia y energía de batería, modelo frente a telemetría a lo largo del recorrido",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Shadow parity.png",
+    "alt": "Potencia de batería y aceleración lateral, modelo frente a telemetría punto a punto, en las cuatro mangas de autocross",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Shadow energy.png",
+    "alt": "Energía neta de batería de cada manga de autocross, modelo frente a telemetría",
+    "shot": true
+  }
+]} />
+
+**Lo que el piloto se dejó por el camino.** Con el modelo ya validado, el solver conduce él mismo la misma trazada, desde parado y sin seguir ningún perfil de velocidad, tan rápido como lo permiten el agarre, la potencia y los frenos: el tiempo que habría marcado un piloto perfecto en la trazada que realmente se condujo. En la mejor manga son 83,7 s frente a los 85,4 s reales. La gráfica de tiempo y el mapa muestran en qué puntos del recorrido se abre la diferencia.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance lap.png",
+    "alt": "Velocidad a lo largo del recorrido, el piloto frente al modelo conduciendo la misma trazada, y el tiempo que gana el modelo",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance runs.png",
+    "alt": "Cada una de las cuatro mangas de autocross tal como se condujo, frente al modelo conduciendo la misma trazada",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance map.png",
+    "alt": "El recorrido coloreado según dónde el modelo es más rápido o más lento que el piloto, y el diagrama g-g del piloto frente al modelo",
+    "shot": true
+  }
+]} />
+
+**Y en un coche que todo el mundo conoce.** El preset de Fórmula 1 se comprueba frente a un único coche, la vuelta de clasificación de Verstappen en Suzuka 2026 (1:30,262) a partir de los datos públicos de cronometraje, porque no hay dos coches de Fórmula 1 iguales. Las mismas dos preguntas, en el mismo orden. Con su velocidad impuesta, el régimen del motor sigue el registro con un error medio de 34 rpm y la marcha coincide en el 84 % de la vuelta, una vez medidas las relaciones de cambio en esa vuelta y conformada la curva del motor según los límites de caudal de combustible del reglamento de unidades de potencia de 2026. La aceleración lateral tiene una correlación de 0,95 con una estimación obtenida a partir de la posición del coche, y el pedal de freno coincide con el modelo en el 94 % de la vuelta. Por debajo de 300 km/h, la potencia que requiere la traza de velocidad se mantiene por debajo del techo de motor más ERS del modelo, y durante un tercio del tiempo en que va a fondo queda por debajo de lo que da el motor por sí solo: el coche de 2026 recargando la batería a pleno gas.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow channels.png",
+    "alt": "Modo sombra en la vuelta de clasificación de Verstappen en Suzuka: régimen del motor, marcha, aceleración lateral, potencia en rueda y freno, modelo frente a telemetría a lo largo de la vuelta",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow parity.png",
+    "alt": "Aceleración lateral y marcha, modelo frente a telemetría punto a punto",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow power.png",
+    "alt": "La potencia en rueda que exige la vuelta a pleno gas frente al techo de motor y ERS del modelo, según la velocidad",
+    "shot": true
+  }
+]} />
+
+**Hasta dónde se acerca la vuelta.** Conduciendo la vuelta por sí mismo, sobre la trazada de referencia del circuito, el modelo marca 1:29,962, 0,30 s por debajo de Verstappen. Los sectores están más alejados entre sí que la vuelta, y las figuras muestran por qué: el modelo gasta su energía eléctrica tan rápido como lo permite el reglamento desde la primera recta, mientras que un coche real la guarda para la recta de atrás (288 km/h ahí frente a sus 328), y en las eses tiene menos agarre del que él aprovecha. Una estrategia de despliegue de energía y el agarre a velocidad media son los próximos cambios del modelo.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance lap.png",
+    "alt": "Velocidad a lo largo de la vuelta, Verstappen frente al modelo, el tiempo que gana el modelo y la reserva de ERS del modelo",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance sectors.png",
+    "alt": "Tiempos por sector y tiempo por vuelta, Verstappen frente al modelo",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance map.png",
+    "alt": "Suzuka coloreado según dónde el modelo es más rápido o más lento que Verstappen, y el diagrama g-g de ambos",
+    "shot": true
+  }
+]} />
+
+**La aplicación.** El simulador funciona como un servicio FastAPI detrás de un front end en React, repartido en varias pantallas: un garaje donde el coche se construye subsistema a subsistema con curvas de capacidad en directo, un navegador de circuitos, el ejecutor de vueltas y carreras, un explorador de señales, una repetición en 3D, un barrido de parámetros transmitido por WebSocket y la validación con telemetría. Una vuelta de clasificación se resuelve en unos 0,05 s, y la configuración más pesada, con todas las realimentaciones térmicas, de desgaste y de energía activadas, en unos 6 s. Antes de cachear las tablas de interpolación eran 66 s: el profiling reveló que el solver construía 231 000 interpoladores spline por vuelta.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web GGV 3D.png",
+    "alt": "La envolvente g-g-V como superficie: capacidad frente a velocidad",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web GGV DRS open.png",
+    "alt": "La misma envolvente con el alerón móvil fijado en abierto",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Track.png",
+    "alt": "Navegador de circuitos: trazada, curvatura y elevación",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Run.png",
+    "alt": "Ejecución: perfil de velocidad con zonas de tracción, paso por curva y frenada",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Run Race.png",
+    "alt": "Modo carrera: tabla por vuelta con consumo de combustible, desgaste y degradación",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Signals.png",
+    "alt": "Explorador de señales: canales apilados frente a la distancia de vuelta",
+    "shot": true
+  }
+]} />
+
+**Todo, de una pasada.** Minuto y medio de la aplicación tal como se usa: un Fórmula 1 construido subsistema a subsistema, con su envolvente redibujada en cada paso, convertida después en superficie y abierta con el alerón. Una vuelta a Suzuka leída en la pantalla de ejecución y en el explorador de señales y repetida desde cuatro cámaras. La misma vuelta frente a la vuelta de clasificación de Verstappen. Un barrido de carga aerodinámica transmitido punto a punto. Un A/B que congela el coche, añade 30 kg y lo cuantifica en tres cuartos de segundo. Y, para terminar, el Formula Student Electric frente a su propia manga de autocross de FSG 2026, conducido por el modelo desde parado y luego en modo sombra frente a la energía de batería registrada. Los datos propios del coche, sus parámetros y las curvas que dibujan, están difuminados. Lo que hace, no. Grabado desde la build de producción a 2560×1440 y 60 fotogramas por segundo: la página funcionaba doce veces más lenta que el tiempo real mientras la captura de pantalla nativa de Chrome la grababa, así que cada fotograma del vídeo es uno que la aplicación dibujó de verdad, y las esperas del solver están recortadas.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/LapTime/walkthrough.mp4",
+    "poster": "/LapTime/walkthrough-poster.jpg",
+    "title": "LapTime: recorrido por la aplicación web"
+  }
+]} />
+
+**Repetición en 3D.** La vuelta resuelta se reproduce en WebGL con la pose del coche obtenida de interpolantes precalculados, de modo que un fotograma cuesta cuatro consultas a tablas en lugar de una búsqueda. Cinco cámaras: persecución, una onboard montada en el chasis, un punto de vista fijo a pie de pista, una cenital y una órbita libre que acompaña al coche. La onboard es la que merece explicación: está anidada dentro del propio grupo de carrocería del coche en lugar de recalcular su pose en cada fotograma a partir del rumbo de la trazada. El rumbo derivado de una trazada remuestreada arrastra ruido, y apuntar una cámara cuarenta metros por delante en la pista multiplica un pequeño error angular hasta convertirlo en una imagen que tiembla visiblemente. Fijar la cámara al coche hace imposible ese tipo de error, porque cualquier ruido residual gira la cámara y la carrocería a la vez. El coche es un AMR25 escaneado y reducido a 2,3 MB (geometría Draco, texturas WebP), que carga en 14 ms y mantiene las ruedas como nodos separados para que giren. Toda la ruta de la repetición se carga de forma diferida, porque three.js no pinta nada en el bundle de una pantalla que nunca lo dibuja.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Onboard.png",
+    "alt": "Repetición: cámara onboard montada en el chasis",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Chase.png",
+    "alt": "Repetición: cámara de persecución",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Trackside.png",
+    "alt": "Repetición: cámara de retransmisión a pie de pista",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Free.png",
+    "alt": "Repetición: órbita libre que acompaña al coche",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Top.png",
+    "alt": "Repetición: vista cenital",
+    "shot": true
+  }
+]} />
+
+<Note>Modelo del coche <a href="https://sketchfab.com/3d-models/aston-martin-aramco-amr25-72ff2e7d2a56468d946f81fdffacc0b8" rel="noreferrer noopener" target="_blank">“Aston Martin Aramco AMR25”</a> de Abu Saif, con licencia <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC-BY-4.0</a>.</Note>
+
+**Hasta dónde llegan los modelos.** La suspensión tiene un cuarto nivel que separa la transferencia de carga lateral en sus vías geométrica y elástica a través de los centros de balanceo, porque hacer pasar cada newton por los muelles y dividir solo por la rigidez al balanceo no permite representar dos coches con la misma rigidez al balanceo y distinta altura de los centros de balanceo. La presión de inflado del neumático es una realimentación opcional, modelada como una ventana a ambos lados de un óptimo y no como una pendiente, ya que un término lineal premiaría una presión cada vez más baja. El reparto del par motor dentro de un eje es explícito: evaluar la elipse de fricción sobre la carga total del eje solo es válido si el par puede seguir a la carga, así que el parámetro no añade ninguna ventaja por torque vectoring, sino que penaliza su ausencia, y un diferencial abierto cuesta 1,3 s por vuelta en Catalunya. Formula Student tiene sus propias pruebas dinámicas, porque todos los circuitos de la base de datos son de Gran Premio, y un coche de FS simulado en uno de ellos pasa el 86 % de la vuelta por encima de 120 km/h, un régimen que la categoría nunca alcanza.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Garage FS Electric.png",
+    "alt": "El coche Formula Student Electric en el garaje",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web FS Events.png",
+    "alt": "Pruebas dinámicas de Formula Student: aceleración y skidpad según el reglamento",
+    "shot": true
+  }
+]} />

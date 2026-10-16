@@ -1,0 +1,344 @@
+---
+title: "Lap Time Simulator"
+subtitle: "Plataforma modular de desenvolupament de vehicles · Python · React · WebGL"
+tags:
+  - "Python"
+  - "FastAPI"
+  - "React · TypeScript"
+  - "WebGL · three.js"
+  - "Simulació QSS"
+  - "Dinàmica vehicular"
+  - "Pacejka MF"
+  - "Validació amb telemetria"
+  - "ERS"
+source: "30f3dd0496"
+---
+
+Una plataforma en Python de simulació de temps per volta i d'anàlisi del vehicle, pensada per acompanyar tot el cicle de desenvolupament d'un cotxe de competició: des del concepte inicial, quan gairebé no hi ha dades del maquinari, fins a la validació a punt per competir contrastada amb telemetria real en pista. L'eina parteix del principi que la fidelitat de la simulació ha d'estar a l'altura de la fidelitat de la informació disponible: a mesura que l'equip coneix millor el cotxe, els models es milloren in situ sense haver de reestructurar el flux de treball.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Garage.png",
+    "alt": "Garatge: sis subsistemes amb nivells de fidelitat independents, amb l'envolupant g-g-V",
+    "shot": true
+  }
+]} />
+
+**El problema que resol.** En el desenvolupament en competició, les decisions amb més impacte en el rendiment (geometria de suspensió, paquet aerodinàmic, arquitectura del grup motopropulsor) es prenen al principi del projecte, quan es disposa de menys dades. Una eina que només funciona quan ja hi ha totes les dades del maquinari arriba massa tard. Igualment, una eina massa simplificada deixa de donar respostes útils quan comencen a arribar dades reals. Aquest simulador ho resol sent útil de manera contínua a cada etapa del desenvolupament, des d'estudis de concepte fets a mà alçada fins a una simulació precisa a nivell de volta i validada amb telemetria.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P2 - The problem it solves.png",
+    "alt": "Cicle de desenvolupament: fidelitat de l'eina segons l'etapa del projecte",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P2 - Comparison.png",
+    "alt": "Comparació d'eines: simple, complexa i modular",
+    "shot": true
+  }
+]} />
+
+**Arquitectura de fidelitat modular.** Cada subsistema té la seva pròpia escala de fidelitat física, seleccionable en temps d'execució, i les escales tenen longituds diferents a propòsit: cadascuna s'atura on la física addicional deixa de compensar. L1 és l'etapa de concepte, amb paràmetres escalars senzills com una potència màxima constant, coeficients de resistència i de sustentació fixos i una fricció constant, suficient per obtenir un temps per volta creïble a partir d'una fitxa tècnica d'una pàgina. L2 és el desenvolupament, amb models basats en la física: corbes de parell, repartiment de frenada i geometria hidràulica, comportament del pneumàtic sensible a la càrrega, transferència lateral de càrrega. Els frens acaben aquí, amb el model hidràulic complet. L3 és la validació, on arriben els pneumàtics amb la Magic Formula de Pacejka ajustada a dades mesurades, amb efectes tèrmics, de desgast i de pressió a sobre, i el xassís incorpora la flexibilitat en capcineig. L4 és l'etapa de detall, i només tres subsistemes en tenen: el grup motopropulsor per a la gestió d'energia de l'ERS, l'aerodinàmica per al mapa d'efecte sòl i d'alçada de marxa, i la suspensió per als centres de balanceig. Els nivells es combinen lliurement, de manera que Pneumàtics L3 pot funcionar al costat de Suspensió L1 quan és tot el que permeten les dades, cosa que deixa 4 × 4 × 4 × 3 × 3 × 2 = **1 152 combinacions de models** darrere d'una única signatura de crida. El solver no sap mai quin nivell està actiu: cada subsistema exposa la mateixa interfície, i els models de més fidelitat són substituts directes.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P3 - 6 subsystems.png",
+    "alt": "Arquitectura de fidelitat modular: 6 subsistemes × nivells",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P8 - OOP architecture diagram.png",
+    "alt": "Model d'objectes: Vehicle, les sis escales de subsistemes darrere d'una única interfície Subsystem, i els motors solve_lap i run_race",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L1.png",
+    "alt": "Pneumàtics a L1: µ constant, dos paràmetres",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L2.png",
+    "alt": "Pneumàtics a L2: sensibilitat a la càrrega, cinc paràmetres",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P3 - L3.png",
+    "alt": "Pneumàtics a L3: Magic Formula de Pacejka, vint-i-set paràmetres",
+    "shot": true
+  }
+]} />
+
+**Capa 1: escombratge espacial QSS.** El motor espacial es basa en el mètode quasiestàtic (Quasi-Steady-State), l'estàndard de la indústria en simulació de competició. El cotxe es tracta com una massa puntual que recorre una traçada coneguda, i se suposa que és en estat estacionari a cada punt de l'espai. L'algorisme fa tres escombratges enllaçats sobre el domini de la distància al llarg del circuit. Primer, els límits de velocitat en corba: a cada punt amb curvatura κ, la velocitat lateral màxima es resol de manera iterativa, ja que la càrrega aerodinàmica, i per tant l'adherència, depèn de la mateixa velocitat. Segon, un escombratge d'acceleració cap endavant propaga l'envolupant de velocitat tenint en compte la potència del motor, la resistència aerodinàmica, la resistència a la rodadura i l'adherència longitudinal que queda un cop restada la demanda en corba mitjançant l'el·lipse de fricció. Tercer, un escombratge de frenada cap enrere aplica la mateixa lògica a la inversa i propaga les velocitats màximes d'entrada a cada corba. Tots dos escombratges donen la volta al circuit, fins a cinc vegades, fins que deixen de canviar, de manera que la volta comença a la mateixa velocitat amb què acaba. El menor dels dos perfils és l'envolupant de velocitat de temps mínim: a cada punt del circuit el cotxe és exactament en un límit (tracció, frenada o pas per corba).
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P4 - Triple sweep scheme.png",
+    "alt": "Triple escombratge QSS: velocitat en corba, acceleració cap endavant, frenada cap enrere",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P4 - Results.png",
+    "alt": "Volta resolta: mapa del circuit, punts de funcionament g-g-V i perfil de velocitat",
+    "shot": true
+  }
+]} />
+
+**Capa 2: integració temporal transitòria i acoblament iteratiu.** Un cop convergit el perfil de velocitat espacial, una segona passada integra la trajectòria en el domini del temps i calcula els estats que evolucionen de manera contínua al llarg de la volta. El model tèrmic del pneumàtic segueix la temperatura del compost amb una xarxa tèrmica de paràmetres concentrats i actualitza els coeficients de fricció i la rigidesa de lliscament que retroalimenten la Capa 1. La dinàmica de la suspensió i del xassís calcula l'alçada de marxa instantània en funció del moviment vertical (heave) i del balanceig, cosa que modifica directament els mapes aerodinàmics utilitzats en l'escombratge espacial. L'estat de càrrega de l'ERS s'integra a partir del perfil de demanda de potència i determina la disponibilitat de desplegament corba a corba. La massa de combustible baixa de manera contínua i fa variar el pes total i l'alçada del centre de gravetat. Aquestes sortides tornen a la Capa 1, que torna a resoldre el perfil de velocitat amb l'estat actualitzat del vehicle. Les dues capes iteren fins a convergir, normalment en cinc a quinze passades amb una relaxació adaptativa, i produeixen un perfil de velocitat que té en compte tant la física instantània com l'estat canviant del cotxe al llarg de tota la volta.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Layer 1 - Layer 2.png",
+    "alt": "Acoblament iteratiu: Capa 1 QSS i Capa 2 d'integració temporal",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Tyre Temperatures.png",
+    "alt": "Temperatures dels pneumàtics segons la distància de la volta: les quatre rodes",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Ride height.png",
+    "alt": "Alçada de marxa segons la distància de la volta",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P5 - Fuel consumption.png",
+    "alt": "Massa de combustible segons la distància de la volta",
+    "shot": true
+  }
+]} />
+
+**Anàlisi de sensibilitat i explorador de senyals.** En lloc d'executar el simulador un cop per configuració, el mòdul de sensibilitat escombra un paràmetre dins d'un rang i representa directament la resposta del temps per volta, per respondre preguntes com: a partir de quin nivell de càrrega aerodinàmica la resistència afegida pesa més que l'adherència en corba guanyada, quina és la penalització del pes, en segons, en un circuit tècnic respecte d'un d'alta velocitat, o a quina alçada del centre de gravetat la transferència lateral de càrrega comença a perjudicar més que no pas ajuda. L'explorador de senyals ofereix una interfície gràfica per inspeccionar cada canal calculat en funció de la posició al circuit o del temps (velocitat, acceleració longitudinal i lateral, càrrega dels pneumàtics per eix, càrrega aerodinàmica, repartiment de la força de frenada, punt de funcionament del motor, contribució de l'ERS) i superposa canals de configuracions diferents per mostrar directament on un setup guanya temps a un altre. El diagrama GG s'hi inclou com a avaluació estàndard de l'eficiència amb què s'aprofita el cercle de fricció del pneumàtic.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P6 - Web Sweep.png",
+    "alt": "Escombratge de paràmetres: resposta del temps per volta transmesa punt a punt",
+    "shot": true
+  }
+]} />
+
+**Bucle de validació amb dades reals.** Un cop el cotxe roda en pista, les sortides del simulador es comparen directament amb la telemetria real (velocitat GPS, acceleracions de la IMU, velocitats de roda, pressió de frenada, canals del motor), alineades espacialment per longitud d'arc. Les desviacions sistemàtiques en sectors concrets indiquen quin model de subsistema cal refinar: un punt de frenada sistemàticament massa d'hora apunta al model de frens, una velocitat en corba sistemàticament massa alta apunta al model lateral del pneumàtic. Això tanca el bucle entre simulació i realitat i dona a cada millora del model un objectiu de validació clar.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - Web Validation.png",
+    "alt": "Validació amb la telemetria de la volta de classificació a Suzuka",
+    "shot": true
+  }
+]} />
+
+**Comprovat en un cotxe que conec.** El preset de Formula Student Electric és el cotxe del meu antic equip, construït amb les dades pròpies de l'equip i comprovat, no ajustat, amb les seves quatre mànegues d'autocross a la Formula Student Germany 2026. La primera pregunta és si el model és correcte. El mode ombra (shadow mode) imposa la traçada i la velocitat registrades a cada mànega, i el model en deriva tota la resta: l'acceleració lateral i longitudinal, el règim del motor i la potència de la bateria segueixen els registres, amb una correlació de 0,98-0,99 en la potència de la bateria a totes les mànegues, i l'energia neta de la bateria de les dues mànegues netes queda dins d'un 1-3 %. Arribar-hi va ser la part útil, perquè cada correcció era una mesura i no un pegat: un suavitzat del circuit dimensionat per a circuits de Gran Premi que aplanava l'eslàlom, un factor d'escala del pneumàtic que s'havia quedat fora de l'ajust, uns canals de potència que no recollien el fregament dels pneumàtics (scrub) que el solver ja comptabilitzava, i un consum fix d'uns quants quilowatts (el sistema de baixa tensió a través del DC-DC, les bombes i les pèrdues fixes dels inversors) a sobre de les pèrdues de la cadena de tracció. Les dades de l'equip són privades: les figures mostren la comparació, no els paràmetres del cotxe.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Shadow channels.png",
+    "alt": "Mode ombra a l'autocross de la FSG 2026: acceleració lateral i longitudinal, règim del motor, potència i energia de la bateria, model contra telemetria al llarg del recorregut",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Shadow parity.png",
+    "alt": "Potència de la bateria i acceleració lateral, model contra telemetria punt a punt, per a les quatre mànegues d'autocross",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Shadow energy.png",
+    "alt": "Energia neta de la bateria de cada mànega d'autocross, model contra telemetria",
+    "shot": true
+  }
+]} />
+
+**El que el pilot es va deixar.** Amb el model ja fiable, el solver condueix ell mateix la mateixa traçada, des d'aturat i sense seguir cap perfil de velocitat, tan ràpid com permeten l'adherència, la potència i els frens: el temps que hauria fet un pilot perfecte amb la traçada que realment es va seguir. A la millor mànega són 83,7 s davant dels 85,4 s reals. La traça de temps i el mapa mostren en quins punts del recorregut s'obre la diferència.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance lap.png",
+    "alt": "Velocitat al llarg del recorregut, el pilot contra el model conduint la mateixa traçada, i el temps que guanya el model",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance runs.png",
+    "alt": "Cadascuna de les quatre mànegues d'autocross tal com es van córrer, contra el model conduint la mateixa traçada",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - FSE Performance map.png",
+    "alt": "El recorregut acolorit segons on el model és més ràpid o més lent que el pilot, i el diagrama g-g del pilot contra el model",
+    "shot": true
+  }
+]} />
+
+**I en un cotxe que coneix tothom.** El preset de Formula 1 es comprova amb un sol cotxe, la volta de classificació de Verstappen a Suzuka el 2026 (1:30,262) a partir de les dades de cronometratge públiques, perquè no hi ha dos cotxes de Formula 1 iguals. Les mateixes dues preguntes, en el mateix ordre. Amb la seva velocitat imposada, el règim del motor segueix el registre amb una diferència mitjana de 34 rpm i la marxa coincideix en el 84 % de la volta, un cop mesurades les relacions de canvi en aquella volta i modelada la corba del motor segons els límits de cabal de combustible del reglament de power units de 2026. L'acceleració lateral té una correlació de 0,95 amb una estimació feta a partir de la posició del cotxe, i el pedal de fre coincideix amb el model en el 94 % de la volta. Per sota de 300 km/h, la potència que necessita la traça de velocitat es manté per sota del sostre de motor més ERS del model, i durant un terç del temps que va a fons és inferior al que dona només el motor: el cotxe de 2026 recarregant la bateria amb el gas a fons.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow channels.png",
+    "alt": "Mode ombra a la volta de classificació de Verstappen a Suzuka: règim del motor, marxa, acceleració lateral, potència a la roda i fre, model contra telemetria al llarg de la volta",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow parity.png",
+    "alt": "Acceleració lateral i marxa, model contra telemetria punt a punt",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Shadow power.png",
+    "alt": "La potència a la roda que necessita la volta amb el gas a fons contra el sostre de motor i ERS del model, segons la velocitat",
+    "shot": true
+  }
+]} />
+
+**Fins on s'acosta la volta.** Fent ell mateix la volta, per la traçada de referència del circuit, el model marca 1:29,962, 0,30 s per sota de Verstappen. Els sectors queden més allunyats que la volta, i les figures mostren per què: el model gasta l'energia elèctrica tan de pressa com permet el reglament des de la primera recta, mentre que un cotxe real la guarda per a la recta de darrere (288 km/h allà contra els seus 328), i a les esses té menys adherència de la que fa servir ell. Una estratègia de desplegament d'energia i l'adherència a velocitat mitjana són els propers canvis del model.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance lap.png",
+    "alt": "Velocitat al llarg de la volta, Verstappen contra el model, el temps que guanya el model i l'energia emmagatzemada a l'ERS del model",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance sectors.png",
+    "alt": "Temps per sector i temps per volta, Verstappen contra el model",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P7 - F1 Performance map.png",
+    "alt": "Suzuka acolorit segons on el model és més ràpid o més lent que Verstappen, i el diagrama g-g de tots dos",
+    "shot": true
+  }
+]} />
+
+**L'aplicació.** El simulador funciona com un servei FastAPI darrere d'un front-end en React, repartit en diverses pantalles: un garatge on es construeix el cotxe subsistema a subsistema amb corbes de capacitat en directe, un navegador de circuits, l'executor de voltes i de curses, un explorador de senyals, una repetició en 3D, un escombratge de paràmetres transmès per WebSocket i la validació amb telemetria. Una volta de classificació es resol en uns 0,05 s, i la configuració més pesada, amb totes les retroalimentacions tèrmiques, de desgast i d'energia activades, en uns 6 s. Abans de desar a la memòria cau les taules d'interpolació eren 66 s: el perfilatge va revelar que el solver construïa 231 000 interpoladors spline per volta.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web GGV 3D.png",
+    "alt": "L'envolupant g-g-V com a superfície: capacitat segons la velocitat",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web GGV DRS open.png",
+    "alt": "La mateixa envolupant amb l'aleró mòbil fixat obert",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Track.png",
+    "alt": "Navegador de circuits: traçada, curvatura i altitud",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Run.png",
+    "alt": "Execució: perfil de velocitat amb zones de tracció, de pas per corba i de frenada",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Run Race.png",
+    "alt": "Mode cursa: taula per volta amb consum de combustible, desgast i degradació",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Signals.png",
+    "alt": "Explorador de senyals: canals apilats segons la distància de la volta",
+    "shot": true
+  }
+]} />
+
+**Tot plegat, d'una tirada.** Un minut i mig de l'aplicació tal com es fa servir: un cotxe de Formula 1 construït subsistema a subsistema, amb l'envolupant redibuixada a cada pas, després convertida en superfície i oberta amb l'aleró. Una volta a Suzuka llegida a la pantalla d'execució i a l'explorador de senyals i reproduïda des de quatre càmeres. La mateixa volta contra la volta de classificació de Verstappen. Un escombratge de càrrega aerodinàmica transmès punt a punt. Un A/B que congela el cotxe, hi afegeix 30 kg i ho valora en tres quarts de segon. I, per acabar, el Formula Student Electric contra la seva pròpia mànega d'autocross de la FSG 2026, conduït pel model des d'aturat i després en mode ombra contra l'energia registrada de la bateria. Les dades pròpies del cotxe, els seus paràmetres i les corbes que dibuixen, estan difuminades. El que fa, no. Enregistrat a partir de la versió de producció a 2560×1440 i 60 fotogrames per segon: la pàgina anava dotze vegades més lenta que el temps real mentre la captura de pantalla integrada de Chrome l'enregistrava, de manera que cada fotograma del vídeo és un que l'aplicació va dibuixar de veritat, i les esperes del solver s'han escurçat.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/LapTime/walkthrough.mp4",
+    "poster": "/LapTime/walkthrough-poster.jpg",
+    "title": "LapTime: recorregut per l'aplicació web"
+  }
+]} />
+
+**Repetició en 3D.** La volta resolta es reprodueix en WebGL amb la posició del cotxe obtinguda d'interpoladors precalculats, de manera que un fotograma costa quatre consultes a taula en lloc d'una cerca. Cinc càmeres: persecució, una onboard fixada al xassís, un punt de vista fix al costat de la pista, una vista zenital i una òrbita lliure que acompanya el cotxe. La onboard és la que val la pena explicar: penja del mateix grup de la carrosseria del cotxe en lloc de recalcular-ne la posició a cada fotograma a partir del rumb de la traçada. El rumb derivat d'una traçada remostrejada porta soroll, i apuntar una càmera quaranta metres més enllà multiplica un petit error angular fins a convertir-lo en una imatge que tremola visiblement. Fixar la càmera al cotxe fa impossible aquest tipus d'error, perquè qualsevol soroll residual gira la càmera i la carrosseria alhora. El cotxe és un AMR25 escanejat i reduït a 2,3 MB (geometria Draco, textures WebP), que es carrega en 14 ms i manté les rodes com a nodes separats perquè girin. Tota la ruta de la repetició es carrega de manera diferida, perquè three.js no hi té res a fer, al paquet d'una pantalla que no el dibuixa mai.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Onboard.png",
+    "alt": "Repetició: càmera onboard fixada al xassís",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Chase.png",
+    "alt": "Repetició: càmera de persecució",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Trackside.png",
+    "alt": "Repetició: càmera de retransmissió al costat de la pista",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Free.png",
+    "alt": "Repetició: òrbita lliure que acompanya el cotxe",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P10 - Web Replay Top.png",
+    "alt": "Repetició: vista zenital",
+    "shot": true
+  }
+]} />
+
+<Note>Model del cotxe <a href="https://sketchfab.com/3d-models/aston-martin-aramco-amr25-72ff2e7d2a56468d946f81fdffacc0b8" rel="noreferrer noopener" target="_blank">«Aston Martin Aramco AMR25»</a> d'Abu Saif, amb llicència <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC-BY-4.0</a>.</Note>
+
+**Fins on arriben els models.** La suspensió té un quart nivell que divideix la transferència lateral de càrrega en els seus camins geomètric i elàstic a través dels centres de balanceig, perquè fer passar cada newton per les molles i dividir només per la rigidesa al balanceig no permet representar dos cotxes amb rigideses de balanceig idèntiques i alçades de centre de balanceig diferents. La pressió d'inflat del pneumàtic és una retroalimentació opcional, modelada com una finestra a banda i banda d'un òptim i no com un pendent, ja que un terme lineal premiaria una pressió cada cop més baixa. El repartiment del parell motor a través d'un eix és explícit: avaluar l'el·lipse de fricció sobre tota la càrrega de l'eix només és vàlid si el parell pot seguir la càrrega, de manera que el paràmetre no afegeix cap bonificació de torque vectoring, sinó que en penalitza l'absència, i un diferencial obert costa 1,3 s per volta a Catalunya. La Formula Student té les seves pròpies proves dinàmiques, perquè tots els circuits de la base de dades són de Gran Premi i un cotxe FS simulat en un d'ells passa el 86 % de la volta per sobre de 120 km/h, un règim que la categoria no assoleix mai.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web Garage FS Electric.png",
+    "alt": "El cotxe Formula Student Electric al garatge",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "LapTime/P9 - Web FS Events.png",
+    "alt": "Proves dinàmiques de Formula Student: acceleració i skidpad segons el reglament",
+    "shot": true
+  }
+]} />

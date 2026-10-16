@@ -1,0 +1,134 @@
+---
+title: "Torque vectoring basat en model"
+subtitle: "Vehicle elèctric 4WD · CAT16x · BCNeMotorsport"
+tags:
+  - "MATLAB"
+  - "Simulink"
+  - "VI-Grade"
+  - "Optimització QP"
+  - "Model NLTV de doble via"
+  - "Pacejka"
+  - "ROS"
+  - "CAN Bus"
+source: "ff29326dd0"
+---
+
+El torque vectoring en un vehicle 4WD amb un motor independent per roda és un dels problemes de control de xassís més complets del motorsport. El sistema té tres capes que s'executen en seqüència: un model no lineal del vehicle que representa què està fent el cotxe, un controlador de velocitat de guinyada que decideix quant moment de guinyada correctiu cal aplicar, i un distribuïdor de parell que reparteix aquest moment entre els quatre motors en temps real. Cada capa alimenta la següent, i tota la cadena s'executa a la unitat de processament del CAT16x durant la competició.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P1 - Scheme.png",
+    "alt": "Arquitectura del sistema de TV: cadena de tres capes"
+  }
+]} />
+
+El model del vehicle és una formulació Dual-Track Nonlinear Time Varying (NLTV). A diferència d'un model bicicleta senzill, segueix les quatre rodes de manera individual i té en compte la transferència de càrrega lateral i longitudinal, la càrrega aerodinàmica (downforce), la geometria de direcció Ackermann i un model de pneumàtic Pacejka Magic Formula per a cada roda. Els paràmetres varien de manera no lineal amb la càrrega vertical i l'angle de deriva, cosa que el fa precís tant en el règim lineal com en la conducció al límit. El model es va calibrar amb telemetria real del CAT15x en tres maniobres: Ramp Steer (ajust del 96,7 %), Skid Pad (ajust del 98,8 %) i l'AutoX de la Formula Student Spain 2023 (ajust del 82,5 %).
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - 4WD.png",
+    "alt": "Model NLTV de doble via 4WD"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - FrictionCircle.png",
+    "alt": "Cercle de fricció del pneumàtic per roda"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - Comparation_RampSteer.jpg",
+    "alt": "Calibració del model: Ramp Steer"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - Comparation_SkidPad.jpg",
+    "alt": "Calibració del model: Skid Pad"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - Comparation_AutoX.jpg",
+    "alt": "Calibració del model: AutoX"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P2 - LuT_Sport.jpg",
+    "alt": "LuT del model NLTV en mode Sport"
+  }
+]} />
+
+El controlador de velocitat de guinyada genera el moment de guinyada correctiu de referència que després executa el distribuïdor de parell. Combina dos components: una branca de Feed-Forward que fa servir el model del vehicle per anticipar el moment necessari a partir de l'angle de volant i la velocitat, i una branca de Feed-Back PID que tanca el llaç sobre l'error de velocitat de guinyada mesurat. Un mecanisme anti-windup (back-calculation) evita la saturació de l'integrador en els transitoris, i un reset dependent de la velocitat evita una acumulació integral excessiva. El controlador combinat segueix la referència de velocitat de guinyada amb errors mitjans del 0,02 % en Ramp Steer, del 0,18 % en Skid Pad i del 0,89 % en condicions d'AutoX.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P3 - Scheme.png",
+    "alt": "Diagrama de blocs del controlador de velocitat de guinyada FF+FB"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P3 - LuT_PID.jpg",
+    "alt": "Gain scheduling del PID"
+  }
+]} />
+
+El distribuïdor de parell tradueix la força longitudinal desitjada (a partir de l'accelerador del pilot) i el moment de guinyada correctiu (del controlador) en quatre consignes de parell individuals per als motors. Es planteja com un problema de programació quadràtica multiobjectiu resolt en temps real. L'optimitzador respecta els límits de parell dels motors, els límits dels inversors i el cercle de fricció del pneumàtic a cada roda, i alhora minimitza l'error sobre les dues referències. Amb els angles de roda corregits per Ackermann, reparteix el parell de manera asimètrica entre esquerra i dreta i entre davant i darrere per generar exactament el moment de guinyada necessari sense sacrificar tracció. Errors de seguiment en llaç tancat: Fx mitjà del 0,9 %, Mz mitjà del 3,6 %.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P4 - SP_Trq.jpg",
+    "alt": "Distribuïdor de parell: parells en Skid Pad"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P4 - SP_TD_1.jpg",
+    "alt": "Distribuïdor de parell: distribució del parell en Skid Pad"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P4 - AX_Trq.jpg",
+    "alt": "Distribuïdor de parell: parells en AutoX"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P4 - AX_TD_1.jpg",
+    "alt": "Distribuïdor de parell: distribució del parell en AutoX"
+  }
+]} />
+
+Tot el sistema es va desenvolupar i provar en un llaç Simulink i VI-Grade CarRealTime abans de desplegar-lo al cotxe real. El model multicos de 14 GDL de VI-Grade reproduïa la dinàmica del CAT15x amb la suspensió completa, la interacció pneumàtic-carretera i la distribució de masses real. Es van fer servir tres maniobres estàndard per posar a prova cada capa per separat i combinades. L'acceleració lateral màxima a l'AutoX va millorar un +7,9 % respecte de la referència base. Pel que fa al hardware, l'algorisme s'executa com a node ROS a la Processing Unit del cotxe, rep dades per CAN de l'INS VectorNav, dels resolvers de roda i dels sensors de suspensió, i envia consignes de parell a dos inversors Lenze en temps real.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P5 - AX_Vehicle.jpg",
+    "alt": "Simulació a VI-Grade: resposta del vehicle a l'AutoX"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P5 - RS_Vehicle.jpg",
+    "alt": "Simulació a VI-Grade: resposta del vehicle al Ramp Steer"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P5 - SP_Vehicle.jpg",
+    "alt": "Simulació a VI-Grade: resposta del vehicle a l'Skid Pad"
+  }
+]} />
+
+Una decisió de disseny clau va ser fer el sistema totalment configurable en temps real. Es van definir tres modes de conducció: Eco, Sport i Hardcore. Cada mode ajusta l'agressivitat de l'objectiu de velocitat de guinyada i la ponderació dels objectius del QP, de manera que el pilot pot ajustar el comportament del cotxe des d'un selector del dashboard sense aturar-se. El controlador es va desplegar i validar al CAT16x per a la temporada de competició 2023-2024.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P6 - LuT_sa.jpg",
+    "alt": "Modes de conducció: acceleració lateral vs. angle de deriva del vehicle"
+  },
+  {
+    "type": "image",
+    "src": "BCNeMotorsport/TV/P6 - LuT_stee.jpg",
+    "alt": "Modes de conducció: acceleració lateral vs. angle de volant"
+  }
+]} />

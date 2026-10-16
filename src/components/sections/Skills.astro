@@ -1,10 +1,10 @@
 ---
+import { useT } from '../../i18n/ui';
+import { langOf } from '../../i18n/current';
+const t = useT(langOf(Astro.currentLocale)).skills;
 ---
 <section id="skills">
-<div class="section-header reveal"><span class="section-num">04</span><h2 class="section-title">Technical Skills</h2><div class="section-line"></div></div>
+<div class="section-header reveal"><span class="section-num">04</span><h2 class="section-title">{t.title}</h2><div class="section-line"></div></div>
 <div class="skills-layout">
-<div class="skill-block reveal stagger-1"><h4>Languages</h4><ul><li>MATLAB</li><li>Python</li><li>C++</li><li>Simulink</li></ul></div>
-<div class="skill-block reveal stagger-2"><h4>Simulation</h4><ul><li>VI-Grade</li><li>IPG CarMaker</li><li>Ecotrons</li><li>Simulink</li></ul></div>
-<div class="skill-block reveal stagger-3"><h4>Tools</h4><ul><li>WinTax</li><li>GEMS Data Analysis</li><li>Git</li><li>SolidWorks</li><li>Excel</li></ul></div>
-<div class="skill-block reveal stagger-4"><h4>Domains</h4><ul><li>Vehicle Dynamics</li><li>Control Systems</li><li>Powertrain Simulation</li><li>Data Acquisition</li><li>Race Engineering</li></ul></div>
+{t.blocks.map((b, i) => <div class={`skill-block reveal stagger-${i + 1}`}><h4>{b.h}</h4><ul>{b.items.map((it) => <li>{it}</li>)}</ul></div>)}
 </div></section>

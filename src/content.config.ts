@@ -3,7 +3,9 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 const projects = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/content/projects' }),
+  // The English original. Translations sit next to it as <slug>.ca.mdx and
+  // <slug>.es.mdx and are their own collection, below.
+  loader: glob({ pattern: ['*.mdx', '!*.ca.mdx', '!*.es.mdx'], base: './src/content/projects' }),
   schema: z.object({
     title: z.string(),
     subtitle: z.string(),
@@ -28,4 +30,25 @@ const projects = defineCollection({
   }),
 });
 
-export const collections = { projects };
+// A translation carries only what is written: the text and the card's
+// headings. Visibility, category, order and the repository come from the
+// English file, so they can never disagree between languages.
+const translations = defineCollection({
+  loader: glob({
+    pattern: ['*.ca.mdx', '*.es.mdx'],
+    base: './src/content/projects',
+    // "purple-stint.ca.mdx" -> "purple-stint.ca": the slug and the language.
+    generateId: ({ entry }) => entry.replace(/\.mdx$/, ''),
+  }),
+  schema: z.object({
+    title: z.string(),
+    subtitle: z.string(),
+    tags: z.array(z.string()).default([]),
+    badge: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.string().optional()),
+    // Fingerprint of the English text this was translated from. When the
+    // English changes, the build lists the translation as out of date.
+    source: z.string().optional(),
+  }),
+});
+
+export const collections = { projects, translations };
