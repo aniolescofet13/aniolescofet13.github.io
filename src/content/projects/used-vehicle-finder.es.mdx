@@ -1,0 +1,174 @@
+---
+title: "Used Vehicle Finder"
+subtitle: "Buscador de coches y motos de segunda mano · Next.js · Supabase · Valoración de mercado"
+tags:
+  - "Next.js"
+  - "React · TypeScript"
+  - "Supabase · Postgres"
+  - "Recogida de datos"
+  - "Modelos de regresión"
+  - "Modelización fiscal"
+  - "Datos abiertos"
+  - "Testing"
+source: "b85d42cae1"
+---
+
+**La herramienta.** Used Vehicle Finder (Cotxes i Motos, en el catalán en que está escrita su interfaz) ayuda a elegir el coche o la moto de segunda mano que comprar. Una búsqueda lee los portales, las cadenas de compraventa y los concesionarios locales que venden el modelo a una distancia de casa, junta los anuncios que son el mismo vehículo, dice si cada precio es bueno respecto al mercado y calcula lo que costaría de verdad el vehículo durante los años que se tenga. Es el hermano de Property Yield Analyser, hecho de la misma manera y con mucho código en común, y como aquel, una herramienta personal y sin ánimo comercial.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P1 - Results.png",
+    "alt": "Una búsqueda de Toyota Corolla híbrido a 50 km de casa: 178 vehículos, ordenados por cuánto por debajo del mercado está cada precio",
+    "shot": true
+  }
+]} />
+
+**El problema que resuelve.** Comprar bien un coche de segunda mano requiere una docena de pestañas. El mismo coche aparece en dos portales y en la web del concesionario con precios algo distintos. La cifra grande de muchos anuncios es el precio si se financia con el vendedor, no el que se paga al contado. Si 15.000 euros es un buen precio depende del año, de los kilómetros y del motor, y de lo que piden ahora los coches parecidos. Y el precio solo es el principio: el impuesto de transmisiones, el impuesto municipal de circulación, la zona de bajas emisiones de Barcelona y la depreciación deciden lo que cuesta tenerlo. La herramienta lo hace todo en un solo sitio, para Cataluña, y cada cifra se puede seguir hasta su origen.
+
+**Una búsqueda, muchas fuentes.** Una búsqueda es un tipo de vehículo, hasta cinco marcas y modelos, los filtros habituales y un radio alrededor de casa, y lee en paralelo todas las fuentes que se pueden leer. Los portales son AutoScout24, coches.com y Wallapop. Entre las cadenas que compran y venden coches de ocasión están Flexicar, OcasionPlus, Clicars, Autohero, Crestanevada, Renew de Renault y los coches de ex-renting de Ayvens. Después vienen los concesionarios locales y los centros de vehículos de ocasión y, para las motos, especialistas como Cüimo, Flexibike y Maquina Motors. Cada fuente es su propio adaptador, y cada una se revisó antes de escribirlo: primero si tiene una API o alertas oficiales, después su robots.txt, incluida la espera entre peticiones que pide, sus condiciones y si está detrás de un servicio antibot. Cada una se lee como permite, por página de modelo, de marca, de provincia o todo el stock en una página, y lo que un portal no sabe filtrar se filtra en local. Las peticiones salen una cada cuatro a seis segundos por web, y una web que responde con un bloqueo o una página antibot se detiene para siempre: coches.net, motos.net y Milanuncios lo hicieron, y no se leen. Los vendedores en línea que llevan el coche a cualquier sitio no tienen distancia, así que el radio no los oculta nunca. El progreso sale en directo, fuente por fuente.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P2 - Search running.png",
+    "alt": "Una búsqueda en marcha: páginas leídas y vehículos encontrados por fuente, y los portales detenidos por mostrar una página antibot",
+    "shot": true
+  }
+]} />
+
+**El precio al contado, siempre.** Muchos concesionarios anuncian el precio financiado, el que solo vale si el comprador acepta su préstamo. Cada adaptador lee el precio al contado y guarda el financiado aparte, y el financiado no entra nunca en ninguna valoración ni en ningún coste. Cuando una web solo da el precio al contado en el texto, la herramienta lo lee de ahí: Renew lo escribe en cada descripción, y en un centro de vehículos de ocasión, la mitad de los coches de una búsqueda mostraban en la lista el precio financiado, hasta 4.500 euros por debajo del real, que solo da la ficha del coche. Allí se lee la ficha de cada coche que pasa los filtros antes de ordenarlo.
+
+**Un vehículo, muchos anuncios.** Un concesionario publica a menudo el mismo coche en dos portales y en su web. Los anuncios se juntan cuando comparten la matrícula, comparada como un hash con sal porque la matrícula nunca se guarda, o la referencia del concesionario, y si no, cuando coinciden la marca, el modelo, el año, los kilómetros con un 1 %, la potencia, el precio con un 5 % y la provincia. Las parejas que se parecen pero no son seguras se marcan como posibles duplicados en lugar de juntarlas. El vehículo se queda con el precio más bajo y muestra todos los anuncios donde aparece.
+
+**Qué dice el mercado.** Cada vehículo se valora con comparables: el mismo modelo, combustible y cambio, de la búsqueda actual y de todas las de los últimos 90 días. Cuando hay suficientes, se ajusta para ese modelo una regresión del logaritmo del precio sobre la edad y los kilómetros, con la potencia cuando la mayoría de los comparables la indican, porque un Corolla de 125 caballos y uno de 180 no valen lo mismo: con el Corolla, añadir la potencia sube el ajuste de una R² de 0,65 a 0,81. Un segundo ajuste quita los puntos a más de 2,5 desviaciones, y con pocos comparables o un ajuste malo se pasa a la mediana de los más cercanos. Los precios que distorsionarían el mercado quedan fuera: cuotas de renting, reservas, coches averiados, stock casi nuevo y precios sin IVA. Cada valoración lleva su confianza, el rango habitual y los comparables de los que sale, los más parecidos primero, y la valoración del precio de AutoScout24 sale al lado como segunda opinión, con un aviso cuando las dos no cuadran.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Valuation.png",
+    "alt": "La valoración de un Corolla: precio de mercado, rango habitual, confianza y la curva de precio del modelo según la edad, los kilómetros y la potencia",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Comparables.png",
+    "alt": "Los comparables de los que sale: Corollas parecidos de todas las fuentes, los más parecidos primero",
+    "shot": true
+  }
+]} />
+
+**Un veredicto, y un aviso cuando es demasiado bueno.** La valoración se convierte en un veredicto en palabras llanas: muy buen precio, buen precio, precio de mercado, algo caro, caro. Un precio un 35 % o más por debajo del mercado, con una valoración fiable, se marca en cambio como demasiado barato: es donde están los anuncios falsos y los problemas ocultos, así que lo dice, pone el vehículo al final y aconseja no pagar nada por adelantado, verlo en persona y pedir antes el informe oficial del vehículo. Las condiciones tienen su propio veredicto. Un vendedor profesional con garantía suma, mientras que una venta entre particulares, unos kilómetros por año extraños, un coche que no puede entrar en la zona de bajas emisiones de Barcelona, un precio que obliga a financiar o uno sin IVA restan. El orden por defecto, mejor compra, ordena por cuánto por debajo del mercado está cada precio, primero las valoraciones fiables y al final los avisos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P3 - Verdict.png",
+    "alt": "La ficha de un coche: un muy buen precio, un 30 % por debajo del mercado, las condiciones y el coche guardado con una nota",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P3 - Too cheap.png",
+    "alt": "El anuncio de un particular a la mitad del precio de mercado, marcado como demasiado barato para fiarse, con lo que hay que comprobar antes de pagar nada",
+    "shot": true
+  }
+]} />
+
+**Lo que cuesta de verdad.** Una calculadora calcula el coste total durante los años que se tiene el vehículo, de uno concreto o de un intervalo. La compra: el precio al contado, el impuesto de transmisiones de Cataluña con las exenciones tal como las dice el código tributario, las tasas de Tráfico y su informe. La depreciación: la curva del valor fiscal de Hacienda, o la curva de mercado del propio modelo cuando la regresión tiene datos suficientes. El uso: la energía, el impuesto de circulación del municipio donde se matricula, el impuesto catalán sobre el CO₂ y cada ITV que toque. Y si puede entrar en las zonas de bajas emisiones hoy, en 2028 y cuando se venda. Cada tipo se guarda con su fuente y la fecha en que se comprobó, y las cifras que no se han podido verificar se marcan así y se pueden editar, en lugar de adivinarlas. Todo el estado vive en la URL, un cálculo se puede guardar ligado a su vehículo y se pueden comparar hasta tres de lado.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Calculator.png",
+    "alt": "La calculadora abierta desde un anuncio: el coste total en cinco años, por año y por kilómetro, con la compra y la depreciación",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Tax source.png",
+    "alt": "La fuente del impuesto de transmisiones: el artículo del código tributario de Cataluña y el texto oficial",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Compare.png",
+    "alt": "Tres Corollas comparados en cinco años, con el más barato por kilómetro marcado",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Cost.png",
+    "alt": "El coste de un coche en su ficha: el total en cinco años, por kilómetro, y lo que entra",
+    "shot": true
+  }
+]} />
+
+**También motos.** La misma búsqueda sirve para motos, con filtros de potencia, que es lo que limita el carné A2, y de cilindrada, y con los especialistas en motos entre las fuentes. Sus modelos se escriben de muchas maneras, "Z 900", "Z900" o "MT-09", así que se normalizan antes de compararlos, y una búsqueda de un modelo ya no deja entrar a un hermano pequeño.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P8 - Motorbikes.png",
+    "alt": "Una búsqueda de Kawasaki Z900 o Yamaha MT-09 a 105 km, ordenadas respecto al mercado de cada modelo",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P8 - Motorbike sheet.png",
+    "alt": "La ficha de una moto: su veredicto, las condiciones y una nota guardada",
+    "shot": true
+  }
+]} />
+
+**Alrededor de la búsqueda.** Cada búsqueda se guarda, y volver a abrir una no pide nada a las fuentes. Cada vehículo guarda su historial de precios y cuánto tiempo lleva a la venta, y su ficha acaba con lo que hay que comprobar antes de comprar: el informe oficial del vehículo, el registro de cargas, los kilómetros de cada ITV, el contrato, y el impuesto de transmisiones y el cambio de titularidad con sus plazos. Los vehículos guardados se ordenan por estado, me interesa, contactado, visto, oferta hecha y descartado, con notas, junto a los cálculos guardados. Una alerta repite una búsqueda dos veces al día desde el Programador de tareas de Windows y avisa de lo nuevo, de lo que ha bajado de precio, contando solo el mismo anuncio para que una copia más barata en otro sitio no cuente como rebaja, y de las mejores compras por encima de un descuento elegido, con una notificación de Windows. coches.net y motos.net no se pueden leer, pero envían alertas por correo, así que cada alerta también abre la búsqueda del portal con los mismos filtros, lista para guardarla allí, y sus correos llegan a un buzón reservado para la herramienta.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - History.png",
+    "alt": "Historial de precios: cuándo se vio el coche por primera vez, cuánto tiempo lleva a la venta y cada precio que ha tenido",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Checks.png",
+    "alt": "Lo que hay que comprobar antes de comprar, con los enlaces oficiales",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P6 - Saved.png",
+    "alt": "Vehículos guardados por estado, con notas",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P7 - News.png",
+    "alt": "Lo que han encontrado las alertas: vehículos nuevos, rebajas y mejores compras",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P7 - Alerts.png",
+    "alt": "Las alertas, con el enlace que crea la misma alerta en coches.net o motos.net",
+    "shot": true
+  }
+]} />
+
+**Cómo está hecho.** Next.js con el App Router y los cache components, React, TypeScript, Tailwind y shadcn/ui. Todo lo que debe sobrevivir a una recarga o a un enlace compartido vive en la URL, con nuqs. Supabase guarda los anuncios, su historial de precios, las búsquedas, los vehículos guardados y las alertas, en Postgres con seguridad por fila tras un inicio de sesión de Google limitado a una cuenta permitida, y sin Supabase la app funciona del todo con un archivo local. La lógica de cálculo son funciones puras separadas de los componentes, fijadas con tests de referencia, y cada adaptador de fuente se prueba con páginas guardadas y recortadas. El obtenedor lee el robots.txt de cada web antes de pedirle una página, solo sigue una redirección si el robots.txt lo permite, respeta la espera que pide cada web y se detiene al primer bloqueo. Funciona en un ordenador personal y no en un servidor, en parte porque las webs suelen bloquear las direcciones de los centros de datos.
+
+**Lo que no es.** Una herramienta personal, no un producto: un solo usuario, sin publicidad, sin seguimiento y sin asesoramiento financiero. Los anuncios se leen solo para el análisis personal, a ritmo lento, dentro del robots.txt de cada web y sin saltarse ninguna protección antibot, y no se publica ni se redistribuye nada. No se guarda ningún teléfono ni ningún nombre de particular, y las matrículas solo como un hash con sal. En estas imágenes y en el vídeo, las fotos de los anuncios, el municipio de casa y los nombres de los concesionarios se desenfocan en el navegador antes de capturarlos, y los vehículos guardados, las notas y las alertas son de una base de datos local de demostración, no de uso real. El repositorio es privado.
+
+**Todo, de una pasada.** Un recorrido grabado por la herramienta tal como se usa: una búsqueda de un Corolla híbrido, con la espera acelerada, la lista y su orden, un coche abierto sección por sección, otro guardado con una nota, llevado a la calculadora y comparado con dos más, un anuncio demasiado barato para fiarse, la búsqueda de motos, y después los vehículos guardados, las novedades de las alertas y el enlace que crea la misma alerta en coches.net. Grabado a 1440p60 desde la app en marcha, renderizado al doble de densidad de píxeles como lo mostraría una pantalla retina, capturado fotograma a fotograma para que todo lo que se mueve tenga un fotograma nuevo cada sesentavo de segundo, y con el mismo desenfoque que las imágenes.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/UsedVehicleFinder/walkthrough.mp4",
+    "poster": "/UsedVehicleFinder/walkthrough-poster.jpg",
+    "title": "Used Vehicle Finder, recorrido"
+  }
+]} />
+
+<Note>Municipios: <a href="https://www.geonames.org/" rel="noreferrer noopener" target="_blank">GeoNames</a>, con licencia <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC BY 4.0</a>. Valores fiscales de las tablas de precios medios de venta del Ministerio de Hacienda. Impuestos y tasas de la Agència Tributària de Catalunya, la DGT y las ordenanzas municipales, cada uno con su fuente en la herramienta.</Note>

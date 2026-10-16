@@ -1,0 +1,174 @@
+---
+title: "Used Vehicle Finder"
+subtitle: "Cercador de cotxes i motos de segona mà · Next.js · Supabase · Valoració de mercat"
+tags:
+  - "Next.js"
+  - "React · TypeScript"
+  - "Supabase · Postgres"
+  - "Recollida de dades"
+  - "Models de regressió"
+  - "Modelització fiscal"
+  - "Dades obertes"
+  - "Testing"
+source: "b85d42cae1"
+---
+
+**L'eina.** Used Vehicle Finder (Cotxes i Motos, en el català en què està escrita la seva interfície) ajuda a triar el cotxe o la moto de segona mà que s'ha de comprar. Una cerca llegeix els portals, les cadenes de compravenda i els concessionaris locals que venen el model a una distància de casa, ajunta els anuncis que són el mateix vehicle, diu si cada preu és bo respecte al mercat i calcula què costaria de veritat el vehicle durant els anys que es tingui. És el germà de Property Yield Analyser, fet de la mateixa manera i amb molt de codi en comú, i com aquell, una eina personal i sense ànim comercial.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P1 - Results.png",
+    "alt": "Una cerca de Toyota Corolla híbrid a 50 km de casa: 178 vehicles, ordenats per com de per sota del mercat és cada preu",
+    "shot": true
+  }
+]} />
+
+**El problema que resol.** Comprar bé un cotxe de segona mà vol una dotzena de pestanyes. El mateix cotxe surt a dos portals i a la web del concessionari amb preus una mica diferents. El número gran de molts anuncis és el preu si es finança amb el venedor, no el que s'ha de pagar al comptat. Si 15.000 euros és un bon preu depèn de l'any, dels quilòmetres i del motor, i del que demanen ara els cotxes semblants. I el preu només és el principi: l'impost de transmissions, l'impost municipal de circulació, la zona de baixes emissions de Barcelona i la depreciació decideixen què costa tenir-lo. L'eina ho fa tot en un sol lloc, per a Catalunya, i cada xifra es pot seguir fins a d'on surt.
+
+**Una cerca, moltes fonts.** Una cerca és un tipus de vehicle, fins a cinc marques i models, els filtres habituals i un radi al voltant de casa, i llegeix en paral·lel totes les fonts que es poden llegir. Els portals són AutoScout24, coches.com i Wallapop. Entre les cadenes que compren i venen cotxes d'ocasió hi ha Flexicar, OcasionPlus, Clicars, Autohero, Crestanevada, Renew de Renault i els cotxes d'ex-rènting d'Ayvens. Després venen els concessionaris locals i els centres de vehicles d'ocasió i, per a les motos, especialistes com Cüimo, Flexibike i Maquina Motors. Cada font és el seu propi adaptador, i cada una es va revisar abans d'escriure'l: primer si té una API o alertes oficials, després el seu robots.txt, també l'espera entre peticions que demana, les seves condicions i si és darrere d'un servei antibot. Cada una es llegeix com deixa, per pàgina de model, de marca, de província o tot l'estoc en una pàgina, i el que un portal no sap filtrar es filtra en local. Les peticions surten una cada quatre a sis segons per web, i una web que respon amb un bloqueig o una pàgina antibot s'atura per sempre: coches.net, motos.net i Milanuncios ho van fer, i no es llegeixen. Els venedors en línia que porten el cotxe a qualsevol lloc no tenen distància, així que el radi no els amaga mai. El progrés surt en directe, font per font.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P2 - Search running.png",
+    "alt": "Una cerca en marxa: pàgines llegides i vehicles trobats per font, i els portals aturats per mostrar una pàgina antibot",
+    "shot": true
+  }
+]} />
+
+**El preu al comptat, sempre.** Molts concessionaris anuncien el preu finançat, el que només val si el comprador agafa el seu préstec. Cada adaptador llegeix el preu al comptat i desa el finançat a part, i el finançat no entra mai en cap valoració ni en cap cost. Quan una web només diu el preu al comptat al text, l'eina el llegeix d'allà: Renew l'escriu a cada descripció, i en un centre de vehicles d'ocasió, la meitat dels cotxes d'una cerca mostraven a la llista el preu finançat, fins a 4.500 euros per sota del real, que només dona la fitxa del cotxe. Allà es llegeix la fitxa de cada cotxe que passa els filtres abans d'ordenar-lo.
+
+**Un vehicle, molts anuncis.** Un concessionari publica sovint el mateix cotxe a dos portals i a la seva web. Els anuncis s'ajunten quan comparteixen la matrícula, comparada com un hash amb sal perquè la matrícula no es desa mai, o la referència del concessionari, i si no, quan coincideixen la marca, el model, l'any, els quilòmetres amb un 1 %, la potència, el preu amb un 5 % i la província. Les parelles que s'assemblen però no són segures es marquen com a possibles duplicats en lloc d'ajuntar-les. El vehicle es queda amb el preu més baix i ensenya tots els anuncis on surt.
+
+**Què diu el mercat.** Cada vehicle es valora amb comparables: el mateix model, combustible i canvi, de la cerca d'ara i de totes les dels últims 90 dies. Quan n'hi ha prou, s'ajusta per a aquell model una regressió del logaritme del preu sobre l'edat i els quilòmetres, amb la potència quan la majoria dels comparables la diuen, perquè un Corolla de 125 cavalls i un de 180 no valen igual: amb el Corolla, afegir-hi la potència fa pujar l'ajust d'una R² de 0,65 a 0,81. Un segon ajust treu els punts a més de 2,5 desviacions, i amb pocs comparables o un ajust dolent es passa a la mediana dels més propers. Els preus que distorsionarien el mercat en queden fora: quotes de rènting, reserves, cotxes avariats, estoc gairebé nou i preus sense IVA. Cada valoració porta la seva confiança, el rang habitual i els comparables d'on surt, els més semblants primer, i la valoració del preu d'AutoScout24 surt al costat com a segona opinió, amb un avís quan les dues no quadren.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Valuation.png",
+    "alt": "La valoració d'un Corolla: preu de mercat, rang habitual, confiança i la corba de preu del model segons l'edat, els quilòmetres i la potència",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Comparables.png",
+    "alt": "Els comparables d'on surt: Corollas semblants de totes les fonts, els més semblants primer",
+    "shot": true
+  }
+]} />
+
+**Un veredicte, i un avís quan és massa bo.** La valoració es converteix en un veredicte en paraules planeres: molt bon preu, bon preu, preu de mercat, una mica car, car. Un preu un 35 % o més per sota del mercat, amb una valoració de fiar, es marca en canvi com a massa barat: és on hi ha els anuncis falsos i els problemes amagats, així que ho diu, posa el vehicle al final i aconsella no pagar res per avançat, veure'l en persona i demanar primer l'informe oficial del vehicle. Les condicions tenen el seu propi veredicte. Un venedor professional amb garantia hi suma, mentre que una venda entre particulars, uns quilòmetres per any estranys, un cotxe que no pot entrar a la zona de baixes emissions de Barcelona, un preu que obliga a finançar o un sense IVA hi resten. L'ordre per defecte, millor compra, ordena per com de per sota del mercat és cada preu, primer les valoracions de fiar i al final els avisos.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P3 - Verdict.png",
+    "alt": "La fitxa d'un cotxe: un molt bon preu, un 30 % per sota del mercat, les condicions i el cotxe guardat amb una nota",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P3 - Too cheap.png",
+    "alt": "L'anunci d'un particular a la meitat del preu de mercat, marcat com a massa barat per ser de fiar, amb el que cal comprovar abans de pagar res",
+    "shot": true
+  }
+]} />
+
+**Què costa de veritat.** Una calculadora calcula el cost total durant els anys que es té el vehicle, d'un vehicle concret o d'un interval. La compra: el preu al comptat, l'impost de transmissions de Catalunya amb les exempcions tal com les diu el codi tributari, les taxes de Trànsit i el seu informe. La depreciació: la corba del valor fiscal d'Hisenda, o la corba de mercat del mateix model quan la regressió té prou dades. L'ús: l'energia, l'impost de circulació del municipi on es matricula, l'impost català sobre el CO₂ i cada ITV que toqui. I si pot entrar a les zones de baixes emissions avui, el 2028 i quan es vengui. Cada tipus es desa amb la seva font i la data en què es va comprovar, i les xifres que no s'han pogut verificar es marquen així i es poden editar, en lloc d'endevinar-les. Tot l'estat viu a la URL, un càlcul es pot desar lligat al seu vehicle i se'n poden comparar fins a tres de costat.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Calculator.png",
+    "alt": "La calculadora oberta des d'un anunci: el cost total en cinc anys, per any i per quilòmetre, amb la compra i la depreciació",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Tax source.png",
+    "alt": "La font de l'impost de transmissions: l'article del codi tributari de Catalunya i el text oficial",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Compare.png",
+    "alt": "Tres Corollas comparats en cinc anys, amb el més barat per quilòmetre marcat",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Cost.png",
+    "alt": "El cost d'un cotxe a la seva fitxa: el total en cinc anys, per quilòmetre, i què hi entra",
+    "shot": true
+  }
+]} />
+
+**També motos.** La mateixa cerca serveix per a motos, amb filtres de potència, que és el que limita el carnet A2, i de cilindrada, i amb els especialistes en motos entre les fonts. Els seus models s'escriuen de moltes maneres, "Z 900", "Z900" o "MT-09", així que es normalitzen abans de comparar-los, i una cerca d'un model ja no deixa entrar un germà petit.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P8 - Motorbikes.png",
+    "alt": "Una cerca de Kawasaki Z900 o Yamaha MT-09 a 105 km, ordenades respecte al mercat de cada model",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P8 - Motorbike sheet.png",
+    "alt": "La fitxa d'una moto: el seu veredicte, les condicions i una nota guardada",
+    "shot": true
+  }
+]} />
+
+**Al voltant de la cerca.** Cada cerca es desa, i tornar-ne a obrir una no demana res a les fonts. Cada vehicle guarda el seu historial de preus i quant temps fa que està a la venda, i la seva fitxa acaba amb el que cal comprovar abans de comprar: l'informe oficial del vehicle, el registre de càrregues, els quilòmetres de cada ITV, el contracte, i l'impost de transmissions i el canvi de titularitat amb els seus terminis. Els vehicles guardats s'ordenen per estat, m'interessa, contactat, vist, oferta feta i descartat, amb notes, al costat dels càlculs desats. Una alerta repeteix una cerca dues vegades al dia des del Programador de tasques de Windows i avisa del que és nou, del que ha baixat de preu, comptant només el mateix anunci perquè una còpia més barata en un altre lloc no és una rebaixa, i de les millors compres per sobre d'un descompte triat, amb una notificació de Windows. coches.net i motos.net no es poden llegir, però envien alertes per correu, així que cada alerta també obre la cerca del portal amb els mateixos filtres, a punt de desar-la allà, i els seus correus arriben a una bústia reservada per a l'eina.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - History.png",
+    "alt": "Historial de preus: quan es va veure el cotxe per primer cop, quant temps fa que està a la venda i cada preu que ha tingut",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Checks.png",
+    "alt": "El que cal comprovar abans de comprar, amb els enllaços oficials",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P6 - Saved.png",
+    "alt": "Vehicles guardats per estat, amb notes",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P7 - News.png",
+    "alt": "El que han trobat les alertes: vehicles nous, rebaixes i millors compres",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P7 - Alerts.png",
+    "alt": "Les alertes, amb l'enllaç que crea la mateixa alerta a coches.net o motos.net",
+    "shot": true
+  }
+]} />
+
+**Com està fet.** Next.js amb l'App Router i els cache components, React, TypeScript, Tailwind i shadcn/ui. Tot el que ha de sobreviure a una recàrrega o a un enllaç compartit viu a la URL, amb nuqs. Supabase guarda els anuncis, el seu historial de preus, les cerques, els vehicles guardats i les alertes, a Postgres amb seguretat per fila darrere d'un inici de sessió de Google limitat a un compte permès, i sense Supabase l'app funciona del tot amb un fitxer local. La lògica de càlcul són funcions pures separades dels components, fixades amb tests d'or, i cada adaptador de font es prova amb pàgines desades i retallades. L'obtenidor llegeix el robots.txt de cada web abans de demanar-hi una pàgina, només segueix una redirecció si el robots.txt ho permet, respecta l'espera que demana cada web i s'atura al primer bloqueig. Funciona en un ordinador personal i no en un servidor, en part perquè les webs solen bloquejar les adreces dels centres de dades.
+
+**Què no és.** Una eina personal, no un producte: un sol usuari, sense publicitat, sense seguiment i sense assessorament financer. Els anuncis es llegeixen només per a l'anàlisi personal, a ritme lent, dins del robots.txt de cada web i sense saltar-se cap protecció antibot, i no es publica ni es redistribueix res. No es desa cap telèfon ni cap nom de particular, i les matrícules només com un hash amb sal. En aquestes imatges i al vídeo, les fotos dels anuncis, el municipi de casa i els noms dels concessionaris es desenfoquen al navegador abans de capturar-los, i els vehicles guardats, les notes i les alertes són d'una base de dades local de demostració, no d'ús real. El repositori és privat.
+
+**Tot, d'una passada.** Un recorregut gravat per l'eina tal com es fa servir: una cerca d'un Corolla híbrid, amb l'espera accelerada, la llista i el seu ordre, un cotxe obert secció per secció, un altre guardat amb una nota, portat a la calculadora i comparat amb dos més, un anunci massa barat per ser de fiar, la cerca de motos, i després els vehicles guardats, les novetats de les alertes i l'enllaç que crea la mateixa alerta a coches.net. Gravat a 1440p60 des de l'app en marxa, renderitzat al doble de densitat de píxels com ho mostraria una pantalla retina, capturat fotograma a fotograma perquè tot el que es mou tingui un fotograma nou cada seixantè de segon, i amb el mateix desenfocament que les imatges.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/UsedVehicleFinder/walkthrough.mp4",
+    "poster": "/UsedVehicleFinder/walkthrough-poster.jpg",
+    "title": "Used Vehicle Finder, recorregut"
+  }
+]} />
+
+<Note>Municipis: <a href="https://www.geonames.org/" rel="noreferrer noopener" target="_blank">GeoNames</a>, amb llicència <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC BY 4.0</a>. Valors fiscals de les taules de preus mitjans de venda del Ministeri d'Hisenda. Impostos i taxes de l'Agència Tributària de Catalunya, la DGT i les ordenances municipals, cada un amb la seva font a l'eina.</Note>

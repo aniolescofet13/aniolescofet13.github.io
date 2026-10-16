@@ -1,0 +1,177 @@
+---
+title: "Used Vehicle Finder"
+subtitle: "Used Car and Motorbike Search · Next.js · Supabase · Market Valuation"
+category: personal
+order: 5
+tags:
+  - "Next.js"
+  - "React · TypeScript"
+  - "Supabase · Postgres"
+  - "Data Collection"
+  - "Regression Modelling"
+  - "Tax Modelling"
+  - "Open Data"
+  - "Testing"
+visibility: unlisted
+repo: https://github.com/aniolescofet13/cotxes-i-motos
+---
+
+**The tool.** Used Vehicle Finder (Cotxes i Motos, in the Catalan its interface is written in) helps choose the second-hand car or motorbike to buy. One search reads the portals, the dealer chains and the local dealers that sell the model within a distance of home, merges the listings that are the same vehicle, says whether each price is good against the market and works out what the vehicle would really cost over the years it is kept. It is the sibling of Property Yield Analyser, built the same way and sharing much of its code, and like it, a personal, non-commercial tool.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P1 - Results.png",
+    "alt": "A Toyota Corolla hybrid search within 50 km of home: 178 vehicles, ranked by how far each price is below the market",
+    "shot": true
+  }
+]} />
+
+**The problem it solves.** Buying a used car well takes a dozen browser tabs. The same car is on two portals and a dealer's own site at slightly different prices. The big number on many listings is the price if you finance with the seller, not the price to pay outright. Whether 15,000 euros is good depends on the year, the mileage and the engine, and on what similar cars are asking right now. And the price is only the start: transfer tax, the municipal road tax, Barcelona's low-emission zone and depreciation decide what it costs to own. The tool does all of it in one place, for Catalonia, with every figure traceable to where it came from.
+
+**One search, many sources.** A search is a vehicle type, up to five makes and models, the usual filters and a radius around home, and it reads every source that can be read, in parallel. The portals are AutoScout24, coches.com and Wallapop. The chains that buy and sell used cars include Flexicar, OcasionPlus, Clicars, Autohero, Crestanevada, Renault's Renew and the ex-lease cars of Ayvens. Then come local dealers and used-car centres and, for motorbikes, specialists like Cüimo, Flexibike and Maquina Motors. Each source is its own adapter, and each was vetted before it was written: an API or official alerts first, then its robots.txt, including the delay between requests it asks for, its terms and whether it sits behind an anti-bot service. Each is read the way it allows, by model page, brand page, province or the whole stock in one page, and what a portal cannot filter is filtered locally. Requests go out one every four to six seconds per site, and a site that answers with a block or an anti-bot page is stopped for good: coches.net, motos.net and Milanuncios did, and are not read at all. Online sellers that deliver anywhere have no distance, so the radius never hides them. Progress streams live, source by source.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P2 - Search running.png",
+    "alt": "A search in progress: pages read and vehicles found per source, and the portals stopped for showing an anti-bot page",
+    "shot": true
+  }
+]} />
+
+**The cash price, always.** Many dealers advertise the financed price, the one that only holds if the buyer takes the dealer's loan. Every adapter reads the cash price and keeps the financed one apart, and the financed price never enters a valuation or a cost. Where a site states the cash price only in the text, the tool reads it there: Renew writes it in each description, and at one used-car centre, half the cars of a search showed the financed price in the list, up to 4,500 euros below the real one, which only the car's own page gives. There, the page of every car that passes the filters is read before it is ranked.
+
+**One vehicle, many listings.** A dealer often publishes the same car on two portals and its own site. Listings are merged when they share the number plate, compared as a salted hash because the plate itself is never stored, or the dealer's reference, and otherwise when make, model, year, mileage within 1 %, power, price within 5 % and province all agree. Pairs that are close but not certain are marked as possible duplicates rather than merged. The vehicle keeps the lowest price and shows every listing it was found in.
+
+**What the market says.** Each vehicle is valued against comparables: the same model, fuel and gearbox, from the current search and from every search of the last 90 days. With enough of them, a regression of the logarithm of price on age and mileage is fitted for that model, with power added when most comparables state it, because a 125-horsepower and a 180-horsepower Corolla are not worth the same: for the Corolla, adding power raised the fit from R² 0.65 to 0.81. A second fit drops the points more than 2.5 standard deviations out, and with few comparables or a poor fit it falls back to the median of the closest ones. Prices that would distort the market stay out of it: leasing instalments, reservations, damaged cars, nearly new stock and prices without VAT. Each valuation carries its confidence, the usual range and the comparables it was built from, most similar first, and AutoScout24's own price rating is shown beside it as a second opinion, with a warning when the two disagree.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Valuation.png",
+    "alt": "The valuation of one Corolla: market price, usual range, confidence and the model's price curve on age, mileage and power",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Comparables.png",
+    "alt": "The comparables behind it: similar Corollas from every source, most similar first",
+    "shot": true
+  }
+]} />
+
+**A verdict, and a warning when it is too good.** The valuation becomes a verdict in plain words: very good price, good price, market price, a bit expensive, expensive. A price 35 % or more below the market, with a valuation worth trusting, is flagged instead as too cheap: that is where fake listings and hidden problems live, so it says so, ranks the vehicle last and advises not to pay anything in advance, to see it in person and to get the official vehicle report first. The conditions get their own verdict. A professional seller with a warranty counts for it, while a private sale, an odd mileage per year, a car that cannot enter Barcelona's low-emission zone, a price that requires financing or one without VAT count against it. The default order, best buy, ranks by how far below the market each price is, trusted valuations first and warnings last.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P3 - Verdict.png",
+    "alt": "One car's sheet: a very good price, 30 % below the market, the conditions, and the car saved with a note",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P3 - Too cheap.png",
+    "alt": "A private listing at half the market price, flagged as too cheap to trust, with what to check before paying anything",
+    "shot": true
+  }
+]} />
+
+**What it really costs.** A calculator works out the total cost over the years the vehicle is kept, for one vehicle or a range of them. Purchase: the cash price, Catalonia's transfer tax with its exemptions as the tax code states them, the traffic authority's fees and its report. Depreciation: the Ministry of Finance's fiscal value curve, or the model's own market curve when the regression has enough data. Use: energy, the municipal road tax of the town where it is registered, Catalonia's CO₂ tax and every inspection due. And whether it can enter the low-emission zones today, in 2028 and when it is sold. Every rate is stored with its source and the date it was checked, and figures that could not be verified are marked as such and stay editable rather than guessed. The whole state lives in the URL, a calculation can be saved against its vehicle, and up to three can be compared side by side.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Calculator.png",
+    "alt": "The calculator opened from a listing: total cost over five years, per year and per kilometre, with the purchase and the depreciation",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Tax source.png",
+    "alt": "The source behind the transfer tax: the article of the Catalan tax code and the official text",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P5 - Compare.png",
+    "alt": "Three Corollas compared over five years, the cheapest per kilometre marked",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Cost.png",
+    "alt": "A car's cost in its sheet: five-year total, per kilometre, and what goes into it",
+    "shot": true
+  }
+]} />
+
+**Motorbikes too.** The same search works for motorbikes, with filters for power, which is what an A2 licence limits, and engine capacity, and the motorbike specialists among the sources. Their model names are written in many ways, "Z 900", "Z900" or "MT-09", so they are normalised before they are compared, and a search for one model no longer lets a smaller sibling slip in.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P8 - Motorbikes.png",
+    "alt": "A search for a Kawasaki Z900 or a Yamaha MT-09 within 105 km, ranked against their own markets",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P8 - Motorbike sheet.png",
+    "alt": "One motorbike's sheet: its verdict, its conditions and a saved note",
+    "shot": true
+  }
+]} />
+
+**Around the search.** Every search is kept, and reopening one asks the sources nothing. Each vehicle keeps its price history and how long it has been for sale, and its sheet ends with what to check before buying: the official vehicle report, the register of charges, the mileage at each inspection, the contract, and the transfer tax and change of ownership with their deadlines. Saved vehicles live by status, interested, contacted, seen, offer made and discarded, with notes, beside the saved calculations. An alert repeats a search twice a day from the Windows task scheduler and reports what is new, what has dropped in price, counting only the same listing so that a cheaper copy elsewhere is not a drop, and the best buys beyond a chosen discount, with a Windows notification. coches.net and motos.net cannot be read, but they send alerts by email, so each alert also opens the portal's own search with the same filters, ready to save there, and their emails arrive in a mailbox kept only for the tool.
+
+<Slider items={[
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - History.png",
+    "alt": "Price history: when the car was first seen, how long it has been for sale and each price it has had",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P4 - Checks.png",
+    "alt": "What to check before buying, with the official links",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P6 - Saved.png",
+    "alt": "Saved vehicles by status, with notes",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P7 - News.png",
+    "alt": "What the alerts found: new vehicles, price drops and best buys",
+    "shot": true
+  },
+  {
+    "type": "image",
+    "src": "UsedVehicleFinder/P7 - Alerts.png",
+    "alt": "The alerts, with the link that creates the same alert on coches.net or motos.net",
+    "shot": true
+  }
+]} />
+
+**How it is built.** Next.js with the App Router and cache components, React, TypeScript, Tailwind and shadcn/ui. Anything that should survive a reload or a shared link lives in the URL, through nuqs. Supabase holds the listings, their price history, the searches, the saved vehicles and the alerts, in Postgres with row-level security behind a Google sign-in limited to an allow-listed account, and without it the app runs entirely on a local file. The calculation logic is pure functions kept apart from the components, pinned by golden tests, and each source adapter is tested against trimmed saved pages. The fetcher reads each site's robots.txt before asking for a page, follows a redirect only where the robots.txt allows it, honours the delay a site asks for and stops at the first block. It runs on a personal computer rather than a server, partly because sites tend to block data-centre addresses.
+
+**What it is not.** A personal tool, not a product: one user, no advertising, no tracking, and no financial advice. Listings are read for personal analysis only, at a slow pace, within each site's robots.txt and without getting past any anti-bot protection, and nothing is published or redistributed. No phone numbers or names of private sellers are stored, and number plates only as a salted hash. In these pictures and in the video, listing photos, the home town and dealers' names are blurred in the browser before capture, and the saved vehicles, notes and alerts belong to a local demo database rather than real use. The repository is private.
+
+**The whole thing, in one pass.** A recorded run through the tool as it is used: a search for a Corolla hybrid, its wait fast-forwarded, the list and its order, one car opened section by section, another saved with a note, taken to the calculator and compared with two more, a listing too cheap to trust, the motorbike search, and then the saved vehicles, the alerts' news and the link that creates the same alert on coches.net. Recorded at 1440p60 from the running app, rendered at twice the pixel density as a retina screen would show it, captured frame by frame so that anything moving gets a new frame every sixtieth of a second, and with the same blurring as the pictures.
+
+<Slider items={[
+  {
+    "type": "video",
+    "src": "/UsedVehicleFinder/walkthrough.mp4",
+    "poster": "/UsedVehicleFinder/walkthrough-poster.jpg",
+    "title": "Used Vehicle Finder, walkthrough"
+  }
+]} />
+
+<Note>Municipalities: <a href="https://www.geonames.org/" rel="noreferrer noopener" target="_blank">GeoNames</a>, licensed <a href="http://creativecommons.org/licenses/by/4.0/" rel="noreferrer noopener" target="_blank">CC BY 4.0</a>. Fiscal values from the Spanish Ministry of Finance's average sale price tables. Taxes and fees from the Catalan Tax Agency, the DGT and the municipal ordinances, each with its source in the tool.</Note>
